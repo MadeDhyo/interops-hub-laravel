@@ -14,63 +14,144 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. SEED DATA USERS (Password semuanya: password123)
-        $admin = User::create([
+        User::create([
             'username' => 'admin',
             'password' => Hash::make('password123'),
             'nama_lengkap' => 'Made Admin Hub',
             'role' => 'admin',
         ]);
 
-        $operator = User::create([
+        User::create([
             'username' => 'operator',
             'password' => Hash::make('password123'),
             'nama_lengkap' => 'Siti Operator',
             'role' => 'operator',
         ]);
 
-        $pimpinan = User::create([
+        User::create([
             'username' => 'pimpinan',
             'password' => Hash::make('password123'),
             'nama_lengkap' => 'Bapak Kepala Hub',
             'role' => 'pimpinan',
         ]);
 
-        $staf = User::create([
+        User::create([
             'username' => 'staf',
             'password' => Hash::make('password123'),
             'nama_lengkap' => 'Gede Staf',
             'role' => 'staf',
         ]);
 
-        // 2. SEED DATA SURAT MASUK
-        SuratMasuk::create([
-            'kepada' => 'Kepala Kantor',
-            'dari' => 'Kementerian Digital',
-            'perihal' => 'Undangan Rapat Koordinasi Interoperabilitas Sistem',
-            'tanggal_masuk' => Carbon::now()->format('Y-m-d'),
-            'no_surat' => 'UND-001/KOMINFO/2026',
-            'status' => 'pending',
-        ]);
+        // Pool Data Kloningan Variasi untuk Surat Masuk (Khas Hubinter & Intelkam)
+        $dariSuratMasuk = [
+            'Kemenko Polhukam RI', 'NCB Paris', 'NCB New-Delhi', 'NCB Manila', 'NCB Singapore', 
+            'NCB Phnom-Penh', 'UK National Crime Agency (NCA)', 'OJK Regional Center', 
+            'Dirjen Protokol Kemenlu RI', 'Bareskrim Polri', 'Badan Siber dan Sandi Negara (BSSN)'
+        ];
 
-        SuratMasuk::create([
-            'kepada' => 'Bagian Kepegawaian',
-            'dari' => 'Badan Kepegawaian Negara',
-            'perihal' => 'Pembaruan Data Sistem Informasi Aparatur',
-            'tanggal_masuk' => Carbon::now()->subDays(4)->format('Y-m-d'), // Udah lewat 3 hari (bakal masuk hitungan SLA)
-            'no_surat' => 'B/210/BKN/V/2026',
-            'status' => 'pending',
-        ]);
+        $kepadaSuratMasuk = [
+            'Kadivhubinter Polri', 'Ses NCB Interpol Indonesia', 'Kabagkominter', 
+            'Kabagjatranin', 'Kepala Biro Misi Internasional'
+        ];
 
-        // 3. SEED DATA SURAT KELUAR
-        SuratKeluar::create([
-            'kepada' => 'Dinas Kominfo Provinsi Bali',
-            'no_surat' => 'OUT-2026-001',
-            'tanggal_surat' => Carbon::now()->format('Y-m-d'),
-            'dari' => 'InterOps Hub Center',
-            'tanggal_input' => Carbon::now()->format('Y-m-d'),
-            'perihal' => 'Pengiriman Log Integrasi Data Triwulan I',
-        ]);
+        $perihalSuratMasuk = [
+            'Request for Case Coordination Meeting regarding Online Scam and Cyber Fraud Assets Tracking',
+            'Invitation to Virtual Pre-Operational Briefing for Joint Transnational Operation Lionfish-Mayag V',
+            'Request for Bilateral Meeting Schedule during the Annual Heads of NCB Conference in Lyon France',
+            'Circular Letter: Questionnaire on Crypto Assets and Decentralized Infrastructure Used by Extremists',
+            'Request Technical Assistance for Regional Workshop on Environmental Crime and Pangolin Scales Trafficking',
+            'Notification of Interagency High-Level Coordination Meeting on Maritime Border Security Framework',
+            'Submission of Final Evaluation Report for Counter-Terrorism Investigative Capability Programme (IPCP)',
+            'Kind Reminder: Monitoring Progress in ICSE Database Post-Training and Trans transnational Operation Plan',
+            'Invitation to Join Operational Phase of Anti-Illicit Pharmaceutical Products Spanning Until Late Year',
+            'Re: Save The Date and Participant Nomination for Focus Group on Women in Policing Conference'
+        ];
 
-        $this->command->info('Database berhasil di-seed! Akun ready digunakan.');
+        $statusSuratMasuk = ['pending', 'disposisi'];
+        $romawiBulan = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+
+        // 2. GENERATE 47 DATA SURAT MASUK (Range Mei-Agustus 2026)
+        for ($i = 1; $i <= 47; $i++) {
+            $bulan = rand(5, 8); // Bulan 5 (Mei) sampai 8 (Agustus)
+            $hari = rand(1, 28);
+            $tanggalMasuk = Carbon::create(2026, $bulan, $hari)->format('Y-m-d');
+            $status = $statusSuratMasuk[array_rand($statusSuratMasuk)];
+            $romawi = $romawiBulan[$bulan - 1];
+
+            // Variasi Pola Nomor Surat Masuk agar Unik layaknya Dokumen Asli
+            $pola = rand(1, 3);
+            if ($pola === 1) {
+                $noSurat = "2026/" . rand(100, 499) . "/OEC/CNET/DRUGS-CASE/" . array_rand(['JSR', 'TLJ', 'TTR']) . "-TLJ";
+            } elseif ($pola === 2) {
+                $noSurat = "B-" . rand(700, 999) . "/LN.00.03/" . str_pad($bulan, 2, '0', STR_PAD_LEFT) . "/2026";
+            } else {
+                $noSurat = "CT/OPS/CT-TECH+/TR" . rand(1, 4) . "/OB-" . array_rand(['TLJ', 'DATAKAN']);
+            }
+
+            SuratMasuk::create([
+                'no_surat' => $noSurat,
+                'dari' => $dariSuratMasuk[array_rand($dariSuratMasuk)],
+                'kepada' => $kepadaSuratMasuk[array_rand($kepadaSuratMasuk)],
+                'perihal' => $perihalSuratMasuk[array_rand($perihalSuratMasuk)] . " (Reference Batch #" . rand(10, 99) . ")",
+                'tanggal_masuk' => $tanggalMasuk,
+                'status' => $status,
+                'no_dispo' => $status === 'disposisi' ? 'DSP/2026/' . $romawi . '/' . rand(1000, 9999) : null,
+                'disposisi_kabag' => $status === 'disposisi' ? 'Harap disiapkan bahan masukan serta koordinasikan dengan fungsi terkait.' : null,
+                'disposisi_kasubag' => $status === 'disposisi' ? 'Laksanakan instruksi pimpinan dan siapkan administrasi perjalanan dinas.' : null,
+                'file_pdf' => null
+            ]);
+        }
+
+        // Pool Data Kloningan Variasi untuk Surat Keluar
+        $dariSuratKeluar = [
+            'Divhubinter Polri', 'NCB Jakarta', 'Bagjatranin', 'Bagkominter', 'Set NCB Interpol Indonesia'
+        ];
+
+        $kepadaSuratKeluar = [
+            'Dirjen Kerja Sama Multilateral Kemenlu RI', 'Bareskrim Polri', 'Kabareskrim', 'Kepala BNN RI',
+            'Dinas Kominfo Provinsi Bali', 'Fakultas Hukum Universitas Indonesia', 'Lembaga Sandi Negara',
+            'Pusat Data dan Teknologi Informasi', 'Para Pejabat Daftar Terlampir'
+        ];
+
+        $perihalSuratKeluar = [
+            'Permohonan Pengurusan Exit Permit dan Administrasi Perjalanan Dinas Luar Negeri Delegasi RI',
+            'Pemberitahuan Informasi Pelatihan Internasional Interpol ICSE Database dan Cybercrime Investigation',
+            'Permohonan Pengiriman Dokumen Konfirmasi Kepesertaan Workshop Enforcement Against Environmental Crimes',
+            'Pelimpahan Surat Permohonan Ekstradisi dan Bantuan Hukum Timbal Balik (Mutual Legal Assistance)',
+            'Pemberitahuan Informasi Awal Pelaksanaan Operasi Bersama Pangea XIX Global Phase',
+            'Permohonan Bantuan Publikasi dan Distribusi Bahan Webinar Cyberbullying Awareness Form',
+            'Penyampaian Laporan Hasil Pelaksanaan Menghadiri United Kingdom National Crime Agency Capacity Building',
+            'Permohonan Bantuan Pengiriman Data Profiling Pelaku Penyelundupan Komoditi Dilindungi melalui Jalur I-24/7',
+            'Pemberitahuan Informasi Iuran Wajib Kontribusi Tahunan Internasional Kepada Lembaga Dunia',
+            'Permohonan Penugasan Personel sebagai Trainer pada Pelatihan Pelaporan Kasus Exploitation Against Children'
+        ];
+
+        // 3. GENERATE 23 DATA SURAT KELUAR (Range Mei-Agustus 2026)
+        for ($j = 1; $j <= 23; $j++) {
+            $bulanKeluar = rand(5, 8);
+            $hariKeluar = rand(1, 28);
+            $tanggalSurat = Carbon::create(2026, $bulanKeluar, $hariKeluar)->format('Y-m-d');
+            $romawiKeluar = $romawiBulan[$bulanKeluar - 1];
+            $subBagian = array_rand(['DIVHUBINTER', 'BAGJATRANIN', 'BAGKOMINTER']);
+
+            // Variasi Pola Nomor Surat Keluar agar mirip Format Kedinasan Polri
+            if (rand(1, 2) === 1) {
+                $noSuratKeluar = "B/" . rand(50, 450) . "/" . $romawiKeluar . "/HUM.4.4.9./2026/" . $subBagian;
+            } else {
+                $noSuratKeluar = "B/ND-" . rand(10, 99) . "/" . $romawiKeluar . "/HUM.4.1./2026/" . $subBagian;
+            }
+
+            SuratKeluar::create([
+                'no_surat' => $noSuratKeluar,
+                'kepada' => $kepadaSuratKeluar[array_rand($kepadaSuratKeluar)],
+                'tanggal_surat' => $tanggalSurat,
+                'dari' => $dariSuratKeluar[array_rand($dariSuratKeluar)],
+                'tanggal_input' => $tanggalSurat,
+                'perihal' => $perihalSuratKeluar[array_rand($perihalSuratKeluar)] . " Vol-" . $j,
+                'file_pdf' => null
+            ]);
+        }
+
+        $this->command->info('Database sukses di-seed! 47 Surat Masuk & 23 Surat Keluar format Polri siap digas.');
     }
 }

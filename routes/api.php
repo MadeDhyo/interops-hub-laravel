@@ -11,3 +11,6 @@ Route::get('/logs', [SuratMasukController::class, 'getLogs']);
 
 Route::get('/surat-keluar', [SuratKeluarController::class, 'index']);
 Route::post('/surat-keluar', [SuratKeluarController::class, 'create']);
+
+Route::post('/surat-masuk/parse', [SuratMasukController::class, 'parsePDF']);
+Route::post('/scan-surat', [SuratMasukController::class, 'scanWithAI']);

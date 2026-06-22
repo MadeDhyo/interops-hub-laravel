@@ -9,7 +9,7 @@ use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-
+use Smalot\PdfParser\Parser;
 class SuratMasukController extends Controller
 {
     public function index(Request $request)
@@ -64,7 +64,8 @@ class SuratMasukController extends Controller
         $fileName = null;
         if ($request->hasFile('file_pdf') && $request->file('file_pdf')->isValid()) {
             $file = $request->file('file_pdf');
-            $fileName = time() . '_' . $file->getRandomName();
+            // PERBAIKAN CODE (Ganti baris 64 jadi ini):
+            $fileName = time() . '_' . $file->hashName();
             // Moves file straight to public/uploads
             $file->move(public_path('uploads'), $fileName); 
         }
@@ -141,5 +142,78 @@ class SuratMasukController extends Controller
     {
         $logs = ActivityLog::orderBy('id', 'desc')->get();
         return response()->json(['status' => 200, 'data' => $logs], 200);
+    }
+
+        public function parsePDF(Request $request)
+    {
+        // 1. Validasi file input (Maksimal 10MB)
+        $request->validate([
+            'file_pdf' => 'required|mimes:pdf|max:10000',
+        ]);
+
+        try {
+            // 2. Ambil file PDF dan konversi langsung ke format Base64
+            $file = $request->file('file_pdf');
+            $pdfBase64 = base64_encode(file_get_contents($file->path()));
+
+            $apiKey = env('GEMINI_API_KEY');
+            
+            // 3. Susun instruksi khusus agar AI melakukan OCR visual pada lembar surat
+            $prompt = "Kamu adalah sistem AI vision untuk manajemen kearsipan surat dinas resmi. "
+                    . "Tugasmu adalah menganalisis gambar/dokumen surat masuk yang dilampirkan (bisa berbentuk teks digital ataupun hasil scan foto/gambar) dan mengekstrak informasi penting secara akurat.\n\n"
+                    . "Format tanggal wajib menggunakan format YYYY-MM-DD.\n"
+                    . "Jika informasi tertentu benar-benar tidak terlihat pada surat, berikan nilai null.\n\n"
+                    . "Kembalikan hasil analisis dalam format JSON murni dengan struktur objek seperti contoh berikut:\n"
+                    . "{\n"
+                    . "  \"no_surat\": \"Nomor surat resmi yang tertera\",\n"
+                    . "  \"tanggal_masuk\": \"Tanggal surat dibuat atau diterima dalam format YYYY-MM-DD\",\n"
+                    . "  \"dari\": \"Nama instansi atau perorangan pengirim surat\",\n"
+                    . "  \"kepada\": \"Nama jabatan atau instansi tujuan surat\",\n"
+                    . "  \"perihal\": \"Ringkasan perihal atau subjek surat\"\n"
+                    . "}";
+
+            // 4. Kirim teks prompt SEKALIGUS file PDF Base64 ke API Gemini 1.5 Flash
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt],
+                            [
+                                'inlineData' => [
+                                    'mimeType' => 'application/pdf',
+                                    'data' => $pdfBase64
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'responseMimeType' => 'application/json'
+                ]
+            ]);
+
+            if ($response->failed()) {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Gagal terhubung ke layanan AI Gateway. Status: ' . $response->status()
+                ], 500);
+            }
+
+            // 5. Ambil data teks JSON hasil scan visual dari response AI
+            $resultJson = $response->json('candidates.0.content.parts.0.text');
+            $extractedData = json_decode($resultJson, true);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Analisis dokumen visual berhasil',
+                'data' => $extractedData
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Terjadi kesalahan sistem saat memproses dokumen: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
