@@ -111,7 +111,7 @@
 <script>
     let statusChartInstance = null;
     
-    // AMBIL ROLE LANGSUNG DARI SESSION LARAVEL (Ini kuncinya biar JS lu ga error)
+    // Ambil data role user dari session backend Laravel
     const currentRole = "{{ auth()->user()->role }}";
 
     $(document).ready(function() {
@@ -189,9 +189,13 @@
             
             // Render kolom tindakan HANYA jika usernya pimpinan
             if (currentRole === 'pimpinan') {
+                // Perbaikan: Taruh encoder URL di dalam loop biar variabel 'row' terbaca sempurna
+                let safeNoSurat = encodeURIComponent(row.no_surat);
+                let safePerihalUrl = encodeURIComponent(row.perihal);
+
                 tdTindakan = `
                     <td class="py-3 text-center">
-                        <a href="{{ url('/surat-masuk') }}?autodispo=${row.id}" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-md text-[11px] transition-all inline-block shadow">
+                        <a href="{{ url('/surat-masuk') }}?autodispo=${row.id}&no_surat=${safeNoSurat}&perihal=${safePerihalUrl}" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-md text-[11px] transition-all inline-block shadow">
                             <i class="fas fa-file-signature mr-1"></i>Eksekusi
                         </a>
                     </td>

@@ -171,7 +171,30 @@
             }
         });
 
+        // 1. Jalankan fetch data tabel utama polosan (Aman, tabel dijamin keluar!)
         fetchSuratMasuk(currentPage);
+
+        // =========================================================================
+        // PERBAIKAN URUTAN: Ambil data DULU, buka modal, BARU bersihkan URL
+        // =========================================================================
+        let urlParams = new URLSearchParams(window.location.search);
+        let autoDispoId = urlParams.get('autodispo');
+        let urlNoSurat = urlParams.get('no_surat');
+        let urlPerihal = urlParams.get('perihal');
+        
+        if (autoDispoId && currentRole === 'pimpinan') {
+            // Ekstrak data selagi parameter URL masih eksis
+            let finalNoSurat = urlNoSurat ? decodeURIComponent(urlNoSurat) : 'Arsip/' + autoDispoId;
+            let finalPerihal = urlPerihal ? decodeURIComponent(urlPerihal) : 'Menunggu Instruksi Komando';
+            
+            // Buka modal secara instan
+            setTimeout(() => {
+                openDisposisiModal(autoDispoId, finalNoSurat, finalPerihal);
+            }, 150);
+
+            // KUNCI AMAN: Hapus parameter URL DI SINI (Setelah semua data selesai diambil)
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
         // Submit Tambah Surat (Admin Only)
         $('#formTambahSurat').on('submit', function(e) {
@@ -233,7 +256,7 @@
         });
     });
 
-    // Scan AI (Admin Only)
+    // SCAN AI FORM (Admin Only)
     function triggerAutoScan() {
         let fileInput = document.getElementById('file_pdf_input');
         if (!fileInput || fileInput.files.length === 0) {
@@ -273,6 +296,7 @@
         });
     }
 
+    // SATU FUNGSI FETCH SURAT MASUK (Murni narik data ke tabel tanpa kepengaruh URL)
     function fetchSuratMasuk(page) {
         currentPage = page;
         let queryParams = {
@@ -290,19 +314,6 @@
             success: function(res) {
                 renderTable(res.data);
                 renderPagination(res.pagination);
-
-                // Auto Open Modal dari parameter Dashboard Link
-                let urlParams = new URLSearchParams(window.location.search);
-                let autoDispoId = urlParams.get('autodispo');
-                
-                if (autoDispoId) {
-                    let targetSurat = res.data.find(item => item.id == autoDispoId);
-                    if (targetSurat && currentRole === 'pimpinan' && targetSurat.status === 'pending') {
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                        let safePerihal = targetSurat.perihal ? targetSurat.perihal.replace(/"/g, '&quot;').replace(/'/g, '&#39;') : '';
-                        openDisposisiModal(targetSurat.id, targetSurat.no_surat, safePerihal);
-                    }
-                }
             },
             error: function() {
                 $('#tableBody').html('<tr><td colspan="6" class="text-center py-6 text-red-400">Gagal memuat data surat masuk.</td></tr>');
@@ -321,7 +332,6 @@
         data.forEach(row => {
             let badgeColor = row.status === 'pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
             
-            // Logika Overdue SLA (> 3 hari)
             let slaWarningTag = '';
             if (row.status === 'pending' && row.tanggal_masuk) {
                 let tglMasuk = new Date(row.tanggal_masuk);
@@ -415,5 +425,3 @@
     function closeModal(id) { $(`#${id}`).addClass('hidden'); }
 </script>
 @endpush
-
-yang ini udah bener kan? gamau gua ancur lagi wkwk mending lu crosscheck dulu dah wok
