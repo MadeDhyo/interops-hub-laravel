@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Api\SuratMasukController;
+use App\Http\Controllers\Api\UserController;
 
 Route::get('/', [AuthController::class, 'index'])->name('login');
 Route::get('/login', [AuthController::class, 'index']);
@@ -29,4 +30,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user-management', function () {
         return view('user_management');
     });
+
+    Route::post('/api/surat-masuk/update/{id}', [SuratMasukController::class, 'updateDisposisi']);
+    Route::get('/api/users', [UserController::class, 'index']);
+    Route::get('/api/dashboard/stats', [DashboardController::class, 'getSlaStats']);
 });

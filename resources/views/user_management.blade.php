@@ -150,11 +150,29 @@
 
     function renderUserTable(data) {
         let html = '';
+        
+        // Ambil nama username admin yang lagi login dari Laravel Blade (disuntik ke JS)
+        let currentUsername = "{{ auth()->user()->username }}";
+
         data.forEach((user, index) => {
             let roleBadge = 'bg-gray-700 text-gray-300';
             if (user.role === 'admin') roleBadge = 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
             else if (user.role === 'pimpinan') roleBadge = 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
             else if (user.role === 'staf') roleBadge = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+
+            // Cek apakah baris ini adalah akun si admin yang sedang login
+            let aksiTombol = '';
+            if (user.username === currentUsername) {
+                // Jika akun sendiri, kasih teks penanda (tombol hapus dihilangkan)
+                aksiTombol = `<span class="text-xs text-gray-500 italic font-medium">Akun Anda (Aktif)</span>`;
+            } else {
+                // Jika akun orang lain, tombol hapus muncul normal
+                aksiTombol = `
+                    <button onclick="deleteUser(${user.id}, '${user.nama_lengkap}')" class="p-2 text-gray-500 hover:text-rose-400 transition-colors" title="Hapus Akun">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+            }
 
             html += `
                 <tr class="hover:bg-gray-700/10 transition-colors duration-150">
@@ -167,9 +185,7 @@
                         </span>
                     </td>
                     <td class="py-4 px-6 text-center">
-                        <button onclick="deleteUser(${user.id}, '${user.nama_lengkap}')" class="p-2 text-gray-500 hover:text-rose-400 transition-colors" title="Hapus Akun">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                        ${aksiTombol}
                     </td>
                 </tr>
             `;

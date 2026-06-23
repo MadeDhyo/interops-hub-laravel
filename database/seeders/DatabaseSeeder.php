@@ -24,14 +24,14 @@ class DatabaseSeeder extends Seeder
         User::create([
             'username' => 'pimpinan',
             'password' => Hash::make('password123'),
-            'nama_lengkap' => 'Bapak Kepala Hub',
+            'nama_lengkap' => 'Bapak Kasubbag Jatranin Divhubinter',
             'role' => 'pimpinan',
         ]);
 
         User::create([
-            'username' => 'staf',
+            'username' => 'anggota',
             'password' => Hash::make('password123'),
-            'nama_lengkap' => 'Gede Staf Pelaksana',
+            'nama_lengkap' => 'Brigadir Staf DivHubinter',
             'role' => 'staf',
         ]);
 

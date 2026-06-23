@@ -6,13 +6,11 @@ use App\Http\Controllers\Api\SuratKeluarController;
 use App\Http\Controllers\Api\UserController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
     });
 Route::get('/surat-masuk', [SuratMasukController::class, 'index']);
 Route::post('/surat-masuk', [SuratMasukController::class, 'create']);
-Route::post('/surat-masuk/update/{id}', [SuratMasukController::class, 'updateDisposisi']);
 Route::get('/logs', [SuratMasukController::class, 'getLogs']);
 
 Route::get('/surat-keluar', [SuratKeluarController::class, 'index']);

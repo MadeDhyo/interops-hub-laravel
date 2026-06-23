@@ -51,15 +51,15 @@ class UserController extends Controller
     // Menghapus user berdasarkan ID
     public function destroy($id)
     {
-        Gate::authorize('akses-admin');
+        \Illuminate\Support\Facades\Gate::authorize('akses-admin');
 
         $user = User::findOrFail($id);
         
-        // Mencegah admin menghapus dirinya sendiri pas login
-        if (auth()->id() == $user->id) {
+        // Proteksi mutlak: Cek id user yang sedang login via Session Web biasa
+        if (\Illuminate\Support\Facades\Auth::id() == $user->id) {
             return response()->json([
                 'status' => 400,
-                'message' => 'Anda tidak bisa menghapus akun Anda sendiri!'
+                'message' => 'Aksi Ditolak! Anda tidak diizinkan menghapus akun Anda sendiri yang sedang aktif digunakan.'
             ], 400);
         }
 
