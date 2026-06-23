@@ -81,7 +81,10 @@
                                 <th class="pb-3">No Surat</th>
                                 <th class="pb-3">Asal</th>
                                 <th class="pb-3 text-center">Keterlambatan</th>
-                                <th class="pb-3 text-center">Tindakan</th>
+                                {{-- Tombol Tindakan hanya tampil di header jika user adalah pimpinan --}}
+                                @if(auth()->user()->role === 'pimpinan')
+                                    <th class="pb-3 text-center" id="th-tindakan">Tindakan</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody id="urgentTableBody" class="text-xs divide-y divide-gray-700/40">
@@ -104,10 +107,12 @@
 @endsection
 
 @push('scripts')
-<!-- Load Chart.js secara asinkronus untuk visualisasi chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     let statusChartInstance = null;
+    
+    // AMBIL ROLE LANGSUNG DARI SESSION LARAVEL (Ini kuncinya biar JS lu ga error)
+    const currentRole = "{{ auth()->user()->role }}";
 
     $(document).ready(function() {
         loadDashboardData();
@@ -120,31 +125,19 @@
             dataType: "json",
             success: function(res) {
                 if (res.status === 200) {
-                    // 1. Suntik metrik teks angka ke UI card
                     $('#metricTotal').text(res.metrics.total);
                     $('#metricPending').text(res.metrics.pending);
                     $('#metricDisposisi').text(res.metrics.disposisi);
                     $('#metricSla').text(res.metrics.sla_breach);
 
-                    // 2. Render Donut Chart status dokumen
-                    renderChart(res.metrics.pending, res.metrics.disposisi);
-
-                    // 3. Render tabel urgent list berkas mandek
-                    <a href="{{ url('/surat-masuk') }}?autodispo=${row.id}" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-md text-[11px] transition-all inline-block shadow">
-                        <i class="fas fa-file-signature mr-1"></i>Eksekusi
-                    </a>
+                    renderChart(res.metrics.pending_safe, res.metrics.sla_breach, res.metrics.disposisi);
                     renderUrgentTable(res.urgent_list);
-                } else {
-                    console.error("Gagal memuat data dashboard: " + res.message);
-                }   
-            },
-            error: function() {
-                console.error("Gagal menarik data visualisasi dashboard.");
+                }
             }
         });
     }
 
-    function renderChart(pending, disposisi) {
+    function renderChart(pendingSafe, slaBreach, disposisi) {
         const ctx = document.getElementById('statusChart').getContext('2d');
         
         if (statusChartInstance) {
@@ -154,10 +147,10 @@
         statusChartInstance = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Pending Review', 'Sudah Disposisi'],
+                labels: ['Pending (<3 Hari)', 'Lewat SLA (>3 Hari)', 'Sudah Disposisi'],
                 datasets: [{
-                    data: [pending, disposisi],
-                    backgroundColor: ['#fbbf24', '#10b981'],
+                    data: [pendingSafe, slaBreach, disposisi],
+                    backgroundColor: ['#fbbf24', '#f43f5e', '#10b981'],
                     borderColor: '#1f2937',
                     borderWidth: 3,
                     hoverOffset: 4
@@ -169,7 +162,11 @@
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { color: '#9ca3af', font: { size: 11, family: 'sans-serif' }, padding: 15 }
+                        labels: { 
+                            color: '#9ca3af', 
+                            font: { size: 11, family: 'sans-serif' }, 
+                            padding: 12 
+                        }
                     }
                 },
                 cutout: '70%'
@@ -179,13 +176,28 @@
 
     function renderUrgentTable(list) {
         let html = '';
+        const colspanValue = currentRole === 'pimpinan' ? 4 : 3;
+
         if (!list || list.length === 0) {
-            html = `<tr><td colspan="4" class="text-center py-6 text-emerald-400 font-medium italic"><i class="fas fa-check-circle mr-1"></i> Aman! Semua berkas masuk di bawah batas waktu SLA.</td></tr>`;
+            html = `<tr><td colspan="${colspanValue}" class="text-center py-6 text-emerald-400 font-medium italic"><i class="fas fa-check-circle mr-1"></i> Aman! Semua berkas masuk di bawah batas waktu SLA.</td></tr>`;
             $('#urgentTableBody').html(html);
             return;
         }
 
         list.forEach(row => {
+            let tdTindakan = '';
+            
+            // Render kolom tindakan HANYA jika usernya pimpinan
+            if (currentRole === 'pimpinan') {
+                tdTindakan = `
+                    <td class="py-3 text-center">
+                        <a href="{{ url('/surat-masuk') }}?autodispo=${row.id}" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-md text-[11px] transition-all inline-block shadow">
+                            <i class="fas fa-file-signature mr-1"></i>Eksekusi
+                        </a>
+                    </td>
+                `;
+            }
+
             html += `
                 <tr class="hover:bg-gray-700/20 transition-colors">
                     <td class="py-3 font-semibold text-white font-mono">${row.no_surat}</td>
@@ -195,11 +207,7 @@
                             +${row.hari_mandek} Hari
                         </span>
                     </td>
-                    <td class="py-3 text-center">
-                        <a href="{{ url('/surat-masuk') }}" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-md text-[11px] transition-all inline-block shadow">
-                            <i class="fas fa-file-signature mr-1"></i>Eksekusi
-                        </a>
-                    </td>
+                    ${tdTindakan}
                 </tr>
             `;
         });
