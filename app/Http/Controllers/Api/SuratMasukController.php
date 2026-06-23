@@ -61,7 +61,7 @@ class SuratMasukController extends Controller
     public function create(Request $request)
     {
         \Illuminate\Support\Facades\Gate::authorize('akses-admin');
-        
+
         // File Upload Handling
         $fileName = null;
         if ($request->hasFile('file_pdf') && $request->file('file_pdf')->isValid()) {
@@ -94,6 +94,17 @@ class SuratMasukController extends Controller
 
     public function updateDisposisi(Request $request, $id)
     {
+        // KUNCI UTAMA: Hanya pimpinan yang boleh mengeksekusi disposisi
+        if (\Illuminate\Support\Facades\Auth::user()->role !== 'pimpinan') {
+            return response()->json(['status' => 403, 'message' => 'Aksi Ditolak! Hanya pimpinan yang dapat memberikan instruksi disposisi.'], 403);
+        }
+
+        $request->validate([
+            'no_dispo' => 'required|string|max:100',
+            'disposisi_kabag' => 'required|string',
+            'disposisi_kasubag' => 'nullable|string',
+        ]);
+
         $surat = SuratMasuk::find($id);
         
         if (!$surat) {
@@ -108,9 +119,9 @@ class SuratMasukController extends Controller
         ]);
 
         // Audit Trail Log
-        ActivityLog::create([
+        \App\Models\ActivityLog::create([
             'aksi'    => 'Pemberian Disposisi',
-            'rincian' => "Operator memperbarui instruksi disposisi pada surat nomor {$surat->no_surat}"
+            'rincian' => "Pimpinan (" . \Illuminate\Support\Facades\Auth::user()->nama_lengkap . ") memberikan instruksi disposisi pada surat nomor {$surat->no_surat}"
         ]);
 
         // ==========================================
@@ -121,23 +132,22 @@ class SuratMasukController extends Controller
                  . "📌 *No Surat:* " . $surat->no_surat . "\n"
                  . "🏢 *Dari:* " . $surat->dari . "\n"
                  . "📝 *Perihal:* " . $surat->perihal . "\n\n"
-                 . "🔸 *Instruksi Kabag:* " . ($surat->disposisi_kabag ?: '-') . "\n"
+                 . "🔸 *Instruksi Kabag:* " . $surat->disposisi_kabag . "\n"
                  . "🔸 *Instruksi Kasubag:* " . ($surat->disposisi_kasubag ?: '-') . "\n\n"
-                 . "Silakan cek sistem InterOps-Hub untuk mengunduh berkas.";
+                 . "Silakan cek sistem InterOps-Hub untuk menindaklanjuti berkas.";
 
         try {
-            // Using Laravel's built-in HTTP client wrapper instead of cURL
             Http::withHeaders([
-                'Authorization' => '2cSbEX1edJb2dWz59iQn'
+                'Authorization' => '2cSbEX1edJb2dWz59iQn' // API Key Fonnte lu
             ])->asForm()->post('https://api.fonnte.com/send', [
-                'target'  => '081219408823',
+                'target'  => '081219408823', // Nomor HP Staf lu
                 'message' => $pesanWA
             ]);
         } catch (\Exception $e) {
             Log::error('Gagal kirim WA: ' . $e->getMessage());
         }
 
-        return response()->json(['status' => 200, 'message' => 'Disposisi disimpan & Notifikasi WA terkirim'], 200);
+        return response()->json(['status' => 200, 'message' => 'Disposisi berhasil disimpan & Notifikasi WA terkirim!'], 200);
     }
 
     public function getLogs()

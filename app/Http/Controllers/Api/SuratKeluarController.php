@@ -83,4 +83,9 @@ class SuratKeluarController extends Controller
             'message' => 'Surat keluar berhasil disimpan'
         ], 201);
     }
+
+    public function store(Request $request)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('akses-admin');
+    }
 }

@@ -9,10 +9,13 @@
             <h1 class="text-3xl font-bold text-white tracking-wide">Data Surat Keluar</h1>
             <p class="text-sm text-gray-400 mt-1">Kelola arsip surat keluar, distribusi instansi tujuan, dan tracking dokumen eksternal</p>
         </div>
+        
+        @can('akses-admin')
         <button onclick="openModal('modalTambahKeluar')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-600/20 flex items-center space-x-2 text-sm">
             <i class="fas fa-plus text-xs"></i>
             <span>Tambah Surat Keluar</span>
         </button>
+        @endcan
     </div>
 
     <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -56,12 +59,12 @@
         
         <div class="p-5 border-t border-gray-700 flex justify-between items-center bg-gray-800/30">
             <p id="paginationInfo" class="text-xs text-gray-400">Menampilkan halaman 1</p>
-            <div class="flex space-x-2" id="paginationButtons">
-                </div>
+            <div class="flex space-x-2" id="paginationButtons"></div>
         </div>
     </div>
 </div>
 
+@can('akses-admin')
 <div id="modalTambahKeluar" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all duration-300">
         <div class="px-6 py-4 border-b border-gray-700 flex justify-between items-center">
@@ -111,52 +114,53 @@
         </form>
     </div>
 </div>
+@endcan
 @endsection
 
 @push('scripts')
 <script>
     let currentPage = 1;
+    let currentRole = "{{ auth()->user()->role }}";
 
     $(document).ready(function() {
-        // Inject token CSRF Laravel ke headers AJAX jQuery secara global
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
 
-        // Ambil data arsip surat keluar saat pertama kali halaman di-load
         fetchSuratKeluar(currentPage);
 
-        // Aksi Submit Form Arsip Baru
-        $('#formTambahSuratKeluar').on('submit', function(e) {
-            e.preventDefault();
-            let formData = new FormData(this);
-            $('#btnSubmitTambah').prop('disabled', true).text('Menyimpan...');
+        // Hanya bind event submit jika formnya eksis (Admin Only)
+        if ($('#formTambahSuratKeluar').length > 0) {
+            $('#formTambahSuratKeluar').on('submit', function(e) {
+                e.preventDefault();
+                let formData = new FormData(this);
+                $('#btnSubmitTambah').prop('disabled', true).text('Menyimpan...');
 
-            $.ajax({
-                url: "{{ url('/api/surat-keluar') }}",
-                type: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(res) {
-                    closeModal('modalTambahKeluar');
-                    $('#formTambahSuratKeluar')[0].reset();
-                    Swal.fire({ icon: 'success', title: 'Berhasil', text: res.message, background: '#1f2937', color: '#fff' });
-                    fetchSuratKeluar(currentPage);
-                },
-                error: function() {
-                    Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal memproses arsip surat keluar.', background: '#1f2937', color: '#fff' });
-                },
-                complete: function() {
-                    $('#btnSubmitTambah').prop('disabled', false).html('<span>Simpan Arsip</span>');
-                }
+                $.ajax({
+                    url: "{{ url('/api/surat-keluar') }}",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(res) {
+                        closeModal('modalTambahKeluar');
+                        $('#formTambahSuratKeluar')[0].reset();
+                        Swal.fire({ icon: 'success', title: 'Berhasil', text: res.message, background: '#1f2937', color: '#fff' });
+                        fetchSuratKeluar(currentPage);
+                    },
+                    error: function() {
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal memproses arsip surat keluar.', background: '#1f2937', color: '#fff' });
+                    },
+                    complete: function() {
+                        $('#btnSubmitTambah').prop('disabled', false).html('<span>Simpan Arsip</span>');
+                    }
+                });
             });
-        });
+        }
     });
 
-    // Tarik data Surat Keluar dari REST API Laravel
     function fetchSuratKeluar(page) {
         currentPage = page;
         let filters = {
@@ -181,10 +185,9 @@
         });
     }
 
-    // Suntik baris data ke komponen tbody
     function renderTable(data) {
         let html = '';
-        if (data.length === 0) {
+        if (!data || data.length === 0) {
             html = '<tr><td colspan="6" class="text-center py-6 text-gray-500">Tidak ada arsip surat keluar ditemukan.</td></tr>';
             $('#tableBody').html(html);
             return;
@@ -192,16 +195,16 @@
 
         data.forEach(row => {
             let fileLink = row.file_pdf 
-                ? `<a href="{{ url('/uploads') }}/${row.file_pdf}" target="_blank" class="text-emerald-400 hover:text-emerald-300 transition-colors"><i class="fas fa-file-pdf text-lg"></i></a>` 
+                ? `<a href="{{ url('/uploads') }}/${row.file_pdf}" target="_blank" class="text-emerald-400 hover:text-emerald-300 transition-colors" title="Lihat PDF"><i class="fas fa-file-pdf text-lg"></i></a>` 
                 : `<span class="text-gray-600">-</span>`;
 
             html += `
                 <tr class="hover:bg-gray-700/20 transition-colors duration-150">
-                    <td class="py-3.5 px-6 font-semibold text-white">${row.no_surat}</td>
-                    <td class="py-3.5 px-6 text-gray-300">${row.kepada}</td>
-                    <td class="py-3.5 px-6 text-gray-400">${row.dari}</td>
-                    <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate">${row.perihal}</td>
-                    <td class="py-3.5 px-6 text-gray-400">${row.tanggal_surat}</td>
+                    <td class="py-3.5 px-6 font-semibold text-white font-mono text-xs">${row.no_surat}</td>
+                    <td class="py-3.5 px-6 text-gray-300 text-xs">${row.kepada}</td>
+                    <td class="py-3.5 px-6 text-gray-400 text-xs">${row.dari}</td>
+                    <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs" title="${row.perihal ? row.perihal.replace(/"/g, '&quot;') : ''}">${row.perihal}</td>
+                    <td class="py-3.5 px-6 text-gray-400 font-mono text-xs">${row.tanggal_surat}</td>
                     <td class="py-3.5 px-6 text-center">${fileLink}</td>
                 </tr>
             `;
@@ -209,29 +212,16 @@
         $('#tableBody').html(html);
     }
 
-    // Render Kontrol Navigasi Halaman Pagination
     function renderPagination(meta) {
         $('#paginationInfo').text(`Halaman ${meta.page} dari ${meta.total_pages}`);
         let buttonsHtml = '';
-
         buttonsHtml += `<button onclick="fetchSuratKeluar(${meta.page - 1})" ${meta.page === 1 ? 'disabled' : ''} class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed text-xs rounded-lg font-medium text-white transition-all">Prev</button>`;
-        
         buttonsHtml += `<button onclick="fetchSuratKeluar(${meta.page + 1})" ${meta.page === meta.total_pages || meta.total_pages === 0 ? 'disabled' : ''} class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed text-xs rounded-lg font-medium text-white transition-all">Next</button>`;
-
         $('#paginationButtons').html(buttonsHtml);
     }
 
-    function handleFilter() {
-        fetchSuratKeluar(1);
-    }
-
-    function openModal(id) {
-        $(`#${id}`).removeClass('hidden');
-    }
-
-    // Pembungkus utilitas penutup modal dialog
-    function closeModal(id) {
-        $(`#${id}`).addClass('hidden');
-    }
+    function handleFilter() { fetchSuratKeluar(1); }
+    function openModal(id) { $(`#${id}`).removeClass('hidden'); }
+    function closeModal(id) { $(`#${id}`).addClass('hidden'); }
 </script>
 @endpush
