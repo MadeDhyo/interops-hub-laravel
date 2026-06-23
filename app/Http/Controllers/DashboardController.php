@@ -2,37 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SuratMasuk;
-use App\Models\SuratKeluar;
-use App\Models\ActivityLog;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    // Method lama lu buat nampilin halaman blade dashboard
     public function index()
     {
-        // 1. Hitung statistik untuk metric cards
-        $totalSuratMasuk = SuratMasuk::count();
-        $suratPending = SuratMasuk::where('status', 'pending')->count();
+        return view('dashboard');
+    }
+
+    // Method baru kita buat ngisap data statistik AJAX SLA pimpinan
+    public function getSlaStats()
+    {
+        // 1. Hitung durasi batas SLA (3 hari yang lalu dari sekarang)
+        $limitSla = Carbon::now()->subDays(3);
+
+        // 2. Ambil metrik ringkas untuk statistik atas
+        $totalSurat  = SuratMasuk::count();
+        $totalPending = SuratMasuk::where('status', 'pending')->count();
+        $totalDispo   = SuratMasuk::where('status', 'disposisi')->count();
         
-        // SLA: Status masih pending dan tanggal_masuk sudah 3 hari atau lebih yang lalu
-        $suratSla = SuratMasuk::where('status', 'pending')
-            ->where('tanggal_masuk', '<=', Carbon::now()->subDays(3))
-            ->count();
-            
-        $totalSuratKeluar = SuratKeluar::count();
+        $totalSlaBreach = SuratMasuk::where('status', 'pending')
+                            ->where('tanggal_masuk', '<=', $limitSla)
+                            ->count();
 
-        // 2. Ambil 5 log aktivitas terbaru untuk komponen Audit Trail
-        $recentLogs = ActivityLog::orderBy('id', 'desc')->take(5)->get();
+        // 3. Ambil daftar surat darurat SLA
+        $urgentSurat = SuratMasuk::where('status', 'pending')
+                            ->where('tanggal_masuk', '<=', $limitSla)
+                            ->orderBy('tanggal_masuk', 'asc')
+                            ->take(5)
+                            ->get()
+                            ->map(function($surat) {
+                                // PERBAIKAN: Gunakan (int) atau floor() biar angkanya bulat murni
+                                $hariMandek = (int) Carbon::parse($surat->tanggal_masuk)->diffInDays(Carbon::now());
+                                $surat->hari_mandek = $hariMandek;
+                                return $surat;
+                            });
 
-        // 3. Lempar semua data ke view resources/views/dashboard.blade.php
-        return view('dashboard', compact(
-            'totalSuratMasuk', 
-            'suratPending', 
-            'suratSla', 
-            'totalSuratKeluar', 
-            'recentLogs'
-        ));
+        return response()->json([
+            'status' => 200,
+            'metrics' => [
+                'total' => $totalSurat,
+                'pending' => $totalPending,
+                'disposisi' => $totalDispo,
+                'sla_breach' => $totalSlaBreach
+            ],
+            'urgent_list' => $urgentSurat
+        ], 200);
     }
 }
