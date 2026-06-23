@@ -17,15 +17,8 @@ class DatabaseSeeder extends Seeder
         User::create([
             'username' => 'admin',
             'password' => Hash::make('password123'),
-            'nama_lengkap' => 'Made Admin Hub',
+            'nama_lengkap' => 'Made Admin & Operator',
             'role' => 'admin',
-        ]);
-
-        User::create([
-            'username' => 'operator',
-            'password' => Hash::make('password123'),
-            'nama_lengkap' => 'Siti Operator',
-            'role' => 'operator',
         ]);
 
         User::create([
@@ -38,7 +31,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'username' => 'staf',
             'password' => Hash::make('password123'),
-            'nama_lengkap' => 'Gede Staf',
+            'nama_lengkap' => 'Gede Staf Pelaksana',
             'role' => 'staf',
         ]);
 
