@@ -349,12 +349,15 @@
                 : `<span class="text-gray-600">-</span>`;
 
             let tombolAksi = '';
-            let safePerihal = row.perihal ? row.perihal.replace(/"/g, '&quot;').replace(/'/g, '&#39;') : '';
+            
+            // Pembersihan string super ketat biar aman dari segala bentuk karakter aneh
+            let cleanNoSurat = row.no_surat ? row.no_surat.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
+            let cleanPerihal = row.perihal ? row.perihal.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\r?\n|\r/g, " ") : '';
 
             if (currentRole === 'pimpinan') {
                 if (row.status === 'pending') {
                     tombolAksi = `
-                        <button onclick="openDisposisiModal(${row.id}, '${row.no_surat}', '${safePerihal}')" class="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-xs rounded-lg text-amber-400 font-semibold transition-all flex items-center space-x-1">
+                        <button onclick="openDisposisiModal(${row.id}, '${cleanNoSurat}', '${cleanPerihal}')" class="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-xs rounded-lg text-amber-400 font-semibold transition-all flex items-center space-x-1">
                             <i class="fas fa-file-signature"></i>
                             <span>Beri Disposisi</span>
                         </button>
@@ -367,9 +370,24 @@
                     ? `<span class="text-xs text-amber-400 font-medium italic">Menunggu Tinjauan</span>`
                     : `<span class="text-xs text-emerald-400 font-medium italic">Selesai</span>`;
             } else {
-                tombolAksi = row.status === 'disposisi'
-                    ? `<span class="text-xs text-indigo-400 font-medium">Siap Dilaksanakan</span>`
-                    : `<span class="text-xs text-gray-500">Belum Ada Perintah</span>`;
+                // LOGIKA SAKLEK UNTUK ROLE STAF PELAKSANA (Clean dan terisolasi)
+                if (row.status === 'disposisi') {
+                    // Gunakan fungsi bawaan JavaScript encodeURIComponent biar string teks panjang ga bakal ngerusak tag HTML button
+                    let safeNoDispo = encodeURIComponent(row.no_dispo || '-');
+                    let safeKabag = encodeURIComponent(row.disposisi_kabag || '-');
+                    let safeKasubag = encodeURIComponent(row.disposisi_kasubag || '-');
+                    let safeNoSuratParam = encodeURIComponent(row.no_surat || '');
+                    let safePerihalParam = encodeURIComponent(row.perihal || '');
+
+                    tombolAksi = `
+                        <button onclick="triggerDetailModal('${safeNoSuratParam}', '${safePerihalParam}', '${safeNoDispo}', '${safeKabag}', '${safeKasubag}')" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-xs rounded-lg text-indigo-400 font-semibold transition-all flex items-center space-x-1">
+                            <i class="fas fa-eye"></i>
+                            <span>Lihat Disposisi</span>
+                        </button>
+                    `;
+                } else {
+                    tombolAksi = `<span class="text-xs text-gray-500 italic"><i class="fas fa-hourglass-start mr-1"></i>Belum Ada Perintah</span>`;
+                }
             }
 
             html += `
@@ -379,7 +397,7 @@
                         ${slaWarningTag}
                     </td>
                     <td class="py-3.5 px-6 text-gray-300 font-medium text-xs">${row.dari}</td>
-                    <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs" title="${safePerihal}">${row.perihal}</td>
+                    <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs" title="${cleanPerihal}">${row.perihal}</td>
                     <td class="py-3.5 px-6 text-gray-400 font-mono text-xs">${row.tanggal_masuk}</td>
                     <td class="py-3.5 px-6">
                         <span class="px-2.5 py-1 rounded-md text-xs font-semibold capitalize ${badgeColor}">${row.status}</span>
@@ -394,6 +412,18 @@
         $('#tableBody').html(html);
     }
 
+    // FUNGSI JEMBATAN PARSING AMAN (Taruh fungsi ini di bawah renderTable)
+    function triggerDetailModal(noSurat, perihal, noDispo, kabag, kasubag) {
+        // Decode kembali string URL komponen yang aman tadi menjadi teks biasa saat disuntik ke modal
+        openDetailDisposisiModal(
+            decodeURIComponent(noSurat),
+            decodeURIComponent(perihal),
+            decodeURIComponent(noDispo),
+            decodeURIComponent(kabag),
+            decodeURIComponent(kasubag)
+        );
+    }
+
     function openDisposisiModal(id, noSurat, perihal) {
         $('#dispoSuratId').val(id);
         $('#textNoSurat').text(noSurat);
@@ -403,6 +433,28 @@
         setTimeout(() => {
             $('#dispoModalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
         }, 10);
+    }
+
+    function openDetailDisposisiModal(noSurat, perihal, noDispo, kabag, kasubag) {
+        $('#viewNoSurat').text(noSurat);
+        $('#viewPerihal').text(perihal);
+        $('#viewNoDispo').text(noDispo);
+        $('#viewInstruksiKabag').text(kabag);
+        $('#viewInstruksiKasubag').text(kasubag || '- Tidak ada instruksi tambahan -');
+        
+        $('#detailDisposisiModal').removeClass('hidden').addClass('flex');
+        
+        setTimeout(() => {
+            $('#detailDispoContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
+        }, 30);
+    }
+
+    function closeDetailModal() {
+        $('#detailDispoContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
+        
+        setTimeout(() => {
+            $('#detailDisposisiModal').removeClass('flex').addClass('hidden');
+        }, 300);
     }
 
     function closeDisposisiModal() {
