@@ -63,15 +63,21 @@ class DatabaseSeeder extends Seeder
         $statusSuratMasuk = ['pending', 'disposisi'];
         $romawiBulan = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
-        // 2. GENERATE 47 DATA SURAT MASUK (Range Mei-Agustus 2026)
+        // 2. GENERATE 47 DATA SURAT MASUK (Range Februari-Juni 2026 agar masuk filter SLA)
         for ($i = 1; $i <= 47; $i++) {
-            $bulan = rand(5, 8); // Bulan 5 (Mei) sampai 8 (Agustus)
-            $hari = rand(1, 28);
+            $bulan = rand(2, 6); // Mundur dari Bulan 2 (Februari) sampai Bulan 6 (Juni)
+            
+            // Jaga-jaga agar data di bulan Juni tidak melompati tanggal hari ini (23 Juni 2026)
+            if ($bulan === 6) {
+                $hari = rand(1, 20); 
+            } else {
+                $hari = rand(1, 28);
+            }
+
             $tanggalMasuk = Carbon::create(2026, $bulan, $hari)->format('Y-m-d');
             $status = $statusSuratMasuk[array_rand($statusSuratMasuk)];
             $romawi = $romawiBulan[$bulan - 1];
 
-            // Variasi Pola Nomor Surat Masuk agar Unik layaknya Dokumen Asli
             $pola = rand(1, 3);
             if ($pola === 1) {
                 $noSurat = "2026/" . rand(100, 499) . "/OEC/CNET/DRUGS-CASE/" . array_rand(['JSR', 'TLJ', 'TTR']) . "-TLJ";
@@ -119,15 +125,18 @@ class DatabaseSeeder extends Seeder
             'Permohonan Penugasan Personel sebagai Trainer pada Pelatihan Pelaporan Kasus Exploitation Against Children'
         ];
 
-        // 3. GENERATE 23 DATA SURAT KELUAR (Range Mei-Agustus 2026)
+        // 3. GENERATE 23 DATA SURAT KELUAR (Range Februari-Juni 2026)
         for ($j = 1; $j <= 23; $j++) {
-            $bulanKeluar = rand(5, 8);
-            $hariKeluar = rand(1, 28);
+            $bulanKeluar = rand(2, 6);
+            if ($bulanKeluar === 6) {
+                $hariKeluar = rand(1, 20);
+            } else {
+                $hariKeluar = rand(1, 28);
+            }
             $tanggalSurat = Carbon::create(2026, $bulanKeluar, $hariKeluar)->format('Y-m-d');
             $romawiKeluar = $romawiBulan[$bulanKeluar - 1];
             $subBagian = array_rand(['DIVHUBINTER', 'BAGJATRANIN', 'BAGKOMINTER']);
 
-            // Variasi Pola Nomor Surat Keluar agar mirip Format Kedinasan Polri
             if (rand(1, 2) === 1) {
                 $noSuratKeluar = "B/" . rand(50, 450) . "/" . $romawiKeluar . "/HUM.4.4.9./2026/" . $subBagian;
             } else {
@@ -145,6 +154,6 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Database sukses di-seed! 47 Surat Masuk & 23 Surat Keluar format Polri siap digas.');
+        $this->command->info('Database sukses di-seed! 47 Surat Masuk & 23 Surat Keluar format tanggal real-past siap digas.');
     }
 }

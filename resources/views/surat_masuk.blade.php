@@ -116,45 +116,42 @@
 </div>
 @endcan
 
-<div id="disposisiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
-    <div class="bg-gray-800 border border-gray-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="dispoModalContent">
+<div id="detailDisposisiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-gray-800 border border-gray-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="detailDispoContent">
         <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800/50">
             <h3 class="text-lg font-bold text-white flex items-center space-x-2">
-                <i class="fas fa-gavel text-amber-400"></i>
-                <span>Lembar Disposisi Digital</span>
+                <i class="fas fa-file-alt text-indigo-400"></i>
+                <span>Nota Komando / Lembar Disposisi</span>
             </h3>
-            <button onclick="closeDisposisiModal()" class="text-gray-400 hover:text-white transition-colors">
+            <button onclick="closeDetailModal()" class="text-gray-400 hover:text-white transition-colors">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <form id="disposisiForm" class="p-6 space-y-4">
-            <input type="hidden" id="dispoSuratId" name="surat_id">
-            
+        <div class="p-6 space-y-4 text-sm">
             <div class="space-y-1 bg-gray-900/50 p-4 rounded-xl border border-gray-700/50 text-xs">
-                <p class="text-gray-400">Target Surat: <span id="textNoSurat" class="text-white font-semibold"></span></p>
-                <p class="text-gray-400">Perihal: <span id="textPerihal" class="text-white"></span></p>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Nomor Agenda / Disposisi</label>
-                <input type="text" id="no_dispo" name="no_dispo" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Contoh: DSP/2026/V/0987">
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Instruksi KADIV / KABAG</label>
-                <textarea id="disposisi_kabag" name="disposisi_kabag" required rows="3" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Masukkan instruksi utama pimpinan untuk pelaksana..."></textarea>
-            </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Instruksi Tambahan KASUBAG (Opsional)</label>
-                <textarea id="disposisi_kasubag" name="disposisi_kasubag" rows="2" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Catatan tambahan koordinasi lapis dua..."></textarea>
+                <p class="text-gray-400">No. Surat: <span id="viewNoSurat" class="text-white font-semibold"></span></p>
+                <p class="text-gray-400">Perihal: <span id="viewPerihal" class="text-white"></span></p>
             </div>
             
-            <div class="pt-2 flex justify-end space-x-3">
-                <button type="button" onclick="closeDisposisiModal()" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium rounded-xl text-sm transition-colors">Batal</button>
-                <button type="submit" id="btnSubmitDisposisi" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-medium rounded-xl text-sm transition-colors flex items-center space-x-2 shadow-lg">
-                    <i class="fas fa-paper-plane text-xs"></i>
-                    <span>Kirim & Disposisi</span>
-                </button>
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nomor Agenda / Disposisi</label>
+                <div id="viewNoDispo" class="w-full bg-gray-900/40 border border-gray-700 rounded-xl px-4 py-3 text-white font-mono"></div>
             </div>
-        </form>
+
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Instruksi KADIV / KABAG</label>
+                <div id="viewInstruksiKabag" class="w-full bg-gray-900/40 border border-gray-700 rounded-xl px-4 py-3 text-white whitespace-pre-line"></div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Instruksi Tambahan KASUBAG</label>
+                <div id="viewInstruksiKasubag" class="w-full bg-gray-900/40 border border-gray-700 rounded-xl px-4 py-3 text-white whitespace-pre-line"></div>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+                <button type="button" onclick="closeDetailModal()" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl text-sm transition-colors">Tutup Dokumen</button>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -350,7 +347,6 @@
 
             let tombolAksi = '';
             
-            // Pembersihan string super ketat biar aman dari segala bentuk karakter aneh
             let cleanNoSurat = row.no_surat ? row.no_surat.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
             let cleanPerihal = row.perihal ? row.perihal.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\r?\n|\r/g, " ") : '';
 
@@ -370,9 +366,8 @@
                     ? `<span class="text-xs text-amber-400 font-medium italic">Menunggu Tinjauan</span>`
                     : `<span class="text-xs text-emerald-400 font-medium italic">Selesai</span>`;
             } else {
-                // LOGIKA SAKLEK UNTUK ROLE STAF PELAKSANA (Clean dan terisolasi)
+                // PERBAIKAN SAKLEK: Ambil data flat langsung dari tabel row utama
                 if (row.status === 'disposisi') {
-                    // Gunakan fungsi bawaan JavaScript encodeURIComponent biar string teks panjang ga bakal ngerusak tag HTML button
                     let safeNoDispo = encodeURIComponent(row.no_dispo || '-');
                     let safeKabag = encodeURIComponent(row.disposisi_kabag || '-');
                     let safeKasubag = encodeURIComponent(row.disposisi_kasubag || '-');
@@ -412,9 +407,7 @@
         $('#tableBody').html(html);
     }
 
-    // FUNGSI JEMBATAN PARSING AMAN (Taruh fungsi ini di bawah renderTable)
     function triggerDetailModal(noSurat, perihal, noDispo, kabag, kasubag) {
-        // Decode kembali string URL komponen yang aman tadi menjadi teks biasa saat disuntik ke modal
         openDetailDisposisiModal(
             decodeURIComponent(noSurat),
             decodeURIComponent(perihal),
