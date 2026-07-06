@@ -41,7 +41,6 @@ class SuratMasukController extends Controller
         $stats = [
             'total'   => SuratMasuk::count(),
             'pending' => SuratMasuk::where('status', 'pending')->count(),
-            // SLA check: pending status and older than or equal to 3 days
             'sla'     => SuratMasuk::where('status', 'pending')
                             ->where('tanggal_masuk', '<=', Carbon::now()->subDays(3))
                             ->count()
@@ -49,7 +48,8 @@ class SuratMasukController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $paginatedData->items(),
+            // KUNCI SAKLEK: Pake toArray()['data'] biar field flat no_dispo dll gak dibuang sama Laravel
+            'data' => $paginatedData->toArray()['data'], 
             'stats' => $stats,
             'pagination' => [
                 'page' => $paginatedData->currentPage(),
@@ -156,94 +156,83 @@ class SuratMasukController extends Controller
         return response()->json(['status' => 200, 'data' => $logs], 200);
     }
 
-        public function parsePDF(Request $request)
+    public function parsePDF(Request $request)
     {
         \Illuminate\Support\Facades\Gate::authorize('akses-admin');
 
-        // 1. Validasi file input (Maksimal 10MB)
         $request->validate([
             'file_pdf' => 'required|mimes:pdf|max:10000',
         ]);
 
         try {
+            set_time_limit(240); 
+
             $file = $request->file('file_pdf');
             $apiKey = env('GEMINI_API_KEY');
 
             if (!$apiKey) {
-                return response()->json([
-                    'status' => 500,
-                    'message' => 'Konfigurasi GEMINI_API_KEY belum dipasang di file .env'
-                ], 500);
+                return response()->json(['status' => 500, 'message' => 'GEMINI_API_KEY belum dipasang di file .env'], 500);
             }
 
-            // 2. Ekstrak teks langsung dari dokumen PDF menggunakan Smalot PdfParser
-            $parser = new Parser();
-            $pdfDocument = $parser->parseFile($file->path());
-            $pdfTextContent = $pdfDocument->getText();
+            $pdfBase64 = base64_encode(file_get_contents($file->path()));
 
-            // Antisipasi jika PDF berupa hasil scan gambar penuh (kosong tanpa teks)
-            if (trim($pdfTextContent) === '') {
-                return response()->json([
-                    'status' => 422,
-                    'message' => 'Gagal membaca teks dokumen. File PDF kemungkinan berupa hasil scan gambar murni tanpa layer teks.'
-                ], 422);
-            }
-            
-            // 3. Susun instruksi ketat agar AI melakukan ekstraksi data ke format JSON
-            $prompt = "Kamu adalah sistem AI pintar untuk manajemen kearsipan surat dinas resmi di lingkungan kepolisian/instansi pemerintah.\n"
-                    . "Tugasmu adalah menganalisis teks dari sebuah surat masuk yang dilampirkan, lalu mengekstrak informasi penting secara akurat.\n\n"
-                    . "Konteks Teks Dokumen Surat:\n"
-                    . "--- START TEXT ---\n"
-                    . $pdfTextContent . "\n"
-                    . "--- END TEXT ---\n\n"
-                    . "Aturan Ekstraksi:\n"
-                    . "1. Format tanggal wajib diubah ke format standar basis data: YYYY-MM-DD (Contoh: '30 Maret 2026' menjadi '2026-03-30').\n"
-                    . "2. Jika informasi tertentu (seperti nomor surat atau perihal) benar-benar tidak tertulis di teks, berikan nilai null.\n"
-                    . "3. Jangan berikan teks pembuka atau penutup apa pun. Kembalikan HASILNYA HANYA DALAM FORMAT JSON MURNI.\n\n"
-                    . "Struktur Objek JSON yang Wajib Diikuti:\n"
-                    . "{\n"
-                    . "  \"no_surat\": \"Nomor surat resmi yang tertera\",\n"
-                    . "  \"tanggal_masuk\": \"Tanggal surat dibuat atau diterima dalam format YYYY-MM-DD\",\n"
-                    . "  \"dari\": \"Nama instansi, divisi, atau perorangan pengirim surat\",\n"
-                    . "  \"kepada\": \"Nama jabatan atau instansi tujuan surat\",\n"
-                    . "  \"perihal\": \"Ringkasan lengkap perihal atau subjek surat\"\n"
-                    . "}";
+            $prompt = "Kamu adalah sistem AI pintar kearsipan dinas kepolisian. Tugasmu wajib menganalisis file dokumen visual PDF/Scan terlampir, lalu lakukan OCR dan ambil data: no_surat, tanggal_masuk, dari, kepada, dan perihal.\n\n"
+                    . "Aturan penting:\n"
+                    . "1. Format tanggal_masuk WAJIB berformat YYYY-MM-DD. Jika dokumen hanya menyebutkan bulan dan tahun seperti 'Mei 2026', ubah otomatis menjadi tanggal 1 yaitu '2026-05-01'.\n"
+                    . "2. Jika data tidak ditemukan, isi properti tersebut dengan string kosong atau null.\n"
+                    . "3. Berikan hasilnya murni dalam bentuk JSON objek langsung tanpa markdown backtick.";
 
-            // 4. Kirim data teks prompt murni ke API Gemini 1.5 Flash
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}", [
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt]
+            // KUNCI UTAMA: Gunakan model 'gemini-2.5-flash' yang paling stabil untuk multimodal visual OCR di v1beta
+            $response = Http::withoutVerifying()
+                ->timeout(180) 
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt],
+                                [
+                                    'inlineData' => [
+                                        'mimeType' => 'application/pdf',
+                                        'data' => $pdfBase64
+                                    ]
+                                ]
+                            ]
                         ]
+                    ],
+                    'generationConfig' => [
+                        'responseMimeType' => 'application/json'
                     ]
-                ],
-                'generationConfig' => [
-                    'responseMimeType' => 'application/json'
-                ]
-            ]);
+                ]);
 
             if ($response->failed()) {
                 return response()->json([
                     'status' => 500,
-                    'message' => 'Gagal mendapatkan respon dari layanan API Gemini. Status internal: ' . $response->status()
+                    'message' => 'Gagal konek ke Gemini. Detail: ' . $response->body()
                 ], 500);
             }
 
-            // 5. Ambil teks hasil parsing JSON dari respon AI
             $resultJson = $response->json('candidates.0.content.parts.0.text');
-            $extractedData = json_decode($resultJson, true);
+            
+            $cleanJson = preg_replace('/^```json\s*|```\s*$/i', '', trim($resultJson));
+            $extractedData = json_decode($cleanJson, true);
+
+            if (!$extractedData) {
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'AI gagal memformat JSON murni. Output mentah: ' . substr($cleanJson, 0, 100)
+                ], 500);
+            }
 
             return response()->json([
                 'status' => 200,
-                'message' => 'Analisis dokumen surat berhasil diproses oleh AI',
+                'message' => 'Dokumen berhasil discan oleh AI!',
                 'data' => $extractedData
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
-                'message' => 'Terjadi kesalahan sistem saat memproses dokumen: ' . $e->getMessage()
+                'message' => 'Sistem Error saat memproses PDF: ' . $e->getMessage()
             ], 500);
         }
     }
