@@ -99,9 +99,8 @@
                 <label class="text-xs font-semibold text-gray-400 uppercase">Berkas Dokumen (PDF)</label>
                 <div class="flex gap-2 items-center">
                     <input type="file" id="file_pdf_input" name="file_pdf" accept="application/pdf" class="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600/10 file:text-indigo-400 hover:file:bg-indigo-600/20 cursor-pointer">
-                    <button type="button" onclick="triggerAutoScan()" id="btnAutoScan" class="px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 font-semibold rounded-xl text-xs transition-all flex items-center space-x-1 whitespace-nowrap">
-                        <i class="fas fa-robot"></i>
-                        <span>Auto Scan</span>
+                    <button type="button" id="btnAutoScan" class="px-5 py-2.5 bg-divhub-gold text-divhub-navy rounded-xl hover:bg-divhub-goldlight transition-all duration-300 font-display font-bold flex items-center gap-2 shadow-lg hover:shadow-[0_4px_15px_rgba(212,175,55,0.4)] hover:-translate-y-0.5">                        <i class="fas fa-microchip"></i>
+                        <span>Auto Scan AI</span>
                     </button>
                 </div>
             </div>
@@ -227,12 +226,14 @@
             let formData = $(this).serialize();
 
             Swal.fire({
-                title: 'Memproses Disposisi...',
-                text: 'Sedang menyimpan lembar komando dan mengirim notifikasi WhatsApp Fonnte.',
+                title: 'Menganalisis Dokumen',
+                html: 'AI sedang mengekstrak data dari hasil scan. Mohon tunggu...',
+                background: '#1C2541', // Biru card
+                color: '#F3F4F6', // Teks abu terang
                 allowOutsideClick: false,
-                background: '#1f2937',
-                color: '#fff',
-                didOpen: () => { Swal.showLoading(); }
+                didOpen: () => {
+                Swal.showLoading();
+                }
             });
 
             $.ajax({
@@ -265,31 +266,74 @@
         formData.append('file_pdf', fileInput.files[0]);
         $('#btnAutoScan').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Scanning...');
 
-        $.ajax({
-            url: "{{ url('/api/surat-masuk/parse') }}",
-            type: "POST",
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(res) {
-                if (res.status === 200 && res.data) {
-                    $('input[name="no_surat"]').val(res.data.no_surat || '');
-                    $('input[name="tanggal_masuk"]').val(res.data.tanggal_masuk || '');
-                    $('input[name="dari"]').val(res.data.dari || '');
-                    $('input[name="kepada"]').val(res.data.kepada || '');
-                    $('textarea[name="perihal"]').val(res.data.perihal || '');
-                    Swal.fire({ icon: 'success', title: 'Scan Sukses', text: 'Data form berhasil terisi otomatis oleh AI.', background: '#1f2937', color: '#fff' });
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Gagal', text: res.message || 'Data gagal diurai.', background: '#1f2937', color: '#fff' });
+        // Contoh kerangka di dalem event click tombol scan lu
+$('#btnAutoScan').on('click', function(e) {
+    e.preventDefault();
+    
+    let formData = new FormData();
+    // (Asumsi lu ambil file dari input file lu)
+    formData.append('file_pdf', $('#file_pdf')[0].files[0]);
+
+    // 1. MUNCULIN LOADING SKELETON SEBELUM AJAX JALAN
+    Swal.fire({
+        title: 'Menganalisis Dokumen',
+        html: 'Sistem AI sedang mengekstrak data dari hasil scan. Mohon tunggu sebentar...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+            $.ajax({
+                url: '/api/surat-masuk/parse',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    // 2. TUTUP LOADING PAS SUKSES
+                    Swal.close();
+                    
+                    if(response.status === 200) {
+                        // Isi form lu otomatis di sini
+                        $('#no_surat').val(response.data.no_surat);
+                        $('#tanggal_masuk').val(response.data.tanggal_masuk);
+                        $('#dari').val(response.data.dari);
+                        $('#kepada').val(response.data.kepada);
+                        $('#perihal').val(response.data.perihal);
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Scan Selesai!',
+                            text: 'Data berhasil diekstrak dengan presisi.',
+                            background: '#1C2541',
+                            color: '#F3F4F6',
+                            confirmButtonColor: '#D4AF37'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    // 3. TUTUP LOADING PAS ERROR DAN TAMPILIN PESAN
+                    Swal.close();
+                    
+                    let errorMsg = 'Terjadi kesalahan sistem.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Scan',
+                        text: errorMsg,
+                        background: '#1C2541',
+                        color: '#F3F4F6',
+                        confirmButtonColor: '#D4AF37'
+                    });
                 }
-            },
-            error: function(xhr) {
-                let errorText = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Gagal menganalisis dokumen menggunakan AI.';
-                Swal.fire({ icon: 'error', title: 'Gagal Scan', text: errorText, background: '#1f2937', color: '#fff' });
-            },
-            complete: function() {
-                $('#btnAutoScan').prop('disabled', false).html('<i class="fas fa-robot"></i> <span>Auto Scan</span>');
-            }
+            });
         });
     }
 
