@@ -94,60 +94,42 @@ class SuratMasukController extends Controller
 
     public function updateDisposisi(Request $request, $id)
     {
-        // KUNCI UTAMA: Hanya pimpinan yang boleh mengeksekusi disposisi
-        if (\Illuminate\Support\Facades\Auth::user()->role !== 'pimpinan') {
-            return response()->json(['status' => 403, 'message' => 'Aksi Ditolak! Hanya pimpinan yang dapat memberikan instruksi disposisi.'], 403);
-        }
-
+        // 1. HAPUS 'no_dispo' => 'required' dari list validasi lu bray!
         $request->validate([
-            'no_dispo' => 'required|string|max:100',
             'disposisi_kabag' => 'required|string',
             'disposisi_kasubag' => 'nullable|string',
         ]);
 
-        $surat = SuratMasuk::find($id);
-        
-        if (!$surat) {
-            return response()->json(['status' => 404, 'message' => 'Data tidak ditemukan'], 404);
-        }
-
-        $surat->update([
-            'no_dispo'          => $request->input('no_dispo'),
-            'disposisi_kabag'   => $request->input('disposisi_kabag'),
-            'disposisi_kasubag' => $request->input('disposisi_kasubag'),
-            'status'            => 'disposisi'
-        ]);
-
-        // Audit Trail Log
-        \App\Models\ActivityLog::create([
-            'aksi'    => 'Pemberian Disposisi',
-            'rincian' => "Pimpinan (" . \Illuminate\Support\Facades\Auth::user()->nama_lengkap . ") memberikan instruksi disposisi pada surat nomor {$surat->no_surat}"
-        ]);
-
-        // ==========================================
-        // WHATSAPP GATEWAY (NOTIFIKASI FONNTE)
-        // ==========================================
-        $pesanWA = "📩 *NOTIFIKASI DISPOSISI BARU* 📩\n\n"
-                 . "Terdapat instruksi baru dari Pimpinan untuk segera ditindaklanjuti.\n\n"
-                 . "📌 *No Surat:* " . $surat->no_surat . "\n"
-                 . "🏢 *Dari:* " . $surat->dari . "\n"
-                 . "📝 *Perihal:* " . $surat->perihal . "\n\n"
-                 . "🔸 *Instruksi Kabag:* " . $surat->disposisi_kabag . "\n"
-                 . "🔸 *Instruksi Kasubag:* " . ($surat->disposisi_kasubag ?: '-') . "\n\n"
-                 . "Silakan cek sistem InterOps-Hub untuk menindaklanjuti berkas.";
-
         try {
-            Http::withHeaders([
-                'Authorization' => '2cSbEX1edJb2dWz59iQn' // API Key Fonnte lu
-            ])->asForm()->post('https://api.fonnte.com/send', [
-                'target'  => '081219408823', // Nomor HP Staf lu
-                'message' => $pesanWA
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Gagal kirim WA: ' . $e->getMessage());
-        }
+            $surat = SuratMasuk::findOrFail($id);
 
-        return response()->json(['status' => 200, 'message' => 'Disposisi berhasil disimpan & Notifikasi WA terkirim!'], 200);
+            // 2. KUNCI AUTO GENERATE: Kita bikin nomor agenda otomatis di sini layaknya sistem Mabes
+            // Format contoh: DSP/2026/VII/RANDOM_ANGKA
+            $romawiBulan = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+            $bulanSekarang = date('n'); // Mengambil angka bulan 1-12
+            $romawi = $romawiBulan[$bulanSekarang - 1];
+            
+            $autoNoDispo = 'DSP/' . date('Y') . '/' . $romawi . '/' . rand(1000, 9999);
+
+            // 3. Masukkan datanya ke database
+            $surat->update([
+                'status' => 'disposisi',
+                'no_dispo' => $autoNoDispo, // Nomor otomatis langsung masuk kesini
+                'disposisi_kabag' => $request->disposisi_kabag,
+                'disposisi_kasubag' => $request->disposisi_kasubag,
+            ]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Lembar disposisi komando berhasil diterbitkan otomatis!'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Gagal memproses disposisi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function getLogs()

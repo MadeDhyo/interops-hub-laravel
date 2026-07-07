@@ -66,54 +66,143 @@
 
 @can('akses-admin')
 <div id="modalTambah" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all duration-300">
-        <div class="px-6 py-4 border-b border-gray-700 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-white">Input Surat Masuk Baru</h3>
+    <div class="bg-divhub-card border border-divhub-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all duration-300">
+        <div class="px-6 py-4 border-b border-divhub-border flex justify-between items-center bg-divhub-navy/50">
+            <h3 class="text-lg font-display font-bold text-white">Input Surat Masuk Baru</h3>
             <button onclick="closeModal('modalTambah')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
         </div>
         <form id="formTambahSurat" enctype="multipart/form-data" class="p-6 space-y-4">
             @csrf
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1">
-                    <label class="text-xs font-semibold text-gray-400 uppercase">No Surat</label>
-                    <input type="text" name="no_surat" required class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
-                </div>
-                <div class="space-y-1">
-                    <label class="text-xs font-semibold text-gray-400 uppercase">Tanggal Masuk</label>
-                    <input type="date" name="tanggal_masuk" required class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
-                </div>
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-400 uppercase">No Surat</label>
+                <input type="text" id="no_surat" name="no_surat" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-gold">
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-400 uppercase">Tanggal Masuk</label>
+                <input type="date" id="tanggal_masuk" name="tanggal_masuk" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-gold">
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Dari (Asal Surat)</label>
-                <input type="text" name="dari" required class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
+                <input type="text" id="dari" name="dari" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-gold">
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Kepada (Tujuan)</label>
-                <input type="text" name="kepada" required class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
+                <input type="text" id="kepada" name="kepada" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-gold">
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Perihal</label>
-                <textarea name="perihal" rows="3" required class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+                <textarea id="perihal" name="perihal" rows="3" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-gold"></textarea>
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Berkas Dokumen (PDF)</label>
                 <div class="flex gap-2 items-center">
-                    <input type="file" id="file_pdf_input" name="file_pdf" accept="application/pdf" class="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-600/10 file:text-indigo-400 hover:file:bg-indigo-600/20 cursor-pointer">
-                    <button type="button" id="btnAutoScan" class="px-5 py-2.5 bg-divhub-gold text-divhub-navy rounded-xl hover:bg-divhub-goldlight transition-all duration-300 font-display font-bold flex items-center gap-2 shadow-lg hover:shadow-[0_4px_15px_rgba(212,175,55,0.4)] hover:-translate-y-0.5">                        <i class="fas fa-microchip"></i>
-                        <span>Auto Scan AI</span>
+                    <input type="file" id="file_pdf" name="file_pdf" accept="application/pdf" class="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-divhub-navy file:text-divhub-gold hover:file:bg-divhub-gold/10 cursor-pointer">
+                    <button type="button" id="btnAutoScan" class="px-5 py-2 bg-divhub-gold text-divhub-navy rounded-xl hover:bg-divhub-goldlight transition-all font-display font-bold flex items-center gap-2">
+                        <i class="fas fa-microchip"></i> <span>Scan AI</span>
                     </button>
                 </div>
             </div>
-            <div class="pt-4 flex justify-end space-x-3 border-t border-gray-700 mt-6">
+            <div class="pt-4 flex justify-end space-x-3 border-t border-divhub-border mt-6">
                 <button type="button" onclick="closeModal('modalTambah')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl text-sm">Batal</button>
-                <button type="submit" id="btnSubmitTambah" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl text-sm flex items-center space-x-2">
-                    <span>Simpan Arsip</span>
-                </button>
+                <button type="submit" id="btnSubmitTambah" class="px-4 py-2 bg-divhub-blue hover:bg-blue-600 text-white font-medium rounded-xl text-sm">Simpan Arsip</button>
             </div>
         </form>
     </div>
 </div>
 @endcan
+
+<!-- 2. MODAL INPUT DISPOSISI (KHUSUS PIMPINAN) -->
+@if(auth()->user()->role === 'pimpinan')
+<div id="disposisiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-divhub-card border border-divhub-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="dispoModalContent">
+        <div class="p-6 border-b border-divhub-border flex justify-between items-center bg-divhub-navy/50">
+            <h3 class="text-lg font-display font-bold text-white flex items-center space-x-2">
+                <i class="fas fa-gavel text-divhub-gold"></i>
+                <span>Lembar Disposisi Digital</span>
+            </h3>
+            <button type="button" class="btn-close-dispo text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="disposisiForm" class="p-6 space-y-4">
+            <input type="hidden" id="dispoSuratId" name="surat_id">
+            
+            <div class="space-y-1 bg-divhub-navy/50 p-4 rounded-xl border border-divhub-border/50 text-xs">
+                <p class="text-gray-400">Target Surat: <span id="textNoSurat" class="text-white font-semibold"></span></p>
+                <p class="text-gray-400">Perihal: <span id="textPerihal" class="text-white"></span></p>
+            </div>
+            
+            <!-- NOMOR AGENDA DIHAPUS DARI SINI -->
+
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Instruksi KADIV / KABAG</label>
+                <div class="relative">
+                    <select id="disposisi_kabag" name="disposisi_kabag" required class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-divhub-gold appearance-none cursor-pointer">
+                        <option value="" disabled selected>-- Pilih Instruksi Komando --</option>
+                        <option value="Tindak Lanjuti (TLJ)">Tindak Lanjuti (TLJ)</option>
+                        <option value="Datakan">Datakan</option>
+                        <option value="Laporkan Hasilnya">Laporkan Hasilnya</option>
+                        <option value="Untuk Diketahui (UDK)">Untuk Diketahui (UDK)</option>
+                    </select>
+                    <!-- Custom Arrow bawaan Tailwind biar selaras dengan tema Navy-Gold -->
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-divhub-gold">
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Instruksi KASUBAG (Opsional)</label>
+                <textarea id="disposisi_kasubag" name="disposisi_kasubag" rows="2" class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-divhub-gold" placeholder="Catatan tambahan koordinasi lapis dua..."></textarea>
+            </div>
+            
+            <div class="pt-2 flex justify-end space-x-3">
+                <button type="button" class="btn-close-dispo px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium rounded-xl text-sm transition-colors">Batal</button>
+                <button type="submit" id="btnSubmitDisposisi" class="px-5 py-2.5 bg-divhub-gold text-divhub-navy font-display font-bold rounded-xl text-sm flex items-center space-x-2 transition-all hover:bg-divhub-goldlight hover:-translate-y-0.5 shadow-lg">
+                    <i class="fas fa-paper-plane text-xs"></i> <span>Kirim Disposisi</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+
+<div id="detailDisposisiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-divhub-card border border-divhub-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="detailDispoContent">
+        <div class="p-6 border-b border-divhub-border flex justify-between items-center bg-divhub-navy/50">
+            <h3 class="text-lg font-display font-bold text-white flex items-center space-x-2">
+                <i class="fas fa-file-alt text-divhub-blue"></i>
+                <span>Nota Komando</span>
+            </h3>
+            <button type="button" class="btn-close-detail text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6 space-y-4 text-sm">
+            <div class="space-y-1 bg-divhub-navy/50 p-4 rounded-xl border border-divhub-border/50 text-xs">
+                <p class="text-gray-400">No. Surat: <span id="viewNoSurat" class="text-white font-semibold"></span></p>
+                <p class="text-gray-400">Perihal: <span id="viewPerihal" class="text-white"></span></p>
+            </div>
+            
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">No Agenda</label>
+                <div id="viewNoDispo" class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-white font-mono"></div>
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Instruksi KADIV / KABAG</label>
+                <div id="viewInstruksiKabag" class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-white whitespace-pre-line"></div>
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Instruksi KASUBAG</label>
+                <div id="viewInstruksiKasubag" class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-white whitespace-pre-line"></div>
+            </div>
+
+            <div class="pt-2 flex justify-end">
+                <button type="button" class="btn-close-detail px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl text-sm transition-colors">Tutup Dokumen</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="detailDisposisiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
     <div class="bg-gray-800 border border-gray-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="detailDispoContent">
@@ -162,37 +251,111 @@
 
     $(document).ready(function() {
         $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         });
 
-        // 1. Jalankan fetch data tabel utama polosan (Aman, tabel dijamin keluar!)
         fetchSuratMasuk(currentPage);
 
-        // =========================================================================
-        // PERBAIKAN URUTAN: Ambil data DULU, buka modal, BARU bersihkan URL
-        // =========================================================================
+        // PENANGANAN PARAMETER URL
         let urlParams = new URLSearchParams(window.location.search);
         let autoDispoId = urlParams.get('autodispo');
         let urlNoSurat = urlParams.get('no_surat');
         let urlPerihal = urlParams.get('perihal');
         
         if (autoDispoId && currentRole === 'pimpinan') {
-            // Ekstrak data selagi parameter URL masih eksis
             let finalNoSurat = urlNoSurat ? decodeURIComponent(urlNoSurat) : 'Arsip/' + autoDispoId;
             let finalPerihal = urlPerihal ? decodeURIComponent(urlPerihal) : 'Menunggu Instruksi Komando';
             
-            // Buka modal secara instan
             setTimeout(() => {
-                openDisposisiModal(autoDispoId, finalNoSurat, finalPerihal);
+                triggerDispoModal(autoDispoId, finalNoSurat, finalPerihal);
             }, 150);
-
-            // KUNCI AMAN: Hapus parameter URL DI SINI (Setelah semua data selesai diambil)
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // Submit Tambah Surat (Admin Only)
+        // DELEGATED EVENT LISTENERS (KEBAL ERROR RENDER)
+        // Listener Tombol "Beri Disposisi"
+        $(document).on('click', '.btn-open-dispo', function() {
+            let id = $(this).data('id');
+            let no = decodeURIComponent($(this).data('no') || '');
+            let perihal = decodeURIComponent($(this).data('perihal') || '');
+            triggerDispoModal(id, no, perihal);
+        });
+
+        // Listener Tombol "Lihat Nota"
+        $(document).on('click', '.btn-open-detail', function() {
+            let no = decodeURIComponent($(this).data('no') || '');
+            let perihal = decodeURIComponent($(this).data('perihal') || '');
+            let dispo = decodeURIComponent($(this).data('dispo') || '-');
+            let kabag = decodeURIComponent($(this).data('kabag') || '-');
+            let kasubag = decodeURIComponent($(this).data('kasubag') || '-');
+            
+            $('#viewNoSurat').text(no);
+            $('#viewPerihal').text(perihal);
+            $('#viewNoDispo').text(dispo);
+            $('#viewInstruksiKabag').text(kabag);
+            $('#viewInstruksiKasubag').text(kasubag);
+
+            $('#detailDisposisiModal').removeClass('hidden').addClass('flex');
+            setTimeout(() => { $('#detailDispoContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100'); }, 50);
+        });
+
+        // Listener Tombol Tutup Modal
+        $(document).on('click', '.btn-close-dispo', function() {
+            $('#dispoModalContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
+            setTimeout(() => { $('#disposisiModal').removeClass('flex').addClass('hidden'); }, 300);
+        });
+
+        $(document).on('click', '.btn-close-detail', function() {
+            $('#detailDispoContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
+            setTimeout(() => { $('#detailDisposisiModal').removeClass('flex').addClass('hidden'); }, 300);
+        });
+
+        // ACTION SCAN AI (Admin)
+        $('#btnAutoScan').on('click', function(e) {
+            e.preventDefault();
+            let fileInput = $('#file_pdf')[0].files[0];
+            
+            if (!fileInput) {
+                Swal.fire({ icon: 'warning', title: 'File Kosong', text: 'Upload dokumen PDF terlebih dahulu.', background: '#1C2541', color: '#F3F4F6', confirmButtonColor: '#D4AF37' });
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append('file_pdf', fileInput);
+
+            Swal.fire({
+                title: 'Menganalisis Dokumen',
+                html: 'AI sedang mengekstrak data dari hasil scan. Mohon tunggu...',
+                background: '#1C2541', color: '#F3F4F6', allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            $.ajax({
+                url: '/api/surat-masuk/parse',
+                type: 'POST',
+                data: formData,
+                contentType: false, processData: false,
+                success: function(response) {
+                    Swal.close();
+                    if(response.status === 200) {
+                        $('#no_surat').val(response.data.no_surat);
+                        $('#tanggal_masuk').val(response.data.tanggal_masuk);
+                        $('#dari').val(response.data.dari);
+                        $('#kepada').val(response.data.kepada);
+                        $('#perihal').val(response.data.perihal);
+                        
+                        Swal.fire({ icon: 'success', title: 'Scan Selesai!', text: 'Data berhasil diekstrak dengan presisi.', background: '#1C2541', color: '#F3F4F6', confirmButtonColor: '#D4AF37' });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    let errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Terjadi kesalahan sistem.';
+                    Swal.fire({ icon: 'error', title: 'Gagal Scan', text: errorMsg, background: '#1C2541', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
+                }
+            });
+        });
+
+        // FORM SUBMISSIONS
         $('#formTambahSurat').on('submit', function(e) {
             e.preventDefault();
             let formData = new FormData(this);
@@ -200,164 +363,72 @@
 
             $.ajax({
                 url: "{{ url('/api/surat-masuk') }}",
-                type: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
+                type: "POST", data: formData, contentType: false, processData: false,
                 success: function(res) {
                     closeModal('modalTambah');
                     $('#formTambahSurat')[0].reset();
-                    Swal.fire({ icon: 'success', title: 'Sukses', text: res.message, background: '#1f2937', color: '#fff' });
-                    fetchSuratMasuk(currentPage);
+                    Swal.fire({ icon: 'success', title: 'Sukses', text: res.message, background: '#1C2541', color: '#F3F4F6', confirmButtonColor: '#D4AF37' });
+                    fetchSuratMasuk(1);
                 },
-                error: function(xhr) {
-                    Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal menyimpan data arsip.', background: '#1f2937', color: '#fff' });
+                error: function() {
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal menyimpan arsip.', background: '#1C2541', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
                 },
                 complete: function() {
-                    $('#btnSubmitTambah').prop('disabled', false).html('<span>Simpan Arsip</span>');
+                    $('#btnSubmitTambah').prop('disabled', false).text('Simpan Arsip');
                 }
             });
         });
 
-        // Submit Disposisi (Pimpinan Only)
         $('#disposisiForm').on('submit', function(e) {
             e.preventDefault();
             let id = $('#dispoSuratId').val();
             let formData = $(this).serialize();
-
-            Swal.fire({
-                title: 'Menganalisis Dokumen',
-                html: 'AI sedang mengekstrak data dari hasil scan. Mohon tunggu...',
-                background: '#1C2541', // Biru card
-                color: '#F3F4F6', // Teks abu terang
-                allowOutsideClick: false,
-                didOpen: () => {
-                Swal.showLoading();
-                }
-            });
+            $('#btnSubmitDisposisi').prop('disabled', true);
 
             $.ajax({
                 url: `{{ url('/api/surat-masuk/update') }}/${id}`,
-                type: "POST",
-                data: formData,
+                type: "POST", data: formData,
                 success: function(res) {
-                    Swal.fire({ icon: 'success', title: 'Sukses!', text: res.message, background: '#1f2937', color: '#fff', confirmButtonColor: '#4f46e5' });
-                    closeDisposisiModal();
+                    Swal.fire({ icon: 'success', title: 'Sukses!', text: res.message, background: '#1C2541', color: '#F3F4F6', confirmButtonColor: '#D4AF37' });
+                    $('.btn-close-dispo').click();
                     $('#disposisiForm')[0].reset();
                     fetchSuratMasuk(currentPage);
                 },
                 error: function(xhr) {
-                    let errorMsg = xhr.responseJSON ? xhr.responseJSON.message : 'Gagal memproses disposisi pimpinan.';
-                    Swal.fire({ icon: 'error', title: 'Aksi Gagal', text: errorMsg, background: '#1f2937', color: '#fff', confirmButtonColor: '#ef4444' });
+                    let errorMsg = xhr.responseJSON ? xhr.responseJSON.message : 'Gagal memproses.';
+                    Swal.fire({ icon: 'error', title: 'Aksi Gagal', text: errorMsg, background: '#1C2541', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
+                },
+                complete: function() {
+                    $('#btnSubmitDisposisi').prop('disabled', false);
                 }
             });
         });
     });
 
-    // SCAN AI FORM (Admin Only)
-    function triggerAutoScan() {
-        let fileInput = document.getElementById('file_pdf_input');
-        if (!fileInput || fileInput.files.length === 0) {
-            Swal.fire({ icon: 'warning', title: 'Pilih File', text: 'Silakan pilih file PDF surat terlebih dahulu sebelum melakukan scanning.', background: '#1f2937', color: '#fff' });
-            return;
-        }
+    // FUNCTIONS
+    function triggerDispoModal(id, no, perihal) {
+        $('#dispoSuratId').val(id);
+        $('#textNoSurat').text(no);
+        $('#textPerihal').text(perihal);
+        
+        // Hapus reset $('#no_dispo') karena elementnya sudah dibuang
+        $('#disposisi_kabag').val('');
+        $('#disposisi_kasubag').val('');
 
-        let formData = new FormData();
-        formData.append('file_pdf', fileInput.files[0]);
-        $('#btnAutoScan').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Scanning...');
-
-        // Contoh kerangka di dalem event click tombol scan lu
-$('#btnAutoScan').on('click', function(e) {
-    e.preventDefault();
-    
-    let formData = new FormData();
-    // (Asumsi lu ambil file dari input file lu)
-    formData.append('file_pdf', $('#file_pdf')[0].files[0]);
-
-    // 1. MUNCULIN LOADING SKELETON SEBELUM AJAX JALAN
-    Swal.fire({
-        title: 'Menganalisis Dokumen',
-        html: 'Sistem AI sedang mengekstrak data dari hasil scan. Mohon tunggu sebentar...',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
-            $.ajax({
-                url: '/api/surat-masuk/parse',
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    // 2. TUTUP LOADING PAS SUKSES
-                    Swal.close();
-                    
-                    if(response.status === 200) {
-                        // Isi form lu otomatis di sini
-                        $('#no_surat').val(response.data.no_surat);
-                        $('#tanggal_masuk').val(response.data.tanggal_masuk);
-                        $('#dari').val(response.data.dari);
-                        $('#kepada').val(response.data.kepada);
-                        $('#perihal').val(response.data.perihal);
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Scan Selesai!',
-                            text: 'Data berhasil diekstrak dengan presisi.',
-                            background: '#1C2541',
-                            color: '#F3F4F6',
-                            confirmButtonColor: '#D4AF37'
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    // 3. TUTUP LOADING PAS ERROR DAN TAMPILIN PESAN
-                    Swal.close();
-                    
-                    let errorMsg = 'Terjadi kesalahan sistem.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMsg = xhr.responseJSON.message;
-                    }
-                    
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal Scan',
-                        text: errorMsg,
-                        background: '#1C2541',
-                        color: '#F3F4F6',
-                        confirmButtonColor: '#D4AF37'
-                    });
-                }
-            });
-        });
+        $('#disposisiModal').removeClass('hidden').addClass('flex');
+        setTimeout(() => { $('#dispoModalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100'); }, 50);
     }
 
-    // SATU FUNGSI FETCH SURAT MASUK (Murni narik data ke tabel tanpa kepengaruh URL)
     function fetchSuratMasuk(page) {
         currentPage = page;
-        let queryParams = {
-            page: page,
-            search: $('#searchFilter').val(),
-            start_date: $('#startDateFilter').val(),
-            end_date: $('#endDateFilter').val()
-        };
-
         $.ajax({
             url: "{{ url('/api/surat-masuk') }}",
             type: "GET",
-            data: queryParams,
+            data: { page: page, search: $('#searchFilter').val(), start_date: $('#startDateFilter').val(), end_date: $('#endDateFilter').val() },
             dataType: "json",
             success: function(res) {
                 renderTable(res.data);
                 renderPagination(res.pagination);
-            },
-            error: function() {
-                $('#tableBody').html('<tr><td colspan="6" class="text-center py-6 text-red-400">Gagal memuat data surat masuk.</td></tr>');
             }
         });
     }
@@ -365,148 +436,58 @@ $('#btnAutoScan').on('click', function(e) {
     function renderTable(data) {
         let html = '';
         if (!data || data.length === 0) {
-            html = '<tr><td colspan="6" class="text-center py-6 text-gray-500">Tidak ada arsip surat masuk ditemukan.</td></tr>';
-            $('#tableBody').html(html);
+            $('#tableBody').html('<tr><td colspan="6" class="text-center py-6 text-gray-500">Tidak ada arsip.</td></tr>');
             return;
         }
 
         data.forEach(row => {
             let badgeColor = row.status === 'pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
             
-            let slaWarningTag = '';
-            if (row.status === 'pending' && row.tanggal_masuk) {
-                let tglMasuk = new Date(row.tanggal_masuk);
-                let tglSekarang = new Date();
-                let selisihWaktu = tglSekarang.getTime() - tglMasuk.getTime();
-                let selisihHari = Math.floor(selisihWaktu / (1000 * 3600 * 24));
-                
-                if (selisihHari >= 3) {
-                    slaWarningTag = `<span class="ml-2 px-1.5 py-0.5 text-[9px] font-black bg-red-500 text-white rounded animate-pulse tracking-wide uppercase">Overdue SLA</span>`;
-                }
-            }
-
-            let fileButton = row.file_pdf 
-                ? `<a href="{{ url('/uploads') }}/${row.file_pdf}" target="_blank" class="text-indigo-400 hover:text-indigo-300 transition-colors" title="Lihat PDF"><i class="fas fa-file-pdf text-base"></i></a>` 
-                : `<span class="text-gray-600">-</span>`;
-
+            let safeNoSurat = encodeURIComponent(row.no_surat || '');
+            let safePerihal = encodeURIComponent(row.perihal || '');
             let tombolAksi = '';
-            
-            let cleanNoSurat = row.no_surat ? row.no_surat.replace(/'/g, "\\'").replace(/"/g, '&quot;') : '';
-            let cleanPerihal = row.perihal ? row.perihal.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\r?\n|\r/g, " ") : '';
 
             if (currentRole === 'pimpinan') {
                 if (row.status === 'pending') {
-                    tombolAksi = `
-                        <button onclick="openDisposisiModal(${row.id}, '${cleanNoSurat}', '${cleanPerihal}')" class="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/30 text-xs rounded-lg text-amber-400 font-semibold transition-all flex items-center space-x-1">
-                            <i class="fas fa-file-signature"></i>
-                            <span>Beri Disposisi</span>
-                        </button>
-                    `;
+                    tombolAksi = `<button type="button" class="btn-open-dispo px-3 py-1.5 bg-divhub-gold/10 hover:bg-divhub-gold/20 border border-divhub-gold/40 text-xs rounded-lg text-divhub-gold font-semibold transition-all flex items-center space-x-1" data-id="${row.id}" data-no="${safeNoSurat}" data-perihal="${safePerihal}"><i class="fas fa-file-signature text-[10px]"></i><span>Beri Disposisi</span></button>`;
                 } else {
-                    tombolAksi = `<span class="text-xs text-emerald-400 font-medium italic"><i class="fas fa-check-circle mr-1"></i>Didisposisikan</span>`;
-                }
-            } else if (currentRole === 'admin') {
-                tombolAksi = row.status === 'pending' 
-                    ? `<span class="text-xs text-amber-400 font-medium italic">Menunggu Tinjauan</span>`
-                    : `<span class="text-xs text-emerald-400 font-medium italic">Selesai</span>`;
-            } else {
-                // PERBAIKAN SAKLEK: Ambil data flat langsung dari tabel row utama
-                if (row.status === 'disposisi') {
-                    let safeNoDispo = encodeURIComponent(row.no_dispo || '-');
+                    let safeDispo = encodeURIComponent(row.no_dispo || '-');
                     let safeKabag = encodeURIComponent(row.disposisi_kabag || '-');
                     let safeKasubag = encodeURIComponent(row.disposisi_kasubag || '-');
-                    let safeNoSuratParam = encodeURIComponent(row.no_surat || '');
-                    let safePerihalParam = encodeURIComponent(row.perihal || '');
-
-                    tombolAksi = `
-                        <button onclick="triggerDetailModal('${safeNoSuratParam}', '${safePerihalParam}', '${safeNoDispo}', '${safeKabag}', '${safeKasubag}')" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-xs rounded-lg text-indigo-400 font-semibold transition-all flex items-center space-x-1">
-                            <i class="fas fa-eye"></i>
-                            <span>Lihat Disposisi</span>
-                        </button>
-                    `;
+                    tombolAksi = `<button type="button" class="btn-open-detail px-3 py-1.5 bg-divhub-blue/10 hover:bg-divhub-blue/20 border border-divhub-blue/30 text-xs rounded-lg text-blue-400 font-semibold transition-all flex items-center space-x-1" data-no="${safeNoSurat}" data-perihal="${safePerihal}" data-dispo="${safeDispo}" data-kabag="${safeKabag}" data-kasubag="${safeKasubag}"><i class="fas fa-eye text-[10px]"></i><span>Lihat Nota</span></button>`;
+                }
+            } else if (currentRole === 'admin') {
+                tombolAksi = row.status === 'pending' ? `<span class="text-xs text-amber-400 italic">Menunggu Tinjauan</span>` : `<span class="text-xs text-emerald-400 italic">Selesai</span>`;
+            } else {
+                if (row.status === 'disposisi') {
+                    let safeDispo = encodeURIComponent(row.no_dispo || '-');
+                    let safeKabag = encodeURIComponent(row.disposisi_kabag || '-');
+                    let safeKasubag = encodeURIComponent(row.disposisi_kasubag || '-');
+                    tombolAksi = `<button type="button" class="btn-open-detail px-3 py-1.5 bg-indigo-600/20 border border-indigo-500/30 text-xs rounded-lg text-indigo-400 font-semibold flex items-center space-x-1" data-no="${safeNoSurat}" data-perihal="${safePerihal}" data-dispo="${safeDispo}" data-kabag="${safeKabag}" data-kasubag="${safeKasubag}"><i class="fas fa-eye"></i><span>Lihat Disposisi</span></button>`;
                 } else {
-                    tombolAksi = `<span class="text-xs text-gray-500 italic"><i class="fas fa-hourglass-start mr-1"></i>Belum Ada Perintah</span>`;
+                    tombolAksi = `<span class="text-xs text-gray-500 italic">Belum Ada Perintah</span>`;
                 }
             }
 
-            html += `
-                <tr class="hover:bg-gray-700/20 transition-colors duration-150">
-                    <td class="py-3.5 px-6 font-semibold text-white font-mono text-xs">
-                        ${row.no_surat}
-                        ${slaWarningTag}
-                    </td>
-                    <td class="py-3.5 px-6 text-gray-300 font-medium text-xs">${row.dari}</td>
-                    <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs" title="${cleanPerihal}">${row.perihal}</td>
-                    <td class="py-3.5 px-6 text-gray-400 font-mono text-xs">${row.tanggal_masuk}</td>
-                    <td class="py-3.5 px-6">
-                        <span class="px-2.5 py-1 rounded-md text-xs font-semibold capitalize ${badgeColor}">${row.status}</span>
-                    </td>
-                    <td class="py-3.5 px-6 text-center flex items-center justify-center space-x-4">
-                        ${fileButton}
-                        ${tombolAksi}
-                    </td>
-                </tr>
-            `;
+            let fileButton = row.file_pdf ? `<a href="{{ url('/uploads') }}/${row.file_pdf}" target="_blank" class="text-divhub-gold hover:text-white transition-colors"><i class="fas fa-file-pdf text-base"></i></a>` : `<span class="text-gray-600">-</span>`;
+
+            html += `<tr class="hover:bg-divhub-card/80 transition-colors border-b border-divhub-border/50">
+                <td class="py-3.5 px-6 text-white font-mono text-xs">${row.no_surat}</td>
+                <td class="py-3.5 px-6 text-gray-300 text-xs">${row.dari}</td>
+                <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs">${row.perihal}</td>
+                <td class="py-3.5 px-6 text-gray-400 font-mono text-xs">${row.tanggal_masuk}</td>
+                <td class="py-3.5 px-6"><span class="px-2.5 py-1 rounded-md text-xs font-semibold ${badgeColor}">${row.status}</span></td>
+                <td class="py-3.5 px-6 text-center flex items-center justify-center space-x-4">${fileButton} ${tombolAksi}</td>
+            </tr>`;
         });
         $('#tableBody').html(html);
     }
 
-    function triggerDetailModal(noSurat, perihal, noDispo, kabag, kasubag) {
-        openDetailDisposisiModal(
-            decodeURIComponent(noSurat),
-            decodeURIComponent(perihal),
-            decodeURIComponent(noDispo),
-            decodeURIComponent(kabag),
-            decodeURIComponent(kasubag)
-        );
-    }
-
-    function openDisposisiModal(id, noSurat, perihal) {
-        $('#dispoSuratId').val(id);
-        $('#textNoSurat').text(noSurat);
-        $('#textPerihal').text(perihal);
-        
-        $('#disposisiModal').removeClass('hidden').addClass('flex');
-        setTimeout(() => {
-            $('#dispoModalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
-        }, 10);
-    }
-
-    function openDetailDisposisiModal(noSurat, perihal, noDispo, kabag, kasubag) {
-        $('#viewNoSurat').text(noSurat);
-        $('#viewPerihal').text(perihal);
-        $('#viewNoDispo').text(noDispo);
-        $('#viewInstruksiKabag').text(kabag);
-        $('#viewInstruksiKasubag').text(kasubag || '- Tidak ada instruksi tambahan -');
-        
-        $('#detailDisposisiModal').removeClass('hidden').addClass('flex');
-        
-        setTimeout(() => {
-            $('#detailDispoContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
-        }, 30);
-    }
-
-    function closeDetailModal() {
-        $('#detailDispoContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
-        
-        setTimeout(() => {
-            $('#detailDisposisiModal').removeClass('flex').addClass('hidden');
-        }, 300);
-    }
-
-    function closeDisposisiModal() {
-        $('#dispoModalContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
-        setTimeout(() => {
-            $('#disposisiModal').removeClass('flex').addClass('hidden');
-        }, 300);
-    }
-
     function renderPagination(meta) {
         $('#paginationInfo').text(`Halaman ${meta.page} dari ${meta.total_pages}`);
-        let buttonsHtml = '';
-        buttonsHtml += `<button onclick="fetchSuratMasuk(${meta.page - 1})" ${meta.page === 1 ? 'disabled' : ''} class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed text-xs rounded-lg font-medium text-white transition-all">Prev</button>`;
-        buttonsHtml += `<button onclick="fetchSuratMasuk(${meta.page + 1})" ${meta.page === meta.total_pages || meta.total_pages === 0 ? 'disabled' : ''} class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed text-xs rounded-lg font-medium text-white transition-all">Next</button>`;
-        $('#paginationButtons').html(buttonsHtml);
+        let html = `<button onclick="fetchSuratMasuk(${meta.page - 1})" ${meta.page === 1 ? 'disabled' : ''} class="px-3 py-1.5 bg-divhub-card disabled:opacity-40 text-xs rounded-lg text-white">Prev</button>`;
+        html += `<button onclick="fetchSuratMasuk(${meta.page + 1})" ${meta.page === meta.total_pages || meta.total_pages === 0 ? 'disabled' : ''} class="px-3 py-1.5 bg-divhub-card disabled:opacity-40 text-xs rounded-lg text-white">Next</button>`;
+        $('#paginationButtons').html(html);
     }
 
     function handleFilter() { fetchSuratMasuk(1); }
