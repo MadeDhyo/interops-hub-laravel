@@ -339,7 +339,7 @@
                     Swal.close();
                     if(response.status === 200) {
                         $('#no_surat').val(response.data.no_surat);
-                        $('#tanggal_masuk').val(response.data.tanggal_masuk);
+                        $('#tanggal_masuk').val(hariIni);
                         $('#dari').val(response.data.dari);
                         $('#kepada').val(response.data.kepada);
                         $('#perihal').val(response.data.perihal);
