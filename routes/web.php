@@ -33,19 +33,20 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // ==========================================
-    // SEMUA ENDPOINT AJAX JQUERY DIPINDAHKAN KESINI
+    // ENDPOINT AJAX JQUERY DATA STREAM
     // ==========================================
     Route::get('/api/dashboard/stats', [DashboardController::class, 'getSlaStats']);
     Route::get('/api/users', [UserController::class, 'index']);
 
     // Surat Masuk API Endpoints
     Route::get('/api/surat-masuk', [SuratMasukController::class, 'index']);
+    Route::post('/api/api/surat-masuk', [SuratMasukController::class, 'create']); // Biar match mapping request
     Route::post('/api/surat-masuk', [SuratMasukController::class, 'create']);
     Route::post('/api/surat-masuk/update/{id}', [SuratMasukController::class, 'updateDisposisi']);
-    Route::post('/api/surat-masuk/parse', [SuratMasukController::class, 'parsePDF']); // Scan AI Pindah Kesini!
+    Route::post('/api/surat-masuk/parse', [SuratMasukController::class, 'parsePDF']);
     
     // Surat Keluar & Logs API Endpoints
     Route::get('/api/surat-keluar', [SuratKeluarController::class, 'index']);
     Route::post('/api/surat-keluar', [SuratKeluarController::class, 'create']);
-    Route::get('/api/logs', [SuratMasukController::class, 'getLogs']);
+    Route::get('/api/logs', [SuratMasukController::class, 'getLogs']); // Endpoint penyuplai data AJAX tabel log
 });
