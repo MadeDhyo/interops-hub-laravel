@@ -12,8 +12,9 @@ Route::get('/login', [AuthController::class, 'index']);
 Route::post('/login/attempt', [AuthController::class, 'attemptLogin']);
 Route::get('/logout', [AuthController::class, 'logout']);
 
-// Rute Terproteksi (Wajib Login & Mendukung Session Cookie)
+// Rute Terproteksi (Wajib Login & Mendukung Session Cookie JQuery)
 Route::middleware(['auth'])->group(function () {
+    // ----------------- RUTE TAMPILAN (VIEWS) -----------------
     Route::get('/dashboard', [DashboardController::class, 'index']);
     
     Route::get('/surat-masuk', function () {
@@ -38,9 +39,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/dashboard/stats', [DashboardController::class, 'getSlaStats']);
     Route::get('/api/users', [UserController::class, 'index']);
 
-    // Surat Masuk API Endpoints
+    // Surat Masuk API Endpoints (Bebas Typo)
     Route::get('/api/surat-masuk', [SuratMasukController::class, 'index']);
-    Route::post('/api/api/surat-masuk', [SuratMasukController::class, 'create']); // Biar match mapping request
     Route::post('/api/surat-masuk', [SuratMasukController::class, 'create']);
     Route::post('/api/surat-masuk/update/{id}', [SuratMasukController::class, 'updateDisposisi']);
     Route::post('/api/surat-masuk/parse', [SuratMasukController::class, 'parsePDF']);
@@ -48,5 +48,5 @@ Route::middleware(['auth'])->group(function () {
     // Surat Keluar & Logs API Endpoints
     Route::get('/api/surat-keluar', [SuratKeluarController::class, 'index']);
     Route::post('/api/surat-keluar', [SuratKeluarController::class, 'create']);
-    Route::get('/api/logs', [SuratMasukController::class, 'getLogs']); // Endpoint penyuplai data AJAX tabel log
+    Route::get('/api/logs', [SuratMasukController::class, 'getLogs']);
 });
