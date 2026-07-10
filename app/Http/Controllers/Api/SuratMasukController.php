@@ -10,8 +10,12 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Smalot\PdfParser\Parser;
+use App\Traits\Loggable; // KUNCI 1: Import Trait Loggable di sini bray
+
 class SuratMasukController extends Controller
 {
+    use Loggable; // KUNCI 2: Aktifkan penjejak log otomatis di dalam class
+
     public function index(Request $request)
     {
         $query = SuratMasuk::query();
@@ -37,7 +41,7 @@ class SuratMasukController extends Controller
         $limit = $request->input('limit', 10);
         $paginatedData = $query->orderBy('id', 'desc')->paginate($limit);
 
-        // 4. Global Stats for Charts (Raw counts)
+        // 4. Global Stats for Charts
         $stats = [
             'total'   => SuratMasuk::count(),
             'pending' => SuratMasuk::where('status', 'pending')->count(),
@@ -48,7 +52,6 @@ class SuratMasukController extends Controller
 
         return response()->json([
             'status' => 200,
-            // KUNCI SAKLEK: Pake toArray()['data'] biar field flat no_dispo dll gak dibuang sama Laravel
             'data' => $paginatedData->toArray()['data'], 
             'stats' => $stats,
             'pagination' => [
@@ -62,13 +65,10 @@ class SuratMasukController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('akses-admin');
 
-        // File Upload Handling
         $fileName = null;
         if ($request->hasFile('file_pdf') && $request->file('file_pdf')->isValid()) {
             $file = $request->file('file_pdf');
-            // PERBAIKAN CODE (Ganti baris 64 jadi ini):
             $fileName = time() . '_' . $file->hashName();
-            // Moves file straight to public/uploads
             $file->move(public_path('uploads'), $fileName); 
         }
 
@@ -83,18 +83,14 @@ class SuratMasukController extends Controller
             'status'        => 'pending'
         ]);
 
-        // Audit Trail Log
-        ActivityLog::create([
-            'aksi'    => 'Input Surat Masuk',
-            'rincian' => "Operator menginput surat nomor {$surat->no_surat} dari {$surat->dari}"
-        ]);
+        // KUNCI 3: Catat Log via Trait otomatis (user_id & nama langsung ketarik)
+        $this->logActivity('Input Surat Masuk', "Operator menginput surat nomor {$surat->no_surat} dari {$surat->dari}");
 
         return response()->json(['status' => 201, 'message' => 'Surat masuk berhasil disimpan'], 201);
     }
 
     public function updateDisposisi(Request $request, $id)
     {
-        // 1. HAPUS 'no_dispo' => 'required' dari list validasi lu bray!
         $request->validate([
             'disposisi_kabag' => 'required|string',
             'disposisi_kasubag' => 'nullable|string',
@@ -103,21 +99,21 @@ class SuratMasukController extends Controller
         try {
             $surat = SuratMasuk::findOrFail($id);
 
-            // 2. KUNCI AUTO GENERATE: Kita bikin nomor agenda otomatis di sini layaknya sistem Mabes
-            // Format contoh: DSP/2026/VII/RANDOM_ANGKA
             $romawiBulan = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
-            $bulanSekarang = date('n'); // Mengambil angka bulan 1-12
+            $bulanSekarang = date('n'); 
             $romawi = $romawiBulan[$bulanSekarang - 1];
             
             $autoNoDispo = 'DSP/' . date('Y') . '/' . $romawi . '/' . rand(1000, 9999);
 
-            // 3. Masukkan datanya ke database
             $surat->update([
                 'status' => 'disposisi',
-                'no_dispo' => $autoNoDispo, // Nomor otomatis langsung masuk kesini
+                'no_dispo' => $autoNoDispo, 
                 'disposisi_kabag' => $request->disposisi_kabag,
                 'disposisi_kasubag' => $request->disposisi_kasubag,
             ]);
+
+            // KUNCI 4: Catat jejak pimpinan nerbitin disposisi ke log trail
+            $this->logActivity('Kirim Disposisi', "Pimpinan menerbitkan nota komando: {$autoNoDispo} untuk surat {$surat->no_surat}");
 
             return response()->json([
                 'status' => 200,
@@ -164,7 +160,6 @@ class SuratMasukController extends Controller
                     . "2. Jika data tidak ditemukan, isi properti tersebut dengan string kosong atau null.\n"
                     . "3. Berikan hasilnya murni dalam bentuk JSON objek langsung tanpa markdown backtick.";
 
-            // KUNCI UTAMA: Gunakan model 'gemini-2.5-flash' yang paling stabil untuk multimodal visual OCR di v1beta
             $response = Http::withoutVerifying()
                 ->timeout(180) 
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
@@ -204,6 +199,9 @@ class SuratMasukController extends Controller
                     'message' => 'AI gagal memformat JSON murni. Output mentah: ' . substr($cleanJson, 0, 100)
                 ], 500);
             }
+
+            // KUNCI 5: Catat log saat AI selesai nge-scan
+            $this->logActivity('AI OCR Scan', "Sistem AI mengekstrak payload dokumen secara visual via Gemini API");
 
             return response()->json([
                 'status' => 200,
