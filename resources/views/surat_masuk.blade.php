@@ -11,10 +11,10 @@
         </div>
         
         @can('akses-admin')
-        <button onclick="openModal('modalTambah')" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-indigo-600/20 flex items-center space-x-2 text-sm">
-            <i class="fas fa-plus text-xs"></i>
-            <span>Tambah Surat Masuk</span>
-        </button>
+            <button onclick="openModal('modalTambah')" class="px-5 py-2.5 bg-divhub-blue hover:bg-blue-600 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
+                <i class="fas fa-plus text-xs"></i>
+                <span>Tambah Surat Masuk</span>
+            </button>
         @endcan
     </div>
 
@@ -73,13 +73,15 @@
         </div>
         <form id="formTambahSurat" enctype="multipart/form-data" class="p-6 space-y-4">
             @csrf
-            <div class="space-y-1">
-                <label class="text-xs font-semibold text-gray-400 uppercase">No Surat</label>
-                <input type="text" id="no_surat" name="no_surat" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-gold">
-            </div>
-            <div class="space-y-1">
-                <label class="text-xs font-semibold text-gray-400 uppercase">Tanggal Masuk</label>
-                <input type="date" id="tanggal_masuk" name="tanggal_masuk" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-gold">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-gray-400 uppercase">No Surat</label>
+                    <input type="text" id="no_surat" name="no_surat" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-gold">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-gray-400 uppercase">Tanggal Masuk</label>
+                    <input type="date" id="tanggal_masuk" name="tanggal_masuk" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-gold cursor-pointer">
+                </div>
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Dari (Asal Surat)</label>
@@ -338,8 +340,15 @@
                 success: function(response) {
                     Swal.close();
                     if(response.status === 200) {
+                        // Mendapatkan tanggal lokal dalam format YYYY-MM-DD 
+                        const d = new Date();
+                        const offset = d.getTimezoneOffset();
+                        const localDate = new Date(d.getTime() - (offset * 60 * 1000));
+                        const hariIniIndo = localDate.toISOString().split('T')[0];
+
+                        // Isi form otomatis dengan data yang diekstrak
                         $('#no_surat').val(response.data.no_surat);
-                        $('#tanggal_masuk').val(hariIni);
+                        $('#tanggal_masuk').val(hariIniIndo); // Menggunakan tanggal hari ini sebagai default
                         $('#dari').val(response.data.dari);
                         $('#kepada').val(response.data.kepada);
                         $('#perihal').val(response.data.perihal);
