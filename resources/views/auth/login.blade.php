@@ -9,6 +9,10 @@
         <p class="text-sm text-gray-400">Silakan login untuk mengakses InterOps-Hub</p>
     </div>
 
+    <div class="flex justify-center mb-6">
+        <img src="{{ asset('images/logo-divhubinter.png') }}" alt="Logo Divhubinter" class="h-24 w-auto object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+    </div>
+
     <form id="loginForm" class="space-y-5">
         @csrf
         

@@ -53,9 +53,7 @@
 
     <nav class="bg-divhub-card border-b border-divhub-border px-6 py-4 flex justify-between items-center fixed w-full top-0 z-50 shadow-md">
         <div class="flex items-center space-x-3">
-            <div class="bg-divhub-navy text-divhub-gold p-2 rounded-lg border border-divhub-gold/40 shadow-[0_0_10px_rgba(212,175,55,0.2)]">
-                <i class="fas fa-globe-asia text-xl"></i> 
-            </div>
+            <img src="{{ asset('images/logo-divhubinter.png') }}" alt="Logo Divhubinter" class="h-10 w-auto object-contain">
             <span class="text-xl font-display font-bold tracking-widest text-white">INTEROPS<span class="text-divhub-gold">HUB</span></span>
         </div>
         
