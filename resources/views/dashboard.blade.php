@@ -13,35 +13,35 @@
     <!-- Top Metrics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
         <!-- Total Surat -->
-        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg flex items-center space-x-4">
+        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg flex items-center space-x-4">
             <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl"><i class="fas fa-envelope text-2xl"></i></div>
             <div>
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Surat Masuk</p>
-                <h3 class="text-2xl font-bold text-white mt-1" id="metricTotal">0</h3>
+                <h3 class="text-2xl font-bold text-white mt-1 font-mono" id="metricTotal">0</h3>
             </div>
         </div>
         <!-- Pending -->
-        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg flex items-center space-x-4">
+        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg flex items-center space-x-4">
             <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl"><i class="fas fa-clock text-2xl"></i></div>
             <div>
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Review Pending</p>
-                <h3 class="text-2xl font-bold text-white mt-1" id="metricPending">0</h3>
+                <h3 class="text-2xl font-bold text-white mt-1 font-mono" id="metricPending">0</h3>
             </div>
         </div>
         <!-- Disposisi -->
-        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg flex items-center space-x-4">
-            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl"><i class="fas fa-check-circle text-2xl"></i></div>
+        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg flex items-center space-x-4">
+            <div class="p-3 bg-divhub-cyan/10 text-divhub-cyan rounded-xl"><i class="fas fa-check-circle text-2xl"></i></div>
             <div>
                 <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Sudah Disposisi</p>
-                <h3 class="text-2xl font-bold text-white mt-1" id="metricDisposisi">0</h3>
+                <h3 class="text-2xl font-bold text-white mt-1 font-mono" id="metricDisposisi">0</h3>
             </div>
         </div>
         <!-- SLA Breach Warning -->
-        <div class="bg-gray-800 p-6 rounded-2xl border border-red-500/30 bg-gradient-to-br from-gray-800 to-red-950/20 shadow-lg flex items-center space-x-4">
+        <div class="bg-divhub-card p-6 rounded-2xl border border-red-500/30 bg-gradient-to-br from-divhub-card to-red-950/20 shadow-lg flex items-center space-x-4">
             <div class="p-3 bg-red-500/10 text-red-400 rounded-xl animate-pulse"><i class="fas fa-exclamation-triangle text-2xl"></i></div>
             <div>
                 <p class="text-xs font-semibold text-red-400 uppercase tracking-wider">Lewat Batas SLA (>3 Hari)</p>
-                <h3 class="text-2xl font-bold text-red-400 mt-1" id="metricSla">0</h3>
+                <h3 class="text-2xl font-bold text-red-400 mt-1 font-mono" id="metricSla">0</h3>
             </div>
         </div>
     </div>
@@ -49,10 +49,10 @@
     <!-- Main Dashboard Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Chart Section -->
-        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg lg:col-span-1 flex flex-col justify-between">
+        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg lg:col-span-1 flex flex-col justify-between">
             <div>
                 <h3 class="text-base font-bold text-white flex items-center space-x-2">
-                    <i class="fas fa-chart-donut text-indigo-400"></i>
+                    <i class="fas fa-chart-pie text-divhub-cyan"></i>
                     <span>Rasio Status Dokumen</span>
                 </h3>
                 <p class="text-xs text-gray-400 mt-1">Perbandingan berkas pending vs selesai didisposisikan</p>
@@ -63,7 +63,7 @@
         </div>
 
         <!-- SLA Warning Table Section -->
-        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg lg:col-span-2 flex flex-col justify-between">
+        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg lg:col-span-2 flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-center">
                     <h3 class="text-base font-bold text-white flex items-center space-x-2">
@@ -77,8 +77,8 @@
                 <div class="overflow-x-auto mt-4">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-gray-700 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                                <th class="pb-3">No Surat</th>
+                            <tr class="border-b border-divhub-border text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                                <th class="pb-3 pl-4">No Surat</th>
                                 <th class="pb-3">Asal</th>
                                 <th class="pb-3 text-center">Keterlambatan</th>
                                 {{-- Tombol Tindakan hanya tampil di header jika user adalah pimpinan --}}
@@ -87,7 +87,7 @@
                                 @endif
                             </tr>
                         </thead>
-                        <tbody id="urgentTableBody" class="text-xs divide-y divide-gray-700/40">
+                        <tbody id="urgentTableBody" class="text-xs divide-y divide-divhub-border/40">
                             <tr>
                                 <td colspan="4" class="text-center py-8 text-gray-500">Memuat antrean darurat...</td>
                             </tr>
@@ -95,8 +95,8 @@
                     </table>
                 </div>
             </div>
-            <div class="pt-4 border-t border-gray-700/50 flex justify-end">
-                <a href="{{ url('/surat-masuk') }}" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center space-x-1">
+            <div class="pt-4 border-t border-divhub-border/50 flex justify-end">
+                <a href="{{ url('/surat-masuk') }}" class="text-xs font-semibold text-divhub-cyan hover:text-divhub-teal transition-colors flex items-center space-x-1">
                     <span>Buka Semua Surat Masuk</span>
                     <i class="fas fa-arrow-right text-[10px]"></i>
                 </a>
@@ -150,8 +150,8 @@
                 labels: ['Pending (<3 Hari)', 'Lewat SLA (>3 Hari)', 'Sudah Disposisi'],
                 datasets: [{
                     data: [pendingSafe, slaBreach, disposisi],
-                    backgroundColor: ['#fbbf24', '#f43f5e', '#10b981'],
-                    borderColor: '#1f2937',
+                    backgroundColor: ['#fbbf24', '#f43f5e', '#00a3c4'],
+                    borderColor: '#161b27',
                     borderWidth: 3,
                     hoverOffset: 4
                 }]
@@ -179,7 +179,7 @@
         const colspanValue = currentRole === 'pimpinan' ? 4 : 3;
 
         if (!list || list.length === 0) {
-            html = `<tr><td colspan="${colspanValue}" class="text-center py-6 text-emerald-400 font-medium italic"><i class="fas fa-check-circle mr-1"></i> Aman! Semua berkas masuk di bawah batas waktu SLA.</td></tr>`;
+            html = `<tr><td colspan="${colspanValue}" class="text-center py-6 text-divhub-cyan font-medium italic"><i class="fas fa-check-circle mr-1"></i> Aman! Semua berkas masuk di bawah batas waktu SLA.</td></tr>`;
             $('#urgentTableBody').html(html);
             return;
         }
@@ -203,11 +203,11 @@
             }
 
             html += `
-                <tr class="hover:bg-gray-700/20 transition-colors">
-                    <td class="py-3 font-semibold text-white font-mono">${row.no_surat}</td>
-                    <td class="py-3 text-gray-300">${row.dari}</td>
+                <tr class="hover:bg-gray-700/20 transition-colors border-l-[3px] border-l-red-500 bg-red-500/5">
+                    <td class="py-3 pl-4 font-semibold text-white font-mono text-xs">${row.no_surat}</td>
+                    <td class="py-3 text-gray-300 text-xs">${row.dari}</td>
                     <td class="py-3 text-center">
-                        <span class="px-2 py-0.5 bg-red-500/10 text-red-400 font-bold rounded border border-red-500/20 font-mono">
+                        <span class="px-2 py-0.5 bg-red-500/10 text-red-400 font-bold rounded border border-red-500/20 font-mono text-[10px]">
                             +${row.hari_mandek} Hari
                         </span>
                     </td>

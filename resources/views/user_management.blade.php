@@ -10,18 +10,18 @@
             <h1 class="text-3xl font-bold text-white tracking-wide">Kelola Pengguna</h1>
             <p class="text-sm text-gray-400 mt-1">Manajemen hak akses data akun administrator, pimpinan, dan staf pelaksana</p>
         </div>
-        <button onclick="openAddModal()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
+        <button onclick="openAddModal()" class="px-5 py-2.5 bg-divhub-cyan hover:bg-divhub-cyan/90 text-divhub-navy font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
             <i class="fas fa-user-plus text-xs"></i>
             <span>Tambah Pengguna</span>
         </button>
     </div>
 
     <!-- Tabel Data User -->
-    <div class="bg-gray-800 rounded-2xl border border-gray-700 shadow-lg overflow-hidden">
+    <div class="bg-divhub-card rounded-2xl border border-divhub-border shadow-lg overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-gray-700 text-xs font-semibold text-gray-400 uppercase tracking-wider bg-gray-800/30">
+                    <tr class="border-b border-divhub-border text-xs font-semibold text-gray-400 uppercase tracking-wider bg-divhub-navy/50">
                         <th class="py-4 px-6 w-20">No</th>
                         <th class="py-4 px-6">Nama Lengkap</th>
                         <th class="py-4 px-6">Username</th>
@@ -29,7 +29,7 @@
                         <th class="py-4 px-6 text-center w-32">Aksi</th>
                     </tr>
                 </thead>
-                <tbody id="userTableBody" class="text-sm divide-y divide-gray-700/50">
+                <tbody id="userTableBody" class="text-sm divide-y divide-divhub-border/50">
                     <tr>
                         <td colspan="5" class="text-center py-8 text-gray-500">
                             <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data pengguna...
@@ -43,10 +43,10 @@
 
 <!-- Modal Tambah User -->
 <div id="userModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50">
-    <div class="bg-gray-800 border border-gray-700 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
-        <div class="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-800/50">
+    <div class="bg-divhub-card border border-divhub-border w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
+        <div class="p-6 border-b border-divhub-border flex justify-between items-center bg-divhub-navy/50">
             <h3 class="text-lg font-bold text-white flex items-center space-x-2">
-                <i class="fas fa-user-shield text-indigo-400"></i>
+                <i class="fas fa-user-shield text-divhub-cyan"></i>
                 <span>Tambah Akun Baru</span>
             </h3>
             <button onclick="closeAddModal()" class="text-gray-400 hover:text-white transition-colors">
@@ -56,15 +56,15 @@
         <form id="addUserForm" class="p-6 space-y-4">
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Nama Lengkap</label>
-                <input type="text" name="nama_lengkap" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Masukkan nama lengkap...">
+                <input type="text" name="nama_lengkap" required class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 transition-colors" placeholder="Masukkan nama lengkap...">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Username</label>
-                <input type="text" name="username" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Masukkan username unik...">
+                <input type="text" name="username" required class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 transition-colors" placeholder="Masukkan username unik...">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Role Akses</label>
-                <select name="role" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors">
+                <select name="role" required class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 transition-colors">
                     <option value="staf">Staf (Pelaksana)</option>
                     <option value="pimpinan">Pimpinan (Validator)</option>
                     <option value="admin">Admin (Full Control)</option>
@@ -72,11 +72,11 @@
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Password Awal</label>
-                <input type="password" name="password" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Minimal 6 karakter...">
+                <input type="password" name="password" required class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 transition-colors" placeholder="Minimal 6 karakter...">
             </div>
             <div class="pt-2 flex justify-end space-x-3">
                 <button type="button" onclick="closeAddModal()" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium rounded-xl text-sm transition-colors">Batal</button>
-                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl text-sm transition-colors flex items-center space-x-2">
+                <button type="submit" class="px-5 py-2.5 bg-divhub-cyan hover:bg-divhub-teal text-divhub-navy font-bold rounded-xl text-sm transition-colors flex items-center space-x-2">
                     <i class="fas fa-save text-xs"></i>
                     <span>Simpan Akun</span>
                 </button>
@@ -112,9 +112,9 @@
                         icon: 'success',
                         title: 'Berhasil!',
                         text: res.message,
-                        background: '#1f2937',
+                        background: '#161b27',
                         color: '#fff',
-                        confirmButtonColor: '#4f46e5'
+                        confirmButtonColor: '#00a3c4'
                     });
                     closeAddModal();
                     $('#addUserForm')[0].reset();
@@ -126,7 +126,7 @@
                         icon: 'error',
                         title: 'Gagal Menyimpan',
                         text: err.message || 'Terjadi kesalahan sistem.',
-                        background: '#1f2937',
+                        background: '#161b27',
                         color: '#fff',
                         confirmButtonColor: '#ef4444'
                     });
@@ -175,7 +175,7 @@
             }
 
             html += `
-                <tr class="hover:bg-gray-700/10 transition-colors duration-150">
+                <tr class="hover:bg-divhub-card/80 transition-colors border-b border-divhub-border/50">
                     <td class="py-4 px-6 text-gray-500 font-mono text-xs">${index + 1}</td>
                     <td class="py-4 px-6 font-semibold text-white">${user.nama_lengkap}</td>
                     <td class="py-4 px-6 font-mono text-xs text-gray-400">${user.username}</td>
@@ -203,9 +203,9 @@
             cancelButtonColor: '#374151',
             confirmButtonText: 'Ya, Hapus!',
             cancelButtonText: 'Batal',
-            background: '#1f2937',
+            background: '#161b27',
             color: '#fff'
-        }).ajax().then((result) => {
+        }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
                     url: `{{ url('/api/users') }}/${id}`,
@@ -215,9 +215,9 @@
                             icon: 'success',
                             title: 'Terhapus!',
                             text: res.message,
-                            background: '#1f2937',
+                            background: '#161b27',
                             color: '#fff',
-                            confirmButtonColor: '#4f46e5'
+                            confirmButtonColor: '#00a3c4'
                         });
                         fetchUsers();
                     },
@@ -226,7 +226,7 @@
                             icon: 'error',
                             title: 'Aksi Ditolak',
                             text: xhr.responseJSON.message || 'Gagal menghapus user.',
-                            background: '#1f2937',
+                            background: '#161b27',
                             color: '#fff',
                             confirmButtonColor: '#ef4444'
                         });

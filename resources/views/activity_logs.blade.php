@@ -9,10 +9,10 @@
         <p class="text-sm text-gray-400 mt-1">Audit Trail & Rekaman jejak operasional sistem manajemen kearsipan InterOps-Hub</p>
     </div>
 
-    <div class="bg-gray-800 rounded-2xl border border-gray-700 shadow-lg overflow-hidden">
-        <div class="p-5 border-b border-gray-700 flex justify-between items-center bg-gray-800/50">
+    <div class="bg-divhub-card rounded-2xl border border-divhub-border shadow-lg overflow-hidden">
+        <div class="p-5 border-b border-divhub-border flex justify-between items-center bg-divhub-navy/50">
             <h3 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">Rekaman Riwayat Operasional</h3>
-            <button onclick="fetchActivityLogs()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 hover:text-white rounded-xl text-xs font-semibold transition-all flex items-center space-x-1">
+            <button onclick="fetchActivityLogs()" class="px-4 py-2 bg-divhub-navy border border-divhub-border hover:bg-divhub-navy/80 text-gray-200 hover:text-white rounded-xl text-xs font-semibold transition-all flex items-center space-x-1">
                 <i class="fas fa-sync-alt"></i>
                 <span>Refresh Log</span>
             </button>
@@ -21,14 +21,14 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-gray-700 text-xs font-semibold text-gray-400 uppercase tracking-wider bg-gray-800/30">
+                    <tr class="border-b border-divhub-border text-xs font-semibold text-gray-400 uppercase tracking-wider bg-divhub-navy/30">
                         <th class="py-4 px-6 w-20">No</th>
                         <th class="py-4 px-6 w-52">Waktu Kejadian</th>
                         <th class="py-4 px-6 w-52">Aksi / Kegiatan</th>
                         <th class="py-4 px-6">Rincian Deskripsi</th>
                     </tr>
                 </thead>
-                <tbody id="logTableBody" class="text-sm divide-y divide-gray-700/50">
+                <tbody id="logTableBody" class="text-sm divide-y divide-divhub-border/50">
                     <tr>
                         <td colspan="4" class="text-center py-8 text-gray-500">
                             <i class="fas fa-spinner fa-spin mr-2"></i> Menghubungkan ke server audit trail...
@@ -81,8 +81,8 @@
             let badgeColor = 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20';
             if (row.aksi.includes('Input')) {
                 badgeColor = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-            } else if (row.aksi.includes('Disposisi')) {
-                badgeColor = 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+            } else if (row.aksi.includes('Disposisi') || row.aksi.includes('Kirim')) {
+                badgeColor = 'bg-divhub-cyan/10 text-divhub-cyan border border-divhub-cyan/20';
             } else if (row.aksi.includes('Hapus') || row.aksi.includes('Tolak')) {
                 badgeColor = 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
             }
@@ -91,7 +91,7 @@
             let waktu = row.created_at ? new Date(row.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
 
             html += `
-                <tr class="hover:bg-gray-700/10 transition-colors duration-150">
+                <tr class="hover:bg-divhub-card/80 transition-colors border-b border-divhub-border/50">
                     <td class="py-4 px-6 text-gray-500 font-mono text-xs">${index + 1}</td>
                     <td class="py-4 px-6 text-gray-400 font-mono text-xs">${waktu}</td>
                     <td class="py-4 px-6">

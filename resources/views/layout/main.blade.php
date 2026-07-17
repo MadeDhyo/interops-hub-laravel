@@ -13,7 +13,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Montserrat:wght@600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -22,15 +22,18 @@
                     fontFamily: {
                         sans: ['Poppins', 'sans-serif'],
                         display: ['Montserrat', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
                         divhub: {
-                            navy: '#0B132B',      // Biru dongker pekat untuk background utama
-                            card: '#1C2541',      // Biru dongker terang untuk sidebar dan modal
-                            border: '#3A506B',    // Garis pembatas elegan
+                            navy: '#0e131f',      // Deep Space Navy pekat
+                            card: '#161b27',      // Latar card dan sidebar
+                            border: '#2d3748',    // Garis pembatas halus
                             gold: '#D4AF37',      // Kuning emas resmi Polri
                             goldlight: '#FDE047', // Emas terang untuk efek hover
                             blue: '#1D4ED8',      // Biru Interpol
+                            cyan: '#00a3c4',      // Electric Teal
+                            teal: '#5cd5f8',      // Cyan glow
                         }
                     }
                 }
@@ -41,7 +44,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #0B132B;
+            background-color: #0e131f;
             color: #F3F4F6;
         }
         h1, h2, h3, h4, h5, h6, .font-display {
@@ -77,17 +80,17 @@
                     <div class="space-y-2">
                         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-3">Sistem Utama</p>
                         
-                        <a href="{{ url('/dashboard') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('dashboard') ? 'bg-divhub-navy text-divhub-gold border-l-4 border-divhub-gold font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
+                        <a href="{{ url('/dashboard') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('dashboard') ? 'bg-divhub-navy text-divhub-cyan border-l-4 border-divhub-cyan font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
                             <i class="fas fa-chart-pie w-5"></i>
                             <span>Dashboard</span>
                         </a>
                         
-                        <a href="{{ url('/surat-masuk') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('surat-masuk*') ? 'bg-divhub-navy text-divhub-gold border-l-4 border-divhub-gold font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
+                        <a href="{{ url('/surat-masuk') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('surat-masuk*') ? 'bg-divhub-navy text-divhub-cyan border-l-4 border-divhub-cyan font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
                             <i class="fas fa-inbox w-5"></i>
                             <span>Surat Masuk</span>
                         </a>
                         
-                        <a href="{{ url('/surat-keluar') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('surat-keluar*') ? 'bg-divhub-navy text-divhub-gold border-l-4 border-divhub-gold font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
+                        <a href="{{ url('/surat-keluar') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('surat-keluar*') ? 'bg-divhub-navy text-divhub-cyan border-l-4 border-divhub-cyan font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
                             <i class="fas fa-paper-plane w-5"></i>
                             <span>Surat Keluar</span>
                         </a>
@@ -97,12 +100,12 @@
                     <div class="space-y-2 pt-5 border-t border-divhub-border">
                         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-3">Audit & Kontrol</p>
                         
-                        <a href="{{ url('/user-management') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('user-management*') ? 'bg-divhub-navy text-divhub-blue border-l-4 border-divhub-blue font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
+                        <a href="{{ url('/user-management') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('user-management*') ? 'bg-divhub-navy text-divhub-cyan border-l-4 border-divhub-cyan font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
                             <i class="fas fa-users-cog w-5"></i>
                             <span>Manajemen Personel</span>
                         </a>
                         
-                        <a href="{{ url('/activity-logs') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('activity-logs*') ? 'bg-divhub-navy text-divhub-blue border-l-4 border-divhub-blue font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
+                        <a href="{{ url('/activity-logs') }}" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 {{ Request::is('activity-logs*') ? 'bg-divhub-navy text-divhub-cyan border-l-4 border-divhub-cyan font-medium' : 'text-gray-300 hover:bg-divhub-navy hover:text-white' }}">
                             <i class="fas fa-history w-5"></i>
                             <span>Log Aktivitas</span>
                         </a>

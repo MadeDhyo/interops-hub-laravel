@@ -3,7 +3,7 @@
 @section('title', 'Login - InterOps-Hub')
 
 @section('content')
-<div class="w-full max-w-md bg-gray-800 rounded-2xl border border-gray-700 shadow-2xl p-8 space-y-6">
+<div class="w-full max-w-md bg-divhub-card rounded-2xl border border-divhub-border shadow-2xl p-8 space-y-6">
     <div class="text-center space-y-2">
         <h1 class="text-2xl font-bold text-white tracking-wide">Selamat Datang</h1>
         <p class="text-sm text-gray-400">Silakan login untuk mengakses InterOps-Hub</p>
@@ -23,7 +23,7 @@
                     <i class="fas fa-user text-sm"></i>
                 </span>
                 <input type="text" id="username" name="username" required
-                    class="w-full pl-11 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-200 text-sm"
+                    class="w-full pl-11 pr-4 py-3 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 transition-all duration-200 text-sm"
                     placeholder="Masukkan username anda">
             </div>
         </div>
@@ -35,13 +35,13 @@
                     <i class="fas fa-lock text-sm"></i>
                 </span>
                 <input type="password" id="password" name="password" required
-                    class="w-full pl-11 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-200 text-sm"
+                    class="w-full pl-11 pr-4 py-3 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 transition-all duration-200 text-sm"
                     placeholder="••••••••">
             </div>
         </div>
 
         <button type="submit" id="btnSubmit"
-            class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-indigo-600/30 flex justify-center items-center space-x-2 text-sm mt-2">
+            class="w-full py-3 bg-divhub-cyan hover:bg-divhub-teal text-divhub-navy font-bold rounded-xl transition-all duration-200 shadow-lg flex justify-center items-center space-x-2 text-sm mt-2">
             <span>Masuk ke Sistem</span>
             <i class="fas fa-arrow-right text-xs"></i>
         </button>
@@ -82,7 +82,7 @@ $(document).ready(function() {
                         text: response.message,
                         timer: 1500,
                         showConfirmButton: false,
-                        background: '#1f2937',
+                        background: '#161b27',
                         color: '#fff'
                     }).then(() => {
                         window.location.href = response.redirect;
@@ -99,9 +99,9 @@ $(document).ready(function() {
                     icon: 'error',
                     title: 'Gagal Login',
                     text: errorMsg,
-                    background: '#1f2937',
+                    background: '#161b27',
                     color: '#fff',
-                    confirmButtonColor: '#4f46e5'
+                    confirmButtonColor: '#00a3c4'
                 });
                 
                 $('#btnSubmit').prop('disabled', false).html('<span>Masuk ke Sistem</span> <i class="fas fa-arrow-right text-xs"></i>');
