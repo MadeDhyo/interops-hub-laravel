@@ -1,4 +1,4 @@
-﻿@extends('layout.main')
+@extends('layout.main')
 
 @section('title', 'Surat Masuk - InterOps-Hub')
 
@@ -68,7 +68,7 @@
 <div id="modalTambah" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all duration-300">
         <div class="px-6 py-4 border-b border-ops-border flex justify-between items-center">
-            <h3 class="text-lg font-display font-bold text-white">Input Surat Masuk Baru</h3>
+            <h3 class="text-lg font-bold text-white">Input Surat Masuk Baru</h3>
             <button onclick="closeModal('modalTambah')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
         </div>
         <form id="formTambahSurat" enctype="multipart/form-data" class="p-6 space-y-4">
@@ -99,7 +99,7 @@
                 <label class="text-xs font-semibold text-gray-400 uppercase">Berkas Dokumen (PDF)</label>
                 <div class="flex gap-2 items-center">
                     <input type="file" id="file_pdf" name="file_pdf" accept="application/pdf" class="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-ops-abyss file:text-ops-gold hover:file:bg-ops-gold/10 cursor-pointer">
-                    <button type="button" id="btnAutoScan" class="px-5 py-2 btn-primary text-ops-abyss rounded-xl hover:bg-divhub-teal transition-all font-display font-bold flex items-center gap-2">
+                    <button type="button" id="btnAutoScan" class="px-5 py-2 btn-primary text-ops-abyss rounded-xl hover:bg-divhub-teal transition-all font-bold flex items-center gap-2">
                         <i class="fas fa-microchip"></i> <span>Scan AI</span>
                     </button>
                 </div>
@@ -118,7 +118,7 @@
 <div id="disposisiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="glass-card w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="dispoModalContent">
         <div class="p-6 border-b border-ops-border flex justify-between items-center">
-            <h3 class="text-lg font-display font-bold text-white flex items-center space-x-2">
+            <h3 class="text-lg font-bold text-white flex items-center space-x-2">
                 <i class="fas fa-gavel text-ops-gold"></i>
                 <span>Lembar Disposisi Digital</span>
             </h3>
@@ -158,7 +158,7 @@
             
             <div class="pt-2 flex justify-end space-x-3">
                 <button type="button" class="btn-close-dispo px-5 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white border border-ops-border px-4 py-2 transition-colors">Batal</button>
-                <button type="submit" id="btnSubmitDisposisi" class="px-5 py-2.5 bg-ops-gold text-ops-abyss font-display font-bold rounded-lg text-sm flex items-center space-x-2 transition-all hover:bg-ops-goldlight shadow-lg">
+                <button type="submit" id="btnSubmitDisposisi" class="px-5 py-2.5 bg-ops-gold text-ops-abyss font-bold rounded-lg text-sm flex items-center space-x-2 transition-all hover:bg-ops-goldlight shadow-lg">
                     <i class="fas fa-paper-plane text-xs"></i> <span>Kirim Disposisi</span>
                 </button>
             </div>
@@ -170,7 +170,7 @@
 <div id="detailDisposisiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="glass-card w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="detailDispoContent">
         <div class="p-6 border-b border-ops-border flex justify-between items-center">
-            <h3 class="text-lg font-display font-bold text-white flex items-center space-x-2">
+            <h3 class="text-lg font-bold text-white flex items-center space-x-2">
                 <i class="fas fa-file-alt text-ops-cyan"></i>
                 <span>Nota Komando</span>
             </h3>

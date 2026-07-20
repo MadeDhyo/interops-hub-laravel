@@ -9,8 +9,8 @@
 
         <!-- Classified header eyebrow -->
         <div class="text-center space-y-1">
-            <p class="section-eyebrow" style="color: rgba(255,51,51,0.7); letter-spacing: 0.25em;">// AKSES TERBATAS //</p>
-            <h1 class="font-display text-2xl text-white mt-2">Verifikasi Identitas</h1>
+            <p class="section-eyebrow" style="color: rgba(255,51,51,0.6); letter-spacing: 0.15em;">// AKSES TERBATAS //</p>
+            <h1 class="text-2xl font-bold text-white mt-2 tracking-tight">Verifikasi Identitas</h1>
             <p class="text-xs text-slate-500 mt-1">Autentikasi diperlukan untuk mengakses sistem operasional</p>
         </div>
 
