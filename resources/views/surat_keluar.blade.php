@@ -1,4 +1,4 @@
-@extends('layout.main')
+﻿@extends('layout.main')
 
 @section('title', 'Surat Keluar - InterOps-Hub')
 
@@ -11,39 +11,39 @@
         </div>
         
         @can('akses-admin')
-        <button onclick="openModal('modalTambahKeluar')" class="px-5 py-2.5 bg-divhub-cyan hover:bg-divhub-cyan/90 text-divhub-navy font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
+        <button onclick="openModal('modalTambahKeluar')" class="px-5 py-2.5 btn-primary rounded-lg transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
             <i class="fas fa-plus text-xs"></i>
             <span>Tambah Surat Keluar</span>
         </button>
         @endcan
     </div>
 
-    <div class="bg-divhub-card p-5 rounded-2xl border border-divhub-border shadow-lg grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+    <div class="glass-card p-5 rounded-xl grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div class="space-y-1">
             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pencarian Smart</label>
-            <input type="text" id="searchFilter" placeholder="Cari nomor, tujuan, perihal..." class="w-full px-4 py-2.5 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 text-sm">
+            <input type="text" id="searchFilter" placeholder="Cari nomor, tujuan, perihal..." class="w-full px-4 py-2.5 ops-input rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none  text-sm">
         </div>
         <div class="space-y-1">
             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tanggal Mulai</label>
-            <input type="date" id="startDateFilter" class="w-full px-4 py-2.5 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 text-sm">
+            <input type="date" id="startDateFilter" class="w-full px-4 py-2.5 ops-input rounded-lg text-gray-100 focus:outline-none  text-sm">
         </div>
         <div class="space-y-1">
             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tanggal Selesai</label>
-            <input type="date" id="endDateFilter" class="w-full px-4 py-2.5 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 text-sm">
+            <input type="date" id="endDateFilter" class="w-full px-4 py-2.5 ops-input rounded-lg text-gray-100 focus:outline-none  text-sm">
         </div>
         <div>
-            <button onclick="handleFilter()" class="w-full py-2.5 bg-divhub-navy hover:bg-divhub-navy/80 border border-divhub-border text-white font-medium rounded-xl transition-all duration-200 text-sm flex justify-center items-center space-x-2">
+            <button onclick="handleFilter()" class="w-full py-2.5 glass-card hover:bg-white/[0.05] border border-ops-border text-slate-300 font-medium rounded-lg transition-all duration-200 text-sm flex justify-center items-center space-x-2">
                 <i class="fas fa-filter text-xs"></i>
                 <span>Terapkan Filter</span>
             </button>
         </div>
     </div>
 
-    <div class="bg-divhub-card rounded-2xl border border-divhub-border shadow-lg overflow-hidden">
+    <div class="glass-card rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-divhub-border text-xs font-semibold text-gray-400 uppercase tracking-wider bg-divhub-navy/50">
+                    <tr class="border-b border-ops-border text-[10px] font-mono font-semibold uppercase tracking-widest text-slate-600 bg-ops-abyss/40">
                         <th class="py-4 px-6">No. Surat</th>
                         <th class="py-4 px-6">Ditujukan Ke</th>
                         <th class="py-4 px-6">Asal Pengirim</th>
@@ -52,12 +52,12 @@
                         <th class="py-4 px-6 text-center">Berkas</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody" class="text-sm divide-y divide-divhub-border/50">
+                <tbody id="tableBody" class="text-sm divide-y divide-ops-border">
                     </tbody>
             </table>
         </div>
         
-        <div class="p-5 border-t border-divhub-border flex justify-between items-center bg-divhub-card/30">
+        <div class="p-5 border-t border-ops-border flex justify-between items-center">
             <p id="paginationInfo" class="text-xs text-gray-400">Menampilkan halaman 1</p>
             <div class="flex space-x-2" id="paginationButtons"></div>
         </div>
@@ -66,8 +66,8 @@
 
 @can('akses-admin')
 <div id="modalTambahKeluar" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-divhub-card border border-divhub-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all duration-300">
-        <div class="px-6 py-4 border-b border-divhub-border flex justify-between items-center bg-divhub-navy/50">
+    <div class="glass-card rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all duration-300">
+        <div class="px-6 py-4 border-b border-ops-border flex justify-between items-center">
             <h3 class="text-lg font-bold text-white">Input Surat Keluar Baru</h3>
             <button onclick="closeModal('modalTambahKeluar')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
         </div>
@@ -76,38 +76,38 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label class="text-xs font-semibold text-gray-400 uppercase">No Surat</label>
-                    <input type="text" name="no_surat" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30">
+                    <input type="text" name="no_surat" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none ">
                 </div>
                 <div class="space-y-1">
                     <label class="text-xs font-semibold text-gray-400 uppercase">Tanggal Surat</label>
-                    <input type="date" name="tanggal_surat" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30">
+                    <input type="date" name="tanggal_surat" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none ">
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label class="text-xs font-semibold text-gray-400 uppercase">Dari (Pengirim)</label>
-                    <input type="text" name="dari" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30" value="InterOps Hub Center">
+                    <input type="text" name="dari" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none " value="InterOps Hub Center">
                 </div>
                 <div class="space-y-1">
                     <label class="text-xs font-semibold text-gray-400 uppercase">Tanggal Input</label>
-                    <input type="date" name="tanggal_input" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30" value="{{ date('Y-m-d') }}">
+                    <input type="date" name="tanggal_input" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none " value="{{ date('Y-m-d') }}">
                 </div>
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Kepada (Tujuan Instansi)</label>
-                <input type="text" name="kepada" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30">
+                <input type="text" name="kepada" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none ">
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Perihal</label>
-                <textarea name="perihal" rows="3" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30" placeholder="Rincian perihal surat keluar..."></textarea>
+                <textarea name="perihal" rows="3" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none " placeholder="Rincian perihal surat keluar..."></textarea>
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Berkas Dokumen PDF (Opsional)</label>
-                <input type="file" name="file_pdf" accept="application/pdf" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-divhub-navy file:text-divhub-cyan hover:file:bg-divhub-cyan/10 cursor-pointer">
+                <input type="file" name="file_pdf" accept="application/pdf" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-ops-abyss file:text-ops-cyan hover:file:opacity-80 cursor-pointer">
             </div>
-            <div class="pt-4 flex justify-end space-x-3 border-t border-divhub-border mt-6">
+            <div class="pt-4 flex justify-end space-x-3 border-t border-ops-border mt-6">
                 <button type="button" onclick="closeModal('modalTambahKeluar')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl text-sm">Batal</button>
-                <button type="submit" id="btnSubmitTambah" class="px-4 py-2 bg-divhub-cyan text-divhub-navy font-bold rounded-xl text-sm">
+                <button type="submit" id="btnSubmitTambah" class="px-4 py-2 btn-primary text-ops-abyss font-bold rounded-xl text-sm">
                     <span>Simpan Arsip</span>
                 </button>
             </div>
@@ -147,11 +147,11 @@
                     success: function(res) {
                         closeModal('modalTambahKeluar');
                         $('#formTambahSuratKeluar')[0].reset();
-                        Swal.fire({ icon: 'success', title: 'Berhasil', text: res.message, background: '#161b27', color: '#fff', confirmButtonColor: '#00a3c4' });
+                        Swal.fire({ icon: 'success', title: 'Berhasil', text: res.message, background: '#0b1628', color: '#fff', confirmButtonColor: '#00c6ff' });
                         fetchSuratKeluar(currentPage);
                     },
                     error: function() {
-                        Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal memproses arsip surat keluar.', background: '#161b27', color: '#fff', confirmButtonColor: '#ef4444' });
+                        Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal memproses arsip surat keluar.', background: '#0b1628', color: '#fff', confirmButtonColor: '#ef4444' });
                     },
                     complete: function() {
                         $('#btnSubmitTambah').prop('disabled', false).html('<span>Simpan Arsip</span>');
@@ -196,11 +196,11 @@
 
         data.forEach(row => {
             let fileLink = row.file_pdf 
-                ? `<a href="{{ url('/uploads') }}/${row.file_pdf}" target="_blank" class="text-divhub-gold hover:text-white transition-colors" title="Lihat PDF"><i class="fas fa-file-pdf text-lg"></i></a>` 
+                ? `<a href="{{ url('/uploads') }}/${row.file_pdf}" target="_blank" class="text-ops-gold hover:text-white transition-colors" title="Lihat PDF"><i class="fas fa-file-pdf text-lg"></i></a>` 
                 : `<span class="text-gray-600">-</span>`;
 
             html += `
-                <tr class="hover:bg-divhub-card/80 transition-colors border-b border-divhub-border/50">
+                <tr class="hover:bg-white/[0.02] transition-colors">
                     <td class="py-3.5 px-6 font-semibold text-white font-mono text-xs">${row.no_surat}</td>
                     <td class="py-3.5 px-6 text-gray-300 text-xs">${row.kepada}</td>
                     <td class="py-3.5 px-6 text-gray-400 text-xs">${row.dari}</td>
@@ -216,8 +216,8 @@
     function renderPagination(meta) {
         $('#paginationInfo').text(`Halaman ${meta.page} dari ${meta.total_pages}`);
         let buttonsHtml = '';
-        buttonsHtml += `<button onclick="fetchSuratKeluar(${meta.page - 1})" ${meta.page === 1 ? 'disabled' : ''} class="px-3 py-1.5 bg-divhub-navy border border-divhub-border hover:bg-divhub-navy/80 disabled:opacity-40 disabled:cursor-not-allowed text-xs rounded-lg font-medium text-white transition-all">Prev</button>`;
-        buttonsHtml += `<button onclick="fetchSuratKeluar(${meta.page + 1})" ${meta.page === meta.total_pages || meta.total_pages === 0 ? 'disabled' : ''} class="px-3 py-1.5 bg-divhub-navy border border-divhub-border hover:bg-divhub-navy/80 disabled:opacity-40 disabled:cursor-not-allowed text-xs rounded-lg font-medium text-white transition-all">Next</button>`;
+        buttonsHtml += `<button onclick="fetchSuratKeluar(${meta.page - 1})" ${meta.page === 1 ? 'disabled' : ''} class="px-3 py-1.5 glass-card border-ops-border hover:bg-white/[0.05] disabled:opacity-40 disabled:cursor-not-allowed text-xs rounded-lg font-medium text-white transition-all">Prev</button>`;
+        buttonsHtml += `<button onclick="fetchSuratKeluar(${meta.page + 1})" ${meta.page === meta.total_pages || meta.total_pages === 0 ? 'disabled' : ''} class="px-3 py-1.5 glass-card border-ops-border hover:bg-white/[0.05] disabled:opacity-40 disabled:cursor-not-allowed text-xs rounded-lg font-medium text-white transition-all">Next</button>`;
         $('#paginationButtons').html(buttonsHtml);
     }
 

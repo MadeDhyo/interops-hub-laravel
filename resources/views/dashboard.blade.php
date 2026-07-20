@@ -6,97 +6,104 @@
 <div class="space-y-6">
     <!-- Header -->
     <div>
-        <h1 class="text-3xl font-bold text-white tracking-wide">Dashboard Pengawasan</h1>
-        <p class="text-sm text-gray-400 mt-1">SLA Monitoring & Ringkasan Distribusi Komando Pimpinan</p>
+        <p class="section-eyebrow mb-1">// SLA MONITORING · DISTRIBUSI KOMANDO</p>
+        <h1 class="font-display text-3xl text-white">Dashboard Pengawasan</h1>
+        <p class="text-sm text-slate-500 mt-1">Ringkasan operasional &amp; status ketaatan batas waktu disposisi pimpinan</p>
     </div>
 
-    <!-- Top Metrics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-        <!-- Total Surat -->
-        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg flex items-center space-x-4">
-            <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl"><i class="fas fa-envelope text-2xl"></i></div>
+    <!-- Metrics Row -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Total -->
+        <div class="glass-card bracket-box p-5 rounded-xl flex items-center space-x-4">
+            <div class="p-2.5 rounded-lg" style="background: rgba(0,198,255,0.08);">
+                <i class="fas fa-envelope text-xl" style="color: #00c6ff;"></i>
+            </div>
             <div>
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Surat Masuk</p>
-                <h3 class="text-2xl font-bold text-white mt-1 font-mono" id="metricTotal">0</h3>
+                <p class="section-eyebrow">Total Surat Masuk</p>
+                <h3 class="font-mono text-2xl font-semibold text-white mt-0.5" id="metricTotal">—</h3>
             </div>
         </div>
         <!-- Pending -->
-        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg flex items-center space-x-4">
-            <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl"><i class="fas fa-clock text-2xl"></i></div>
+        <div class="glass-card bracket-box p-5 rounded-xl flex items-center space-x-4">
+            <div class="p-2.5 rounded-lg" style="background: rgba(245,158,11,0.08);">
+                <i class="fas fa-clock text-xl" style="color: #f59e0b;"></i>
+            </div>
             <div>
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Review Pending</p>
-                <h3 class="text-2xl font-bold text-white mt-1 font-mono" id="metricPending">0</h3>
+                <p class="section-eyebrow" style="color: rgba(245,158,11,0.6);">Review Pending</p>
+                <h3 class="font-mono text-2xl font-semibold text-white mt-0.5" id="metricPending">—</h3>
             </div>
         </div>
         <!-- Disposisi -->
-        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg flex items-center space-x-4">
-            <div class="p-3 bg-divhub-cyan/10 text-divhub-cyan rounded-xl"><i class="fas fa-check-circle text-2xl"></i></div>
+        <div class="glass-card bracket-box p-5 rounded-xl flex items-center space-x-4">
+            <div class="p-2.5 rounded-lg" style="background: rgba(167,139,250,0.08);">
+                <i class="fas fa-check-circle text-xl" style="color: #a78bfa;"></i>
+            </div>
             <div>
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Sudah Disposisi</p>
-                <h3 class="text-2xl font-bold text-white mt-1 font-mono" id="metricDisposisi">0</h3>
+                <p class="section-eyebrow" style="color: rgba(167,139,250,0.6);">Sudah Disposisi</p>
+                <h3 class="font-mono text-2xl font-semibold text-white mt-0.5" id="metricDisposisi">—</h3>
             </div>
         </div>
-        <!-- SLA Breach Warning -->
-        <div class="bg-divhub-card p-6 rounded-2xl border border-red-500/30 bg-gradient-to-br from-divhub-card to-red-950/20 shadow-lg flex items-center space-x-4">
-            <div class="p-3 bg-red-500/10 text-red-400 rounded-xl animate-pulse"><i class="fas fa-exclamation-triangle text-2xl"></i></div>
+        <!-- SLA Breach -->
+        <div class="bracket-box p-5 rounded-xl flex items-center space-x-4" style="background: rgba(255,51,51,0.06); border: 1px solid rgba(255,51,51,0.2); backdrop-filter: blur(16px);">
+            <div class="p-2.5 rounded-lg animate-pulse" style="background: rgba(255,51,51,0.1);">
+                <i class="fas fa-exclamation-triangle text-xl" style="color: #ff3333;"></i>
+            </div>
             <div>
-                <p class="text-xs font-semibold text-red-400 uppercase tracking-wider">Lewat Batas SLA (>3 Hari)</p>
-                <h3 class="text-2xl font-bold text-red-400 mt-1 font-mono" id="metricSla">0</h3>
+                <p class="section-eyebrow" style="color: rgba(255,51,51,0.7);">Lewat SLA (&gt;3 Hari)</p>
+                <h3 class="font-mono text-2xl font-semibold mt-0.5" style="color: #ff3333;" id="metricSla">—</h3>
             </div>
         </div>
     </div>
 
-    <!-- Main Dashboard Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Chart Section -->
-        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg lg:col-span-1 flex flex-col justify-between">
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Chart -->
+        <div class="glass-card p-6 rounded-xl lg:col-span-1 flex flex-col">
             <div>
-                <h3 class="text-base font-bold text-white flex items-center space-x-2">
-                    <i class="fas fa-chart-pie text-divhub-cyan"></i>
-                    <span>Rasio Status Dokumen</span>
-                </h3>
-                <p class="text-xs text-gray-400 mt-1">Perbandingan berkas pending vs selesai didisposisikan</p>
+                <p class="section-eyebrow mb-1">Distribusi Status</p>
+                <h3 class="font-display text-base text-white">Rasio Dokumen</h3>
+                <p class="text-xs text-slate-500 mt-1">Berkas pending vs. terdisposisi</p>
             </div>
-            <div class="py-4 flex justify-center items-center relative h-64">
+            <div class="flex-1 flex justify-center items-center py-4 min-h-[220px]">
                 <canvas id="statusChart"></canvas>
             </div>
         </div>
 
-        <!-- SLA Warning Table Section -->
-        <div class="bg-divhub-card p-6 rounded-2xl border border-divhub-border shadow-lg lg:col-span-2 flex flex-col justify-between">
-            <div>
-                <div class="flex justify-between items-center">
-                    <h3 class="text-base font-bold text-white flex items-center space-x-2">
-                        <i class="fas fa-fire text-red-400"></i>
-                        <span>Antrean Urgent (Darurat SLA)</span>
-                    </h3>
-                    <span class="px-2 py-0.5 bg-red-500/10 text-red-400 text-[10px] font-bold uppercase rounded border border-red-500/20">Butuh Aksi Segera</span>
+        <!-- Urgent Table -->
+        <div class="glass-card p-6 rounded-xl lg:col-span-2 flex flex-col">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="section-eyebrow mb-1" style="color: rgba(255,51,51,0.6);">Antrean Prioritas Tinggi</p>
+                    <h3 class="font-display text-base text-white">Darurat SLA</h3>
+                    <p class="text-xs text-slate-500 mt-1">Tertahan &gt;3 hari tanpa instruksi pimpinan</p>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">Daftar surat masuk yang tertahan lebih dari 3 hari tanpa instruksi komando pimpinan.</p>
-                
-                <div class="overflow-x-auto mt-4">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-divhub-border text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                                <th class="pb-3 pl-4">No Surat</th>
-                                <th class="pb-3">Asal</th>
-                                <th class="pb-3 text-center">Keterlambatan</th>
-                                {{-- Tombol Tindakan hanya tampil di header jika user adalah pimpinan --}}
-                                @if(auth()->user()->role === 'pimpinan')
-                                    <th class="pb-3 text-center" id="th-tindakan">Tindakan</th>
-                                @endif
-                            </tr>
-                        </thead>
-                        <tbody id="urgentTableBody" class="text-xs divide-y divide-divhub-border/40">
-                            <tr>
-                                <td colspan="4" class="text-center py-8 text-gray-500">Memuat antrean darurat...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <span class="stamp stamp-red mt-1">Butuh Aksi</span>
             </div>
-            <div class="pt-4 border-t border-divhub-border/50 flex justify-end">
-                <a href="{{ url('/surat-masuk') }}" class="text-xs font-semibold text-divhub-cyan hover:text-divhub-teal transition-colors flex items-center space-x-1">
+
+            <div class="overflow-x-auto mt-5 flex-1">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-[10px] font-mono font-semibold uppercase tracking-widest text-slate-600 border-b border-ops-border">
+                            <th class="pb-3 pl-3">No Surat</th>
+                            <th class="pb-3">Asal</th>
+                            <th class="pb-3 text-center">Keterlambatan</th>
+                            @if(auth()->user()->role === 'pimpinan')
+                                <th class="pb-3 text-center" id="th-tindakan">Tindakan</th>
+                            @endif
+                        </tr>
+                    </thead>
+                    <tbody id="urgentTableBody" class="text-xs divide-y divide-ops-border">
+                        <tr>
+                            <td colspan="4" class="text-center py-8 text-slate-600">
+                                <i class="fas fa-spinner fa-spin mr-2"></i> Memuat antrean darurat...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pt-4 border-t border-ops-border flex justify-end mt-4">
+                <a href="{{ url('/surat-masuk') }}" class="font-mono text-xs font-semibold transition-colors flex items-center space-x-1" style="color: #00c6ff;">
                     <span>Buka Semua Surat Masuk</span>
                     <i class="fas fa-arrow-right text-[10px]"></i>
                 </a>
@@ -110,13 +117,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     let statusChartInstance = null;
-    
-    // Ambil data role user dari session backend Laravel
     const currentRole = "{{ auth()->user()->role }}";
 
-    $(document).ready(function() {
-        loadDashboardData();
-    });
+    $(document).ready(function() { loadDashboardData(); });
 
     function loadDashboardData() {
         $.ajax({
@@ -129,7 +132,6 @@
                     $('#metricPending').text(res.metrics.pending);
                     $('#metricDisposisi').text(res.metrics.disposisi);
                     $('#metricSla').text(res.metrics.sla_breach);
-
                     renderChart(res.metrics.pending_safe, res.metrics.sla_breach, res.metrics.disposisi);
                     renderUrgentTable(res.urgent_list);
                 }
@@ -139,10 +141,7 @@
 
     function renderChart(pendingSafe, slaBreach, disposisi) {
         const ctx = document.getElementById('statusChart').getContext('2d');
-        
-        if (statusChartInstance) {
-            statusChartInstance.destroy();
-        }
+        if (statusChartInstance) statusChartInstance.destroy();
 
         statusChartInstance = new Chart(ctx, {
             type: 'doughnut',
@@ -150,10 +149,10 @@
                 labels: ['Pending (<3 Hari)', 'Lewat SLA (>3 Hari)', 'Sudah Disposisi'],
                 datasets: [{
                     data: [pendingSafe, slaBreach, disposisi],
-                    backgroundColor: ['#fbbf24', '#f43f5e', '#00a3c4'],
-                    borderColor: '#161b27',
+                    backgroundColor: ['#f59e0b', '#ff3333', '#00c6ff'],
+                    borderColor: 'rgba(11,22,40,0.8)',
                     borderWidth: 3,
-                    hoverOffset: 4
+                    hoverOffset: 6
                 }]
             },
             options: {
@@ -162,14 +161,16 @@
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { 
-                            color: '#9ca3af', 
-                            font: { size: 11, family: 'sans-serif' }, 
-                            padding: 12 
+                        labels: {
+                            color: '#64748b',
+                            font: { size: 10, family: 'IBM Plex Mono' },
+                            padding: 14,
+                            usePointStyle: true,
+                            pointStyleWidth: 8
                         }
                     }
                 },
-                cutout: '70%'
+                cutout: '72%'
             }
         });
     }
@@ -179,37 +180,31 @@
         const colspanValue = currentRole === 'pimpinan' ? 4 : 3;
 
         if (!list || list.length === 0) {
-            html = `<tr><td colspan="${colspanValue}" class="text-center py-6 text-divhub-cyan font-medium italic"><i class="fas fa-check-circle mr-1"></i> Aman! Semua berkas masuk di bawah batas waktu SLA.</td></tr>`;
+            html = `<tr><td colspan="${colspanValue}" class="text-center py-8 font-mono text-xs italic" style="color: #00c6ff;"><i class="fas fa-check-circle mr-2"></i>Aman — semua berkas di bawah batas SLA.</td></tr>`;
             $('#urgentTableBody').html(html);
             return;
         }
 
         list.forEach(row => {
             let tdTindakan = '';
-            
-            // Render kolom tindakan HANYA jika usernya pimpinan
             if (currentRole === 'pimpinan') {
-                // Perbaikan: Taruh encoder URL di dalam loop biar variabel 'row' terbaca sempurna
                 let safeNoSurat = encodeURIComponent(row.no_surat);
                 let safePerihalUrl = encodeURIComponent(row.perihal);
-
                 tdTindakan = `
                     <td class="py-3 text-center">
-                        <a href="{{ url('/surat-masuk') }}?autodispo=${row.id}&no_surat=${safeNoSurat}&perihal=${safePerihalUrl}" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-md text-[11px] transition-all inline-block shadow">
-                            <i class="fas fa-file-signature mr-1"></i>Eksekusi
+                        <a href="{{ url('/surat-masuk') }}?autodispo=${row.id}&no_surat=${safeNoSurat}&perihal=${safePerihalUrl}" class="btn-primary px-3 py-1.5 rounded-md text-[11px] inline-flex items-center space-x-1">
+                            <i class="fas fa-file-signature"></i><span>Eksekusi</span>
                         </a>
                     </td>
                 `;
             }
 
             html += `
-                <tr class="hover:bg-gray-700/20 transition-colors border-l-[3px] border-l-red-500 bg-red-500/5">
-                    <td class="py-3 pl-4 font-semibold text-white font-mono text-xs">${row.no_surat}</td>
-                    <td class="py-3 text-gray-300 text-xs">${row.dari}</td>
+                <tr class="hover:bg-white/[0.02] transition-colors" style="border-left: 2px solid rgba(255,51,51,0.5);">
+                    <td class="py-3 pl-3 font-mono text-xs font-semibold text-white">${row.no_surat}</td>
+                    <td class="py-3 text-sm text-slate-400">${row.dari}</td>
                     <td class="py-3 text-center">
-                        <span class="px-2 py-0.5 bg-red-500/10 text-red-400 font-bold rounded border border-red-500/20 font-mono text-[10px]">
-                            +${row.hari_mandek} Hari
-                        </span>
+                        <span class="stamp stamp-red">+${row.hari_mandek} Hari</span>
                     </td>
                     ${tdTindakan}
                 </tr>

@@ -3,70 +3,89 @@
 @section('title', 'Login - InterOps-Hub')
 
 @section('content')
-<div class="w-full max-w-md bg-divhub-card rounded-2xl border border-divhub-border shadow-2xl p-8 space-y-6">
-    <div class="text-center space-y-2">
-        <h1 class="text-2xl font-bold text-white tracking-wide">Selamat Datang</h1>
-        <p class="text-sm text-gray-400">Silakan login untuk mengakses InterOps-Hub</p>
-    </div>
+<div class="w-full max-w-md relative">
+    <!-- Outer bracket decoration -->
+    <div class="bracket-box glass-card rounded-xl shadow-2xl shadow-black/60 p-8 space-y-6">
 
-    <div class="flex justify-center mb-6">
-        <img src="{{ asset('images/logo-divhubinter.png') }}" alt="Logo Divhubinter" class="h-24 w-auto object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-    </div>
+        <!-- Classified header eyebrow -->
+        <div class="text-center space-y-1">
+            <p class="section-eyebrow" style="color: rgba(255,51,51,0.7); letter-spacing: 0.25em;">// AKSES TERBATAS //</p>
+            <h1 class="font-display text-2xl text-white mt-2">Verifikasi Identitas</h1>
+            <p class="text-xs text-slate-500 mt-1">Autentikasi diperlukan untuk mengakses sistem operasional</p>
+        </div>
 
-    <form id="loginForm" class="space-y-5">
-        @csrf
-        
-        <div class="space-y-2">
-            <label for="username" class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Username</label>
+        <!-- Logo -->
+        <div class="flex justify-center py-2">
             <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">
-                    <i class="fas fa-user text-sm"></i>
-                </span>
-                <input type="text" id="username" name="username" required
-                    class="w-full pl-11 pr-4 py-3 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 transition-all duration-200 text-sm"
-                    placeholder="Masukkan username anda">
+                <div class="absolute inset-0 rounded-full" style="background: radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%);"></div>
+                <img src="{{ asset('images/logo-divhubinter.png') }}" alt="Logo Divhubinter" class="h-20 w-auto object-contain relative z-10">
             </div>
         </div>
 
-        <div class="space-y-2">
-            <label for="password" class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Password</label>
-            <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-500">
-                    <i class="fas fa-lock text-sm"></i>
-                </span>
-                <input type="password" id="password" name="password" required
-                    class="w-full pl-11 pr-4 py-3 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 transition-all duration-200 text-sm"
-                    placeholder="••••••••">
-            </div>
+        <!-- Divider -->
+        <div class="flex items-center space-x-3">
+            <div class="flex-1 border-t border-ops-border"></div>
+            <span class="font-mono text-[10px] text-slate-600 tracking-widest">SYSLOGIN v2.1</span>
+            <div class="flex-1 border-t border-ops-border"></div>
         </div>
 
-        <button type="submit" id="btnSubmit"
-            class="w-full py-3 bg-divhub-cyan hover:bg-divhub-teal text-divhub-navy font-bold rounded-xl transition-all duration-200 shadow-lg flex justify-center items-center space-x-2 text-sm mt-2">
-            <span>Masuk ke Sistem</span>
-            <i class="fas fa-arrow-right text-xs"></i>
-        </button>
-    </form>
+        <form id="loginForm" class="space-y-4">
+            @csrf
+
+            <div class="space-y-1.5">
+                <label for="username" class="section-eyebrow block">Username</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-600">
+                        <i class="fas fa-user text-xs"></i>
+                    </span>
+                    <input type="text" id="username" name="username" required
+                        class="ops-input w-full pl-10 pr-4 py-3 rounded-lg text-sm"
+                        placeholder="identifier...">
+                </div>
+            </div>
+
+            <div class="space-y-1.5">
+                <label for="password" class="section-eyebrow block">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-600">
+                        <i class="fas fa-lock text-xs"></i>
+                    </span>
+                    <input type="password" id="password" name="password" required
+                        class="ops-input w-full pl-10 pr-4 py-3 rounded-lg text-sm"
+                        placeholder="••••••••">
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" id="btnSubmit"
+                    class="btn-primary w-full py-3 rounded-lg text-sm flex justify-center items-center space-x-2">
+                    <i class="fas fa-fingerprint text-xs"></i>
+                    <span>AKSES SISTEM</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Footer stamp -->
+        <div class="text-center pt-2">
+            <p class="font-mono text-[9px] text-slate-700 tracking-widest uppercase">DIVHUBINTER POLRI · SISTEM TERKLASIFIKASI</p>
+        </div>
+    </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Setup jQuery to always pass the CSRF token with AJAX requests
     $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
+        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
     });
 
     $('#loginForm').on('submit', function(e) {
         e.preventDefault();
-        
         let formData = {
             username: $('#username').val(),
             password: $('#password').val()
         };
-
         $('#btnSubmit').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...');
 
         $.ajax({
@@ -78,33 +97,27 @@ $(document).ready(function() {
                 if (response.status === 200) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Login Berhasil!',
+                        title: 'Autentikasi Berhasil',
                         text: response.message,
                         timer: 1500,
                         showConfirmButton: false,
-                        background: '#161b27',
-                        color: '#fff'
-                    }).then(() => {
-                        window.location.href = response.redirect;
-                    });
+                        background: '#0b1628',
+                        color: '#e2e8f0'
+                    }).then(() => { window.location.href = response.redirect; });
                 }
             },
             error: function(xhr) {
                 let errorMsg = 'Terjadi kesalahan sistem.';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMsg = xhr.responseJSON.message;
-                }
-                
+                if (xhr.responseJSON && xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
                 Swal.fire({
                     icon: 'error',
-                    title: 'Gagal Login',
+                    title: 'Akses Ditolak',
                     text: errorMsg,
-                    background: '#161b27',
-                    color: '#fff',
-                    confirmButtonColor: '#00a3c4'
+                    background: '#0b1628',
+                    color: '#e2e8f0',
+                    confirmButtonColor: '#00c6ff'
                 });
-                
-                $('#btnSubmit').prop('disabled', false).html('<span>Masuk ke Sistem</span> <i class="fas fa-arrow-right text-xs"></i>');
+                $('#btnSubmit').prop('disabled', false).html('<i class="fas fa-fingerprint text-xs"></i> <span>AKSES SISTEM</span>');
             }
         });
     });

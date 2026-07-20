@@ -1,4 +1,4 @@
-@extends('layout.main')
+﻿@extends('layout.main')
 
 @section('title', 'Surat Masuk - InterOps-Hub')
 
@@ -11,39 +11,39 @@
         </div>
         
         @can('akses-admin')
-            <button onclick="openModal('modalTambah')" class="px-5 py-2.5 bg-divhub-cyan hover:bg-divhub-cyan/90 text-divhub-navy font-bold rounded-xl transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
+            <button onclick="openModal('modalTambah')" class="px-5 py-2.5 btn-primary rounded-lg transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
                 <i class="fas fa-plus text-xs"></i>
                 <span>Tambah Surat Masuk</span>
             </button>
         @endcan
     </div>
 
-    <div class="bg-divhub-card p-5 rounded-2xl border border-divhub-border shadow-lg grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+    <div class="glass-card p-5 rounded-xl grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div class="space-y-1">
             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pencarian Smart</label>
-            <input type="text" id="searchFilter" placeholder="Cari nomor, asal, perihal..." class="w-full px-4 py-2.5 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 placeholder-gray-500 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 text-sm">
+            <input type="text" id="searchFilter" placeholder="Cari nomor, asal, perihal..." class="w-full px-4 py-2.5 ops-input rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none  text-sm">
         </div>
         <div class="space-y-1">
             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tanggal Mulai</label>
-            <input type="date" id="startDateFilter" class="w-full px-4 py-2.5 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 text-sm">
+            <input type="date" id="startDateFilter" class="w-full px-4 py-2.5 ops-input rounded-lg text-gray-100 focus:outline-none  text-sm">
         </div>
         <div class="space-y-1">
             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tanggal Selesai</label>
-            <input type="date" id="endDateFilter" class="w-full px-4 py-2.5 bg-divhub-navy border border-divhub-border rounded-xl text-gray-100 focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 text-sm">
+            <input type="date" id="endDateFilter" class="w-full px-4 py-2.5 ops-input rounded-lg text-gray-100 focus:outline-none  text-sm">
         </div>
         <div>
-            <button onclick="handleFilter()" class="w-full py-2.5 bg-divhub-navy hover:bg-divhub-navy/80 border border-divhub-border text-white font-medium rounded-xl transition-all duration-200 text-sm flex justify-center items-center space-x-2">
+            <button onclick="handleFilter()" class="w-full py-2.5 glass-card hover:bg-white/[0.05] border border-ops-border text-slate-300 font-medium rounded-lg transition-all duration-200 text-sm flex justify-center items-center space-x-2">
                 <i class="fas fa-filter text-xs"></i>
                 <span>Terapkan Filter</span>
             </button>
         </div>
     </div>
 
-    <div class="bg-divhub-card rounded-2xl border border-divhub-border shadow-lg overflow-hidden">
+    <div class="glass-card rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-divhub-border text-xs font-semibold text-gray-400 uppercase tracking-wider bg-divhub-navy/50">
+                    <tr class="border-b border-ops-border text-[10px] font-mono font-semibold uppercase tracking-widest text-slate-600 bg-ops-abyss/40">
                         <th class="py-4 px-6">No. Surat</th>
                         <th class="py-4 px-6">Asal Surat</th>
                         <th class="py-4 px-6">Perihal</th>
@@ -52,12 +52,12 @@
                         <th class="py-4 px-6 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody" class="text-sm divide-y divide-divhub-border/50">
+                <tbody id="tableBody" class="text-sm divide-y divide-ops-border">
                     </tbody>
             </table>
         </div>
         
-        <div class="p-5 border-t border-divhub-border flex justify-between items-center bg-divhub-card/30">
+        <div class="p-5 border-t border-ops-border flex justify-between items-center">
             <p id="paginationInfo" class="text-xs text-gray-400">Menampilkan halaman 1</p>
             <div class="flex space-x-2" id="paginationButtons"></div>
         </div>
@@ -66,8 +66,8 @@
 
 @can('akses-admin')
 <div id="modalTambah" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-divhub-card border border-divhub-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all duration-300">
-        <div class="px-6 py-4 border-b border-divhub-border flex justify-between items-center bg-divhub-navy/50">
+    <div class="glass-card rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden transform transition-all duration-300">
+        <div class="px-6 py-4 border-b border-ops-border flex justify-between items-center">
             <h3 class="text-lg font-display font-bold text-white">Input Surat Masuk Baru</h3>
             <button onclick="closeModal('modalTambah')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
         </div>
@@ -76,37 +76,37 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label class="text-xs font-semibold text-gray-400 uppercase">No Surat</label>
-                    <input type="text" id="no_surat" name="no_surat" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30">
+                    <input type="text" id="no_surat" name="no_surat" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none ">
                 </div>
                 <div class="space-y-1">
                     <label class="text-xs font-semibold text-gray-400 uppercase">Tanggal Masuk</label>
-                    <input type="date" id="tanggal_masuk" name="tanggal_masuk" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30 cursor-pointer">
+                    <input type="date" id="tanggal_masuk" name="tanggal_masuk" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none  cursor-pointer">
                 </div>
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Dari (Asal Surat)</label>
-                <input type="text" id="dari" name="dari" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30">
+                <input type="text" id="dari" name="dari" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none ">
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Kepada (Tujuan)</label>
-                <input type="text" id="kepada" name="kepada" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30">
+                <input type="text" id="kepada" name="kepada" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none ">
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Perihal</label>
-                <textarea id="perihal" name="perihal" rows="3" required class="w-full px-4 py-2 bg-divhub-navy border border-divhub-border rounded-xl text-sm text-white focus:outline-none focus:border-divhub-cyan focus:ring-1 focus:ring-divhub-cyan/30"></textarea>
+                <textarea id="perihal" name="perihal" rows="3" required class="w-full px-4 py-2 ops-input rounded-lg text-sm text-white focus:outline-none "></textarea>
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Berkas Dokumen (PDF)</label>
                 <div class="flex gap-2 items-center">
-                    <input type="file" id="file_pdf" name="file_pdf" accept="application/pdf" class="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-divhub-navy file:text-divhub-gold hover:file:bg-divhub-gold/10 cursor-pointer">
-                    <button type="button" id="btnAutoScan" class="px-5 py-2 bg-divhub-cyan text-divhub-navy rounded-xl hover:bg-divhub-teal transition-all font-display font-bold flex items-center gap-2">
+                    <input type="file" id="file_pdf" name="file_pdf" accept="application/pdf" class="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-ops-abyss file:text-ops-gold hover:file:bg-ops-gold/10 cursor-pointer">
+                    <button type="button" id="btnAutoScan" class="px-5 py-2 btn-primary text-ops-abyss rounded-xl hover:bg-divhub-teal transition-all font-display font-bold flex items-center gap-2">
                         <i class="fas fa-microchip"></i> <span>Scan AI</span>
                     </button>
                 </div>
             </div>
-            <div class="pt-4 flex justify-end space-x-3 border-t border-divhub-border mt-6">
+            <div class="pt-4 flex justify-end space-x-3 border-t border-ops-border mt-6">
                 <button type="button" onclick="closeModal('modalTambah')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl text-sm">Batal</button>
-                <button type="submit" id="btnSubmitTambah" class="px-4 py-2 bg-divhub-cyan text-divhub-navy font-bold rounded-xl text-sm">Simpan Arsip</button>
+                <button type="submit" id="btnSubmitTambah" class="px-4 py-2 btn-primary text-ops-abyss font-bold rounded-xl text-sm">Simpan Arsip</button>
             </div>
         </form>
     </div>
@@ -116,10 +116,10 @@
 <!-- 2. MODAL INPUT DISPOSISI (KHUSUS PIMPINAN) -->
 @if(auth()->user()->role === 'pimpinan')
 <div id="disposisiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-divhub-card border border-divhub-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="dispoModalContent">
-        <div class="p-6 border-b border-divhub-border flex justify-between items-center bg-divhub-navy/50">
+    <div class="glass-card w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="dispoModalContent">
+        <div class="p-6 border-b border-ops-border flex justify-between items-center">
             <h3 class="text-lg font-display font-bold text-white flex items-center space-x-2">
-                <i class="fas fa-gavel text-divhub-gold"></i>
+                <i class="fas fa-gavel text-ops-gold"></i>
                 <span>Lembar Disposisi Digital</span>
             </h3>
             <button type="button" class="btn-close-dispo text-gray-400 hover:text-white transition-colors">
@@ -129,7 +129,7 @@
         <form id="disposisiForm" class="p-6 space-y-4">
             <input type="hidden" id="dispoSuratId" name="surat_id">
             
-            <div class="space-y-1 bg-divhub-navy/50 p-4 rounded-xl border border-divhub-border/50 text-xs">
+            <div class="space-y-1 bg-ops-abyss/40 p-4 rounded-xl border border-ops-border/50 text-xs">
                 <p class="text-gray-400">Target Surat: <span id="textNoSurat" class="text-white font-semibold"></span></p>
                 <p class="text-gray-400">Perihal: <span id="textPerihal" class="text-white"></span></p>
             </div>
@@ -137,7 +137,7 @@
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Instruksi KADIV / KABAG</label>
                 <div class="relative">
-                    <select id="disposisi_kabag" name="disposisi_kabag" required class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-divhub-cyan appearance-none cursor-pointer">
+                    <select id="disposisi_kabag" name="disposisi_kabag" required class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none  appearance-none cursor-pointer">
                         <option value="" disabled selected>-- Pilih Instruksi Komando --</option>
                         <option value="Tindak Lanjuti (TLJ)">Tindak Lanjuti (TLJ)</option>
                         <option value="Datakan">Datakan</option>
@@ -145,7 +145,7 @@
                         <option value="Untuk Diketahui (UDK)">Untuk Diketahui (UDK)</option>
                     </select>
                     <!-- Custom Arrow bawaan Tailwind biar selaras dengan tema Navy-Gold -->
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-divhub-gold">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-ops-gold">
                         <i class="fas fa-chevron-down text-xs"></i>
                     </div>
                 </div>
@@ -153,12 +153,12 @@
 
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Instruksi KASUBAG (Opsional)</label>
-                <textarea id="disposisi_kasubag" name="disposisi_kasubag" rows="2" class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-sm text-gray-100 focus:outline-none focus:border-divhub-cyan" placeholder="Catatan tambahan koordinasi lapis dua..."></textarea>
+                <textarea id="disposisi_kasubag" name="disposisi_kasubag" rows="2" class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none " placeholder="Catatan tambahan koordinasi lapis dua..."></textarea>
             </div>
             
             <div class="pt-2 flex justify-end space-x-3">
-                <button type="button" class="btn-close-dispo px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium rounded-xl text-sm transition-colors">Batal</button>
-                <button type="submit" id="btnSubmitDisposisi" class="px-5 py-2.5 bg-divhub-gold text-divhub-navy font-display font-bold rounded-xl text-sm flex items-center space-x-2 transition-all hover:bg-divhub-goldlight hover:-translate-y-0.5 shadow-lg">
+                <button type="button" class="btn-close-dispo px-5 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white border border-ops-border px-4 py-2 transition-colors">Batal</button>
+                <button type="submit" id="btnSubmitDisposisi" class="px-5 py-2.5 bg-ops-gold text-ops-abyss font-display font-bold rounded-lg text-sm flex items-center space-x-2 transition-all hover:bg-ops-goldlight shadow-lg">
                     <i class="fas fa-paper-plane text-xs"></i> <span>Kirim Disposisi</span>
                 </button>
             </div>
@@ -168,10 +168,10 @@
 @endif
 
 <div id="detailDisposisiModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="bg-divhub-card border border-divhub-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="detailDispoContent">
-        <div class="p-6 border-b border-divhub-border flex justify-between items-center bg-divhub-navy/50">
+    <div class="glass-card w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="detailDispoContent">
+        <div class="p-6 border-b border-ops-border flex justify-between items-center">
             <h3 class="text-lg font-display font-bold text-white flex items-center space-x-2">
-                <i class="fas fa-file-alt text-divhub-cyan"></i>
+                <i class="fas fa-file-alt text-ops-cyan"></i>
                 <span>Nota Komando</span>
             </h3>
             <button type="button" class="btn-close-detail text-gray-400 hover:text-white transition-colors">
@@ -179,22 +179,22 @@
             </button>
         </div>
         <div class="p-6 space-y-4 text-sm">
-            <div class="space-y-1 bg-divhub-navy/50 p-4 rounded-xl border border-divhub-border/50 text-xs">
+            <div class="space-y-1 bg-ops-abyss/40 p-4 rounded-xl border border-ops-border/50 text-xs">
                 <p class="text-gray-400">No. Surat: <span id="viewNoSurat" class="text-white font-semibold font-mono"></span></p>
                 <p class="text-gray-400">Perihal: <span id="viewPerihal" class="text-white"></span></p>
             </div>
             
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">No Agenda</label>
-                <div id="viewNoDispo" class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-white font-mono"></div>
+                <div id="viewNoDispo" class="w-full ops-input rounded-lg px-4 py-3 text-white font-mono"></div>
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Instruksi KADIV / KABAG</label>
-                <div id="viewInstruksiKabag" class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-white whitespace-pre-line"></div>
+                <div id="viewInstruksiKabag" class="w-full ops-input rounded-lg px-4 py-3 text-white whitespace-pre-line"></div>
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Instruksi KASUBAG</label>
-                <div id="viewInstruksiKasubag" class="w-full bg-divhub-navy border border-divhub-border rounded-xl px-4 py-3 text-white whitespace-pre-line"></div>
+                <div id="viewInstruksiKasubag" class="w-full ops-input rounded-lg px-4 py-3 text-white whitespace-pre-line"></div>
             </div>
 
             <div class="pt-2 flex justify-end">
@@ -277,7 +277,7 @@
             let fileInput = $('#file_pdf')[0].files[0];
             
             if (!fileInput) {
-                Swal.fire({ icon: 'warning', title: 'File Kosong', text: 'Upload dokumen PDF terlebih dahulu.', background: '#161b27', color: '#F3F4F6', confirmButtonColor: '#00a3c4' });
+                Swal.fire({ icon: 'warning', title: 'File Kosong', text: 'Upload dokumen PDF terlebih dahulu.', background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#00c6ff' });
                 return;
             }
 
@@ -287,7 +287,7 @@
             Swal.fire({
                 title: 'Menganalisis Dokumen',
                 html: 'AI sedang mengekstrak data dari hasil scan. Mohon tunggu...',
-                background: '#161b27', color: '#F3F4F6', allowOutsideClick: false,
+                background: '#0b1628', color: '#F3F4F6', allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); }
             });
 
@@ -312,13 +312,13 @@
                         $('#kepada').val(response.data.kepada);
                         $('#perihal').val(response.data.perihal);
                         
-                        Swal.fire({ icon: 'success', title: 'Scan Selesai!', text: 'Data berhasil diekstrak dengan presisi.', background: '#161b27', color: '#F3F4F6', confirmButtonColor: '#00a3c4' });
+                        Swal.fire({ icon: 'success', title: 'Scan Selesai!', text: 'Data berhasil diekstrak dengan presisi.', background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#00c6ff' });
                     }
                 },
                 error: function(xhr) {
                     Swal.close();
                     let errorMsg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Terjadi kesalahan sistem.';
-                    Swal.fire({ icon: 'error', title: 'Gagal Scan', text: errorMsg, background: '#161b27', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
+                    Swal.fire({ icon: 'error', title: 'Gagal Scan', text: errorMsg, background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
                 }
             });
         });
@@ -335,11 +335,11 @@
                 success: function(res) {
                     closeModal('modalTambah');
                     $('#formTambahSurat')[0].reset();
-                    Swal.fire({ icon: 'success', title: 'Sukses', text: res.message, background: '#161b27', color: '#F3F4F6', confirmButtonColor: '#00a3c4' });
+                    Swal.fire({ icon: 'success', title: 'Sukses', text: res.message, background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#00c6ff' });
                     fetchSuratMasuk(1);
                 },
                 error: function() {
-                    Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal menyimpan arsip.', background: '#161b27', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal menyimpan arsip.', background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
                 },
                 complete: function() {
                     $('#btnSubmitTambah').prop('disabled', false).text('Simpan Arsip');
@@ -357,14 +357,14 @@
                 url: `{{ url('/api/surat-masuk/update') }}/${id}`,
                 type: "POST", data: formData,
                 success: function(res) {
-                    Swal.fire({ icon: 'success', title: 'Sukses!', text: res.message, background: '#161b27', color: '#F3F4F6', confirmButtonColor: '#00a3c4' });
+                    Swal.fire({ icon: 'success', title: 'Sukses!', text: res.message, background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#00c6ff' });
                     $('.btn-close-dispo').click();
                     $('#disposisiForm')[0].reset();
                     fetchSuratMasuk(currentPage);
                 },
                 error: function(xhr) {
                     let errorMsg = xhr.responseJSON ? xhr.responseJSON.message : 'Gagal memproses.';
-                    Swal.fire({ icon: 'error', title: 'Aksi Gagal', text: errorMsg, background: '#161b27', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
+                    Swal.fire({ icon: 'error', title: 'Aksi Gagal', text: errorMsg, background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
                 },
                 complete: function() {
                     $('#btnSubmitDisposisi').prop('disabled', false);
@@ -415,12 +415,12 @@
 
         data.forEach(row => {
             let badgeColor = row.status === 'pending' 
-                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 inline-flex items-center gap-1.5' 
-                : 'bg-divhub-cyan/10 text-divhub-cyan border border-divhub-cyan/20 inline-flex items-center gap-1.5';
+                ? 'stamp stamp-pending inline-flex items-center gap-1.5' 
+                : 'stamp stamp-disposisi inline-flex items-center gap-1.5';
             
             let statusDot = row.status === 'pending'
                 ? '<span class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></span>'
-                : '<span class="h-1.5 w-1.5 rounded-full bg-divhub-cyan"></span>';
+                : '<span class="h-1.5 w-1.5 rounded-full btn-primary"></span>';
 
             let safeNoSurat = encodeURIComponent(row.no_surat || '');
             let safePerihal = encodeURIComponent(row.perihal || '');
@@ -428,29 +428,29 @@
 
             if (currentRole === 'pimpinan') {
                 if (row.status === 'pending') {
-                    tombolAksi = `<button type="button" class="btn-open-dispo px-3 py-1.5 bg-divhub-gold/10 hover:bg-divhub-gold/20 border border-divhub-gold/40 text-xs rounded-lg text-divhub-gold font-semibold transition-all flex items-center space-x-1" data-id="${row.id}" data-no="${safeNoSurat}" data-perihal="${safePerihal}"><i class="fas fa-file-signature text-[10px]"></i><span>Beri Disposisi</span></button>`;
+                    tombolAksi = `<button type="button" class="btn-open-dispo px-3 py-1.5 border text-xs rounded-lg style='border-color:rgba(245,158,11,0.4);color:#f59e0b;background:rgba(245,158,11,0.08)' font-semibold transition-all flex items-center space-x-1" data-id="${row.id}" data-no="${safeNoSurat}" data-perihal="${safePerihal}"><i class="fas fa-file-signature text-[10px]"></i><span>Beri Disposisi</span></button>`;
                 } else {
                     let safeDispo = encodeURIComponent(row.no_dispo || '-');
                     let safeKabag = encodeURIComponent(row.disposisi_kabag || '-');
                     let safeKasubag = encodeURIComponent(row.disposisi_kasubag || '-');
-                    tombolAksi = `<button type="button" class="btn-open-detail px-3 py-1.5 bg-divhub-cyan/10 hover:bg-divhub-cyan/20 border border-divhub-cyan/30 text-xs rounded-lg text-divhub-cyan font-semibold transition-all flex items-center space-x-1" data-no="${safeNoSurat}" data-perihal="${safePerihal}" data-dispo="${safeDispo}" data-kabag="${safeKabag}" data-kasubag="${safeKasubag}"><i class="fas fa-eye text-[10px]"></i><span>Lihat Nota</span></button>`;
+                    tombolAksi = `<button type="button" class="btn-open-detail px-3 py-1.5 border text-xs rounded-lg style='border-color:rgba(0,198,255,0.3);color:#00c6ff;background:rgba(0,198,255,0.08)' font-semibold transition-all flex items-center space-x-1" data-no="${safeNoSurat}" data-perihal="${safePerihal}" data-dispo="${safeDispo}" data-kabag="${safeKabag}" data-kasubag="${safeKasubag}"><i class="fas fa-eye text-[10px]"></i><span>Lihat Nota</span></button>`;
                 }
             } else if (currentRole === 'admin') {
-                tombolAksi = row.status === 'pending' ? `<span class="text-xs text-amber-400 italic">Menunggu Tinjauan</span>` : `<span class="text-xs text-divhub-cyan italic font-medium">Selesai</span>`;
+                tombolAksi = row.status === 'pending' ? `<span class="text-xs text-amber-400 italic">Menunggu Tinjauan</span>` : `<span class="text-xs text-ops-cyan italic font-medium">Selesai</span>`;
             } else {
                 if (row.status === 'disposisi') {
                     let safeDispo = encodeURIComponent(row.no_dispo || '-');
                     let safeKabag = encodeURIComponent(row.disposisi_kabag || '-');
                     let safeKasubag = encodeURIComponent(row.disposisi_kasubag || '-');
-                    tombolAksi = `<button type="button" class="btn-open-detail px-3 py-1.5 bg-divhub-cyan/10 hover:bg-divhub-cyan/20 border border-divhub-cyan/30 text-xs rounded-lg text-divhub-cyan font-semibold flex items-center space-x-1" data-no="${safeNoSurat}" data-perihal="${safePerihal}" data-dispo="${safeDispo}" data-kabag="${safeKabag}" data-kasubag="${safeKasubag}"><i class="fas fa-eye"></i><span>Lihat Disposisi</span></button>`;
+                    tombolAksi = `<button type="button" class="btn-open-detail px-3 py-1.5 border text-xs rounded-lg style='border-color:rgba(0,198,255,0.3);color:#00c6ff;background:rgba(0,198,255,0.08)' font-semibold flex items-center space-x-1" data-no="${safeNoSurat}" data-perihal="${safePerihal}" data-dispo="${safeDispo}" data-kabag="${safeKabag}" data-kasubag="${safeKasubag}"><i class="fas fa-eye"></i><span>Lihat Disposisi</span></button>`;
                 } else {
                     tombolAksi = `<span class="text-xs text-gray-500 italic">Belum Ada Perintah</span>`;
                 }
             }
 
-            let fileButton = row.file_pdf ? `<a href="{{ url('/uploads') }}/${row.file_pdf}" target="_blank" class="text-divhub-gold hover:text-white transition-colors"><i class="fas fa-file-pdf text-base"></i></a>` : `<span class="text-gray-600">-</span>`;
+            let fileButton = row.file_pdf ? `<a href="{{ url('/uploads') }}/${row.file_pdf}" target="_blank" class="text-ops-gold hover:text-white transition-colors"><i class="fas fa-file-pdf text-base"></i></a>` : `<span class="text-gray-600">-</span>`;
 
-            html += `<tr class="hover:bg-divhub-card/80 transition-colors border-b border-divhub-border/50">
+            html += `<tr class="hover:bg-white/[0.02] transition-colors">
                 <td class="py-3.5 px-6 text-white font-mono text-xs">${row.no_surat}</td>
                 <td class="py-3.5 px-6 text-gray-300 text-xs">${row.dari}</td>
                 <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs">${row.perihal}</td>
@@ -464,8 +464,8 @@
 
     function renderPagination(meta) {
         $('#paginationInfo').text(`Halaman ${meta.page} dari ${meta.total_pages}`);
-        let html = `<button onclick="fetchSuratMasuk(${meta.page - 1})" ${meta.page === 1 ? 'disabled' : ''} class="px-3 py-1.5 bg-divhub-navy border border-divhub-border hover:bg-divhub-navy/80 disabled:opacity-40 text-xs rounded-lg text-white transition-colors">Prev</button>`;
-        html += `<button onclick="fetchSuratMasuk(${meta.page + 1})" ${meta.page === meta.total_pages || meta.total_pages === 0 ? 'disabled' : ''} class="px-3 py-1.5 bg-divhub-navy border border-divhub-border hover:bg-divhub-navy/80 disabled:opacity-40 text-xs rounded-lg text-white transition-colors">Next</button>`;
+        let html = `<button onclick="fetchSuratMasuk(${meta.page - 1})" ${meta.page === 1 ? 'disabled' : ''} class="px-3 py-1.5 glass-card border-ops-border hover:bg-white/[0.05] disabled:opacity-40 text-xs rounded-lg text-white transition-colors">Prev</button>`;
+        html += `<button onclick="fetchSuratMasuk(${meta.page + 1})" ${meta.page === meta.total_pages || meta.total_pages === 0 ? 'disabled' : ''} class="px-3 py-1.5 glass-card border-ops-border hover:bg-white/[0.05] disabled:opacity-40 text-xs rounded-lg text-white transition-colors">Next</button>`;
         $('#paginationButtons').html(html);
     }
 
