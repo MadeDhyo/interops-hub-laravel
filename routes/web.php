@@ -44,9 +44,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/api/surat-masuk', [SuratMasukController::class, 'create']);
     Route::post('/api/surat-masuk/update/{id}', [SuratMasukController::class, 'updateDisposisi']);
     Route::post('/api/surat-masuk/parse', [SuratMasukController::class, 'parsePDF']);
+    Route::get('/api/surat-masuk/export', [SuratMasukController::class, 'exportCsv']);
     
     // Surat Keluar & Logs API Endpoints
     Route::get('/api/surat-keluar', [SuratKeluarController::class, 'index']);
     Route::post('/api/surat-keluar', [SuratKeluarController::class, 'create']);
+    Route::get('/api/surat-keluar/export', [SuratKeluarController::class, 'exportCsv']);
     Route::get('/api/logs', [SuratMasukController::class, 'getLogs']);
 });

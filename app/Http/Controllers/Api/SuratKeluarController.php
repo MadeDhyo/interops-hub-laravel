@@ -51,6 +51,52 @@ class SuratKeluarController extends Controller
         ], 200);
     }
 
+    public function exportCsv(Request $request)
+    {
+        $query = SuratKeluar::query();
+
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('kepada', 'like', "%{$search}%")
+                  ->orWhere('dari', 'like', "%{$search}%")
+                  ->orWhere('perihal', 'like', "%{$search}%")
+                  ->orWhere('no_surat', 'like', "%{$search}%");
+            });
+        }
+        if ($startDate = $request->input('start_date')) {
+            $query->where('tanggal_surat', '>=', $startDate);
+        }
+        if ($endDate = $request->input('end_date')) {
+            $query->where('tanggal_surat', '<=', $endDate);
+        }
+
+        $data = $query->orderBy('id', 'desc')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="surat_keluar_' . date('Y-m-d_His') . '.csv"',
+        ];
+
+        $callback = function() use ($data) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, ['No Surat', 'Kepada', 'Dari', 'Perihal', 'Tanggal Surat', 'Tanggal Input']);
+            foreach ($data as $row) {
+                fputcsv($file, [
+                    $row->no_surat,
+                    $row->kepada,
+                    $row->dari,
+                    $row->perihal,
+                    $row->tanggal_surat,
+                    $row->tanggal_input
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function create(Request $request)
     {
         // Native Laravel File Upload Handling

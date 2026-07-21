@@ -146,11 +146,70 @@
         .bracket-box::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
         .bracket-box::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
 
-        /* === SCROLLBAR === */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,198,255,0.2); border-radius: 2px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(0,198,255,0.4); }
+        /* === SKELETON LOADING === */
+        @keyframes skeletonPulse {
+            0%   { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                rgba(0,198,255,0.04) 25%,
+                rgba(0,198,255,0.08) 50%,
+                rgba(0,198,255,0.04) 75%
+            );
+            background-size: 200% 100%;
+            animation: skeletonPulse 1.8s ease-in-out infinite;
+            border-radius: 6px;
+        }
+        .skeleton-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            gap: 24px;
+            border-bottom: 1px solid rgba(0,198,255,0.06);
+        }
+        .skeleton-cell {
+            height: 12px;
+            border-radius: 4px;
+            background: linear-gradient(
+                90deg,
+                rgba(0,198,255,0.04) 25%,
+                rgba(0,198,255,0.08) 50%,
+                rgba(0,198,255,0.04) 75%
+            );
+            background-size: 200% 100%;
+            animation: skeletonPulse 1.8s ease-in-out infinite;
+        }
+
+        /* === STAGGERED FADE-IN === */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in-up {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .fade-delay-1 { animation-delay: 0.05s; }
+        .fade-delay-2 { animation-delay: 0.10s; }
+        .fade-delay-3 { animation-delay: 0.15s; }
+        .fade-delay-4 { animation-delay: 0.20s; }
+        .fade-delay-5 { animation-delay: 0.25s; }
+        .fade-delay-6 { animation-delay: 0.30s; }
+
+        /* === SCROLLBAR (Enhanced) === */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(0,198,255,0.03); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(0,198,255,0.25), rgba(167,139,250,0.2));
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(0,198,255,0.45), rgba(167,139,250,0.35));
+        }
+        /* Firefox */
+        * { scrollbar-width: thin; scrollbar-color: rgba(0,198,255,0.25) transparent; }
 
         /* === INPUT FOCUS GLOW === */
         .ops-input {

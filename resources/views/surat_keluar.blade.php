@@ -1,4 +1,4 @@
-﻿@extends('layout.main')
+@extends('layout.main')
 
 @section('title', 'Surat Keluar - InterOps-Hub')
 
@@ -10,12 +10,18 @@
             <p class="text-sm text-gray-400 mt-1">Kelola arsip surat keluar, distribusi instansi tujuan, dan tracking dokumen eksternal</p>
         </div>
         
-        @can('akses-admin')
-        <button onclick="openModal('modalTambahKeluar')" class="px-5 py-2.5 btn-primary rounded-lg transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
-            <i class="fas fa-plus text-xs"></i>
-            <span>Tambah Surat Keluar</span>
-        </button>
-        @endcan
+        <div class="flex items-center space-x-2">
+            <button onclick="exportCsv()" class="px-4 py-2.5 glass-card hover:bg-white/[0.05] border border-ops-border text-slate-300 font-medium rounded-lg transition-all duration-200 text-sm flex items-center space-x-2">
+                <i class="fas fa-file-export text-xs"></i>
+                <span>Export CSV</span>
+            </button>
+            @can('akses-admin')
+            <button onclick="openModal('modalTambahKeluar')" class="px-5 py-2.5 btn-primary rounded-lg transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
+                <i class="fas fa-plus text-xs"></i>
+                <span>Tambah Surat Keluar</span>
+            </button>
+            @endcan
+        </div>
     </div>
 
     <div class="glass-card p-5 rounded-xl grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -53,7 +59,12 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm divide-y divide-ops-border">
-                    </tbody>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:15%"></div><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:25%"></div><div class="skeleton-cell" style="width:12%"></div><div class="skeleton-cell" style="width:8%"></div></div></td></tr>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:18%"></div><div class="skeleton-cell" style="width:22%"></div><div class="skeleton-cell" style="width:18%"></div><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:14%"></div><div class="skeleton-cell" style="width:8%"></div></div></td></tr>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:12%"></div><div class="skeleton-cell" style="width:25%"></div><div class="skeleton-cell" style="width:22%"></div><div class="skeleton-cell" style="width:18%"></div><div class="skeleton-cell" style="width:15%"></div><div class="skeleton-cell" style="width:8%"></div></div></td></tr>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:16%"></div><div class="skeleton-cell" style="width:18%"></div><div class="skeleton-cell" style="width:24%"></div><div class="skeleton-cell" style="width:22%"></div><div class="skeleton-cell" style="width:12%"></div><div class="skeleton-cell" style="width:8%"></div></div></td></tr>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:15%"></div><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:24%"></div><div class="skeleton-cell" style="width:13%"></div><div class="skeleton-cell" style="width:8%"></div></div></td></tr>
+                </tbody>
             </table>
         </div>
         
@@ -224,5 +235,14 @@
     function handleFilter() { fetchSuratKeluar(1); }
     function openModal(id) { $(`#${id}`).removeClass('hidden'); }
     function closeModal(id) { $(`#${id}`).addClass('hidden'); }
+
+    function exportCsv() {
+        let params = new URLSearchParams({
+            search: $('#searchFilter').val() || '',
+            start_date: $('#startDateFilter').val() || '',
+            end_date: $('#endDateFilter').val() || ''
+        });
+        window.location.href = "{{ url('/api/surat-keluar/export') }}?" + params.toString();
+    }
 </script>
 @endpush

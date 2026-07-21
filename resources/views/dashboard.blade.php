@@ -14,7 +14,7 @@
     <!-- Metrics Row -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Total -->
-        <div class="glass-card bracket-box p-5 rounded-xl flex items-center space-x-4">
+        <div class="glass-card bracket-box p-5 rounded-xl flex items-center space-x-4 fade-in-up fade-delay-1">
             <div class="p-2.5 rounded-lg" style="background: rgba(0,198,255,0.08);">
                 <i class="fas fa-envelope text-xl" style="color: #00c6ff;"></i>
             </div>
@@ -24,7 +24,7 @@
             </div>
         </div>
         <!-- Pending -->
-        <div class="glass-card bracket-box p-5 rounded-xl flex items-center space-x-4">
+        <div class="glass-card bracket-box p-5 rounded-xl flex items-center space-x-4 fade-in-up fade-delay-2">
             <div class="p-2.5 rounded-lg" style="background: rgba(245,158,11,0.08);">
                 <i class="fas fa-clock text-xl" style="color: #f59e0b;"></i>
             </div>
@@ -34,7 +34,7 @@
             </div>
         </div>
         <!-- Disposisi -->
-        <div class="glass-card bracket-box p-5 rounded-xl flex items-center space-x-4">
+        <div class="glass-card bracket-box p-5 rounded-xl flex items-center space-x-4 fade-in-up fade-delay-3">
             <div class="p-2.5 rounded-lg" style="background: rgba(167,139,250,0.08);">
                 <i class="fas fa-check-circle text-xl" style="color: #a78bfa;"></i>
             </div>
@@ -44,7 +44,7 @@
             </div>
         </div>
         <!-- SLA Breach -->
-        <div class="bracket-box p-5 rounded-xl flex items-center space-x-4" style="background: rgba(255,51,51,0.06); border: 1px solid rgba(255,51,51,0.2); backdrop-filter: blur(16px);">
+        <div class="bracket-box p-5 rounded-xl flex items-center space-x-4 fade-in-up fade-delay-4" style="background: rgba(255,51,51,0.06); border: 1px solid rgba(255,51,51,0.2); backdrop-filter: blur(16px);">
             <div class="p-2.5 rounded-lg animate-pulse" style="background: rgba(255,51,51,0.1);">
                 <i class="fas fa-exclamation-triangle text-xl" style="color: #ff3333;"></i>
             </div>
@@ -58,7 +58,7 @@
     <!-- Main Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <!-- Chart -->
-        <div class="glass-card p-6 rounded-xl lg:col-span-1 flex flex-col">
+        <div class="glass-card p-6 rounded-xl lg:col-span-1 flex flex-col fade-in-up fade-delay-5">
             <div>
                 <p class="section-eyebrow mb-1">Distribusi Status</p>
                 <h3 class="font-display text-base text-white">Rasio Dokumen</h3>
@@ -70,7 +70,7 @@
         </div>
 
         <!-- Urgent Table -->
-        <div class="glass-card p-6 rounded-xl lg:col-span-2 flex flex-col">
+        <div class="glass-card p-6 rounded-xl lg:col-span-2 flex flex-col fade-in-up fade-delay-6">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="section-eyebrow mb-1" style="color: rgba(255,51,51,0.6);">Antrean Prioritas Tinggi</p>
@@ -93,11 +93,9 @@
                         </tr>
                     </thead>
                     <tbody id="urgentTableBody" class="text-xs divide-y divide-ops-border">
-                        <tr>
-                            <td colspan="4" class="text-center py-8 text-slate-600">
-                                <i class="fas fa-spinner fa-spin mr-2"></i> Memuat antrean darurat...
-                            </td>
-                        </tr>
+                        <tr><td colspan="4"><div class="skeleton-row"><div class="skeleton-cell" style="width:25%"></div><div class="skeleton-cell" style="width:35%"></div><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:20%"></div></div></td></tr>
+                        <tr><td colspan="4"><div class="skeleton-row"><div class="skeleton-cell" style="width:30%"></div><div class="skeleton-cell" style="width:25%"></div><div class="skeleton-cell" style="width:25%"></div><div class="skeleton-cell" style="width:20%"></div></div></td></tr>
+                        <tr><td colspan="4"><div class="skeleton-row"><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:40%"></div><div class="skeleton-cell" style="width:15%"></div><div class="skeleton-cell" style="width:25%"></div></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -168,9 +166,21 @@
                             usePointStyle: true,
                             pointStyleWidth: 8
                         }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function() { return '(Klik untuk filter)'; }
+                        }
                     }
                 },
-                cutout: '72%'
+                cutout: '72%',
+                onClick: function(evt, elements) {
+                    if (elements.length > 0) {
+                        const idx = elements[0].index;
+                        const statusMap = ['pending', 'sla', 'disposisi'];
+                        window.location.href = "{{ url('/surat-masuk') }}?status=" + statusMap[idx];
+                    }
+                }
             }
         });
     }

@@ -37,11 +37,24 @@ class SuratMasukController extends Controller
             $query->where('tanggal_masuk', '<=', $endDate);
         }
 
-        // 3. Execution with Pagination
+        // 3. Status Filter (dari klik chart dashboard)
+        if ($status = $request->input('status')) {
+            if ($status === 'pending') {
+                $query->where('status', 'pending')
+                      ->where('tanggal_masuk', '>', Carbon::now()->subDays(3));
+            } elseif ($status === 'sla') {
+                $query->where('status', 'pending')
+                      ->where('tanggal_masuk', '<=', Carbon::now()->subDays(3));
+            } elseif ($status === 'disposisi') {
+                $query->where('status', 'disposisi');
+            }
+        }
+
+        // 4. Execution with Pagination
         $limit = $request->input('limit', 10);
         $paginatedData = $query->orderBy('id', 'desc')->paginate($limit);
 
-        // 4. Global Stats for Charts
+        // 5. Global Stats for Charts
         $stats = [
             'total'   => SuratMasuk::count(),
             'pending' => SuratMasuk::where('status', 'pending')->count(),
@@ -59,6 +72,62 @@ class SuratMasukController extends Controller
                 'total_pages' => $paginatedData->lastPage()
             ]
         ], 200);
+    }
+
+    public function exportCsv(Request $request)
+    {
+        $query = SuratMasuk::query();
+
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('no_surat', 'like', "%{$search}%")
+                  ->orWhere('dari', 'like', "%{$search}%")
+                  ->orWhere('perihal', 'like', "%{$search}%");
+            });
+        }
+        if ($startDate = $request->input('start_date')) {
+            $query->where('tanggal_masuk', '>=', $startDate);
+        }
+        if ($endDate = $request->input('end_date')) {
+            $query->where('tanggal_masuk', '<=', $endDate);
+        }
+        if ($status = $request->input('status')) {
+            if ($status === 'pending') {
+                $query->where('status', 'pending')->where('tanggal_masuk', '>', Carbon::now()->subDays(3));
+            } elseif ($status === 'sla') {
+                $query->where('status', 'pending')->where('tanggal_masuk', '<=', Carbon::now()->subDays(3));
+            } elseif ($status === 'disposisi') {
+                $query->where('status', 'disposisi');
+            }
+        }
+
+        $data = $query->orderBy('id', 'desc')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="surat_masuk_' . date('Y-m-d_His') . '.csv"',
+        ];
+
+        $callback = function() use ($data) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM UTF-8
+            fputcsv($file, ['No Surat', 'Dari', 'Kepada', 'Perihal', 'Tanggal Masuk', 'Status', 'Disposisi Kabag', 'Disposisi Kasubag']);
+            foreach ($data as $row) {
+                fputcsv($file, [
+                    $row->no_surat,
+                    $row->dari,
+                    $row->kepada,
+                    $row->perihal,
+                    $row->tanggal_masuk,
+                    $row->status,
+                    $row->disposisi_kabag ?? '-',
+                    $row->disposisi_kasubag ?? '-'
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function create(Request $request)

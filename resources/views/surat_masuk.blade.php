@@ -10,12 +10,18 @@
             <p class="text-sm text-gray-400 mt-1">Kelola dokumen surat masuk, tracking status, dan distribusi disposisi pimpinan</p>
         </div>
         
-        @can('akses-admin')
-            <button onclick="openModal('modalTambah')" class="px-5 py-2.5 btn-primary rounded-lg transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
-                <i class="fas fa-plus text-xs"></i>
-                <span>Tambah Surat Masuk</span>
+        <div class="flex items-center space-x-2">
+            <button onclick="exportCsv()" class="px-4 py-2.5 glass-card hover:bg-white/[0.05] border border-ops-border text-slate-300 font-medium rounded-lg transition-all duration-200 text-sm flex items-center space-x-2">
+                <i class="fas fa-file-export text-xs"></i>
+                <span>Export CSV</span>
             </button>
-        @endcan
+            @can('akses-admin')
+                <button onclick="openModal('modalTambah')" class="px-5 py-2.5 btn-primary rounded-lg transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
+                    <i class="fas fa-plus text-xs"></i>
+                    <span>Tambah Surat Masuk</span>
+                </button>
+            @endcan
+        </div>
     </div>
 
     <div class="glass-card p-5 rounded-xl grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -53,7 +59,12 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody" class="text-sm divide-y divide-ops-border">
-                    </tbody>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:15%"></div><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:25%"></div><div class="skeleton-cell" style="width:15%"></div><div class="skeleton-cell" style="width:12%"></div><div class="skeleton-cell" style="width:13%"></div></div></td></tr>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:18%"></div><div class="skeleton-cell" style="width:22%"></div><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:14%"></div><div class="skeleton-cell" style="width:10%"></div><div class="skeleton-cell" style="width:16%"></div></div></td></tr>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:12%"></div><div class="skeleton-cell" style="width:25%"></div><div class="skeleton-cell" style="width:22%"></div><div class="skeleton-cell" style="width:16%"></div><div class="skeleton-cell" style="width:11%"></div><div class="skeleton-cell" style="width:14%"></div></div></td></tr>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:16%"></div><div class="skeleton-cell" style="width:18%"></div><div class="skeleton-cell" style="width:28%"></div><div class="skeleton-cell" style="width:13%"></div><div class="skeleton-cell" style="width:12%"></div><div class="skeleton-cell" style="width:13%"></div></div></td></tr>
+                    <tr><td colspan="6"><div class="skeleton-row"><div class="skeleton-cell" style="width:20%"></div><div class="skeleton-cell" style="width:15%"></div><div class="skeleton-cell" style="width:24%"></div><div class="skeleton-cell" style="width:15%"></div><div class="skeleton-cell" style="width:14%"></div><div class="skeleton-cell" style="width:12%"></div></div></td></tr>
+                </tbody>
             </table>
         </div>
         
@@ -214,6 +225,13 @@
         $.ajaxSetup({
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         });
+
+        // Baca parameter ?status= dari URL (dari klik chart dashboard)
+        const urlParams = new URLSearchParams(window.location.search);
+        const statusFilter = urlParams.get('status');
+        if (statusFilter) {
+            window.currentStatusFilter = statusFilter;
+        }
 
         fetchSuratMasuk(currentPage);
 
@@ -394,10 +412,20 @@
 
     function fetchSuratMasuk(page) {
         currentPage = page;
+        let reqData = {
+            page: page,
+            search: $('#searchFilter').val(),
+            start_date: $('#startDateFilter').val(),
+            end_date: $('#endDateFilter').val()
+        };
+        // Tambahkan status filter jika dari klik chart dashboard
+        if (window.currentStatusFilter) {
+            reqData.status = window.currentStatusFilter;
+        }
         $.ajax({
             url: "{{ url('/api/surat-masuk') }}",
             type: "GET",
-            data: { page: page, search: $('#searchFilter').val(), start_date: $('#startDateFilter').val(), end_date: $('#endDateFilter').val() },
+            data: reqData,
             dataType: "json",
             success: function(res) {
                 renderTable(res.data);
@@ -469,8 +497,22 @@
         $('#paginationButtons').html(html);
     }
 
-    function handleFilter() { fetchSuratMasuk(1); }
+    function handleFilter() {
+        // Reset status filter saat user gunakan filter manual
+        window.currentStatusFilter = null;
+        fetchSuratMasuk(1);
+    }
     function openModal(id) { $(`#${id}`).removeClass('hidden'); }
     function closeModal(id) { $(`#${id}`).addClass('hidden'); }
+
+    function exportCsv() {
+        let params = new URLSearchParams({
+            search: $('#searchFilter').val() || '',
+            start_date: $('#startDateFilter').val() || '',
+            end_date: $('#endDateFilter').val() || ''
+        });
+        if (window.currentStatusFilter) params.set('status', window.currentStatusFilter);
+        window.location.href = "{{ url('/api/surat-masuk/export') }}?" + params.toString();
+    }
 </script>
 @endpush
