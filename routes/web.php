@@ -34,6 +34,11 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // ==========================================
+    // SECURE DOCUMENT SERVING
+    // ==========================================
+    Route::get('/arsip/dokumen/{filename}', [\App\Http\Controllers\FileController::class, 'show']);
+
+    // ==========================================
     // ENDPOINT AJAX JQUERY DATA STREAM
     // ==========================================
     Route::get('/api/dashboard/stats', [DashboardController::class, 'getSlaStats']);

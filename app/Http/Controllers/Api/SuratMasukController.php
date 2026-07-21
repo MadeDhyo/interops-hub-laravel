@@ -134,11 +134,15 @@ class SuratMasukController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('akses-admin');
 
+        $request->validate([
+            'file_pdf' => 'nullable|file|mimes:pdf|max:10240'
+        ]);
+
         $fileName = null;
         if ($request->hasFile('file_pdf') && $request->file('file_pdf')->isValid()) {
             $file = $request->file('file_pdf');
             $fileName = time() . '_' . $file->hashName();
-            $file->move(public_path('uploads'), $fileName); 
+            $file->storeAs('arsip_pdf', $fileName, 'local'); 
         }
 
         $surat = SuratMasuk::create([

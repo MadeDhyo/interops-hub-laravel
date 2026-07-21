@@ -478,7 +478,7 @@
             }
 
             let fileButton = row.file_pdf
-                ? `<button type="button" onclick="openPdfModal('{{ url('/uploads') }}/${row.file_pdf}', '${row.file_pdf}')" class="text-ops-gold hover:text-white transition-colors" title="Preview PDF"><i class="fas fa-file-pdf text-base"></i></button>`
+                ? `<button type="button" onclick="openPdfModal('{{ url('/arsip/dokumen') }}/${row.file_pdf}', '${row.file_pdf}')" class="text-ops-gold hover:text-white transition-colors" title="Preview PDF"><i class="fas fa-file-pdf text-base"></i></button>`
                 : `<span class="text-gray-600">-</span>`;
 
             html += `<tr class="hover:bg-white/[0.02] transition-colors">

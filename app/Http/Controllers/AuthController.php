@@ -25,8 +25,19 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
+        $throttleKey = \Illuminate\Support\Str::lower($request->input('username')) . '|' . $request->ip();
+
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey);
+            return response()->json([
+                'status' => 429,
+                'message' => "Terlalu banyak percobaan. Coba lagi dalam $seconds detik."
+            ], 429);
+        }
+
         // Attempt login session creation
         if (Auth::attempt($credentials)) {
+            \Illuminate\Support\Facades\RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
 
             // Log activity trail
@@ -41,6 +52,8 @@ class AuthController extends Controller
                 'redirect' => url('/dashboard')
             ]);
         }
+
+        \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 60);
 
         return response()->json([
             'status' => 401,

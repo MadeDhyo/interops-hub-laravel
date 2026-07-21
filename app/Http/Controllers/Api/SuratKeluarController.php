@@ -99,13 +99,15 @@ class SuratKeluarController extends Controller
 
     public function create(Request $request)
     {
-        // Native Laravel File Upload Handling
+        $request->validate([
+            'file_pdf' => 'nullable|file|mimes:pdf|max:10240'
+        ]);
+
         $fileName = null;
         if ($request->hasFile('file_pdf') && $request->file('file_pdf')->isValid()) {
             $file = $request->file('file_pdf');
             $fileName = time() . '_' . $file->getClientOriginalName();
-            // Moves uploaded file to public/uploads directory directly
-            $file->move(public_path('uploads'), $fileName);
+            $file->storeAs('arsip_pdf', $fileName, 'local');
         }
 
         $surat = SuratKeluar::create([
