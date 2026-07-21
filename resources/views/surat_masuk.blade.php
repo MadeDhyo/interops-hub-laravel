@@ -226,8 +226,10 @@
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         });
 
-        // Baca parameter ?status= dari URL (dari klik chart dashboard)
+        // Baca parameter URL
         const urlParams = new URLSearchParams(window.location.search);
+
+        // Status filter (dari klik chart dashboard)
         const statusFilter = urlParams.get('status');
         if (statusFilter) {
             window.currentStatusFilter = statusFilter;
@@ -235,8 +237,7 @@
 
         fetchSuratMasuk(currentPage);
 
-        // PENANGANAN PARAMETER URL
-        let urlParams = new URLSearchParams(window.location.search);
+        // Auto-open disposisi modal jika ada parameter autodispo
         let autoDispoId = urlParams.get('autodispo');
         let urlNoSurat = urlParams.get('no_surat');
         let urlPerihal = urlParams.get('perihal');
