@@ -477,7 +477,9 @@
                 }
             }
 
-            let fileButton = row.file_pdf ? `<a href="{{ url('/uploads') }}/${row.file_pdf}" target="_blank" class="text-ops-gold hover:text-white transition-colors"><i class="fas fa-file-pdf text-base"></i></a>` : `<span class="text-gray-600">-</span>`;
+            let fileButton = row.file_pdf
+                ? `<button type="button" onclick="openPdfModal('{{ url('/uploads') }}/${row.file_pdf}', '${row.file_pdf}')" class="text-ops-gold hover:text-white transition-colors" title="Preview PDF"><i class="fas fa-file-pdf text-base"></i></button>`
+                : `<span class="text-gray-600">-</span>`;
 
             html += `<tr class="hover:bg-white/[0.02] transition-colors">
                 <td class="py-3.5 px-6 text-white font-mono text-xs">${row.no_surat}</td>

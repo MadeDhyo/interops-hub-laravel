@@ -337,5 +337,75 @@
     </div>
 
     @stack('scripts')
+
+    <!-- ===== GLOBAL PDF PREVIEW MODAL ===== -->
+    <div id="pdfPreviewModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4" style="background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);">
+        <div class="glass w-full max-w-5xl rounded-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden" style="height: 90vh; max-height: 90vh;">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-5 py-3.5 border-b border-ops-border flex-shrink-0">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-file-pdf text-ops-gold text-lg"></i>
+                    <div>
+                        <p class="text-white font-semibold text-sm" id="pdfModalTitle">Berkas Dokumen</p>
+                        <p class="section-eyebrow mt-0.5">Preview — baca saja · untuk unduh klik ikon di kanan atas viewer</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a id="pdfDownloadLink" href="#" target="_blank" class="text-xs font-mono text-slate-400 hover:text-ops-gold transition-colors flex items-center space-x-1.5" title="Buka / Unduh di Tab Baru">
+                        <i class="fas fa-external-link-alt text-[10px]"></i>
+                        <span>Buka di Tab Baru</span>
+                    </a>
+                    <div class="w-px h-4 bg-ops-border"></div>
+                    <button onclick="closePdfModal()" class="text-slate-500 hover:text-red-400 transition-colors p-1" title="Tutup">
+                        <i class="fas fa-times text-base"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- iframe PDF Viewer -->
+            <div class="flex-1 overflow-hidden bg-ops-abyss/60 relative">
+                <iframe id="pdfIframe" src="" class="w-full h-full border-0" title="PDF Preview"></iframe>
+                <div id="pdfLoadingOverlay" class="absolute inset-0 flex items-center justify-center" style="background: rgba(6,13,25,0.6);">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2" style="color: #00c6ff;"></i>
+                        <p class="text-slate-400 text-xs font-mono">Memuat dokumen...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openPdfModal(url, filename) {
+            document.getElementById('pdfIframe').src = '';
+            document.getElementById('pdfLoadingOverlay').style.display = 'flex';
+            document.getElementById('pdfModalTitle').textContent = filename || 'Berkas Dokumen';
+            document.getElementById('pdfDownloadLink').href = url;
+            document.getElementById('pdfPreviewModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            // Load iframe after short delay for smooth animation
+            setTimeout(function() {
+                document.getElementById('pdfIframe').src = url;
+                document.getElementById('pdfIframe').onload = function() {
+                    document.getElementById('pdfLoadingOverlay').style.display = 'none';
+                };
+            }, 100);
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdfPreviewModal').classList.add('hidden');
+            document.getElementById('pdfIframe').src = '';
+            document.body.style.overflow = '';
+        }
+
+        // Close on backdrop click
+        document.getElementById('pdfPreviewModal').addEventListener('click', function(e) {
+            if (e.target === this) closePdfModal();
+        });
+
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closePdfModal();
+        });
+    </script>
 </body>
 </html>
