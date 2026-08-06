@@ -9,6 +9,9 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: #050b14;
@@ -16,7 +19,7 @@
                 radial-gradient(at 0% 0%, rgba(30, 64, 175, 0.15) 0px, transparent 50%),
                 radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
             color: #e2e8f0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Nunito', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
