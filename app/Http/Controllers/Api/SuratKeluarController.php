@@ -19,7 +19,8 @@ class SuratKeluarController extends Controller
                 $q->where('kepada', 'like', "%{$search}%")
                   ->orWhere('dari', 'like', "%{$search}%")
                   ->orWhere('perihal', 'like', "%{$search}%")
-                  ->orWhere('no_surat', 'like', "%{$search}%");
+                  ->orWhere('no_surat', 'like', "%{$search}%")
+                  ->orWhere('full_text_content', 'like', "%{$search}%");
             });
         }
 
@@ -104,20 +105,32 @@ class SuratKeluarController extends Controller
         ]);
 
         $fileName = null;
+        $extractedText = null;
+
         if ($request->hasFile('file_pdf') && $request->file('file_pdf')->isValid()) {
             $file = $request->file('file_pdf');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $file->storeAs('arsip_pdf', $fileName, 'local');
+            
+            // Extract full text using smalot/pdfparser
+            try {
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf = $parser->parseFile($file->path());
+                $extractedText = $pdf->getText();
+            } catch (\Exception $e) {
+                $extractedText = null;
+            }
         }
 
         $surat = SuratKeluar::create([
-            'kepada'        => $request->input('kepada'),
-            'no_surat'      => $request->input('no_surat'),
-            'tanggal_surat' => $request->input('tanggal_surat'),
-            'dari'          => $request->input('dari'),
-            'tanggal_input' => $request->input('tanggal_input'),
-            'perihal'       => $request->input('perihal'),
-            'file_pdf'      => $fileName
+            'kepada'            => $request->input('kepada'),
+            'no_surat'          => $request->input('no_surat'),
+            'tanggal_surat'     => $request->input('tanggal_surat'),
+            'dari'              => $request->input('dari'),
+            'tanggal_input'     => $request->input('tanggal_input'),
+            'perihal'           => $request->input('perihal'),
+            'file_pdf'          => $fileName,
+            'full_text_content' => $extractedText
         ]);
 
         // Audit Trail Log Capture

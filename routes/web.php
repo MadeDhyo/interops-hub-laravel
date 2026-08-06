@@ -6,14 +6,36 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Api\SuratMasukController;
 use App\Http\Controllers\Api\SuratKeluarController;
 use App\Http\Controllers\Api\UserController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', [AuthController::class, 'index'])->name('login');
-Route::get('/login', [AuthController::class, 'index']);
+Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login/attempt', [AuthController::class, 'attemptLogin']);
 Route::get('/logout', [AuthController::class, 'logout']);
 
-// Rute Terproteksi (Wajib Login & Mendukung Session Cookie JQuery)
-Route::middleware(['auth'])->group(function () {
+// UI Halaman Kunci (bisa diakses jika Auth, tapi tak terpengaruh session.lock)
+Route::get('/locked', function() {
+    if (!Auth::check()) return redirect('/login');
+    if (session('locked') !== true) return redirect('/dashboard');
+    return view('auth.locked');
+})->name('locked');
+
+Route::post('/api/auth/lock', function() {
+    if (Auth::check()) session(['locked' => true]);
+    return response()->json(['status' => 'locked']);
+});
+
+Route::post('/api/auth/unlock', function(\Illuminate\Http\Request $request) {
+    if (!Auth::check()) return response()->json(['status' => 401, 'message' => 'Unauthorized'], 401);
+    if (\Illuminate\Support\Facades\Hash::check($request->password, Auth::user()->password)) {
+        session(['locked' => false]);
+        return response()->json(['status' => 200, 'message' => 'Unlocked']);
+    }
+    return response()->json(['status' => 403, 'message' => 'Password salah!'], 403);
+});
+
+// ROUTE GROUP BERDASARKAN MIDDLEWARE AUTH & SESSION LOCK
+Route::middleware(['auth', 'session.lock'])->group(function () {
     // ----------------- RUTE TAMPILAN (VIEWS) -----------------
     Route::get('/dashboard', [DashboardController::class, 'index']);
     

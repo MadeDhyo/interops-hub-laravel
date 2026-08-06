@@ -114,7 +114,19 @@
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Berkas Dokumen PDF (Opsional)</label>
-                <input type="file" name="file_pdf" accept="application/pdf" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-ops-abyss file:text-ops-cyan hover:file:opacity-80 cursor-pointer">
+                <div id="drop-area-keluar" class="w-full relative border-2 border-dashed border-gray-600 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-ops-cyan hover:bg-white/5 transition-all group">
+                    <input type="file" id="file_pdf_keluar" name="file_pdf" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 group-hover:text-ops-cyan mb-3 transition-colors"></i>
+                    <p class="text-sm text-gray-300 font-medium"><span class="text-ops-cyan">Klik untuk upload</span> atau drag & drop file ke sini</p>
+                    <p class="text-xs text-gray-500 mt-1">Hanya file PDF (Maks. 10MB)</p>
+                    <div id="file-info-keluar" class="hidden mt-3 p-2 bg-ops-abyss/80 rounded-lg border border-ops-border flex items-center gap-3 w-full">
+                        <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                        <div class="text-left flex-1 overflow-hidden">
+                            <p id="file-name-keluar" class="text-sm font-semibold text-white truncate"></p>
+                            <p id="file-size-keluar" class="text-xs text-gray-400"></p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="pt-4 flex justify-end space-x-3 border-t border-ops-border mt-6">
                 <button type="button" onclick="closeModal('modalTambahKeluar')" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl text-sm">Batal</button>
@@ -244,5 +256,70 @@
         });
         window.location.href = "{{ url('/api/surat-keluar/export') }}?" + params.toString();
     }
+
+    // DRAG AND DROP FILE UPLOAD LOGIC
+    const dropArea = document.getElementById('drop-area-keluar');
+    const fileInput = document.getElementById('file_pdf_keluar');
+    const fileInfo = document.getElementById('file-info-keluar');
+    const fileNameDisplay = document.getElementById('file-name-keluar');
+    const fileSizeDisplay = document.getElementById('file-size-keluar');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropArea.classList.add('border-ops-cyan', 'bg-white/5');
+    }
+
+    function unhighlight(e) {
+        dropArea.classList.remove('border-ops-cyan', 'bg-white/5');
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
+    function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        if (files.length > 0) {
+            fileInput.files = files; // Assign files to hidden input
+            handleFiles(files);
+        }
+    }
+
+    function handleFiles(files) {
+        const file = files[0];
+        if (!file) return;
+
+        // Validasi Ekstensi PDF
+        if (file.type !== 'application/pdf') {
+            Swal.fire('Error', 'Hanya file berformat PDF yang diperbolehkan!', 'error');
+            fileInput.value = ''; // Reset
+            fileInfo.classList.add('hidden');
+            return;
+        }
+
+        // Tampilkan info file
+        fileInfo.classList.remove('hidden');
+        fileNameDisplay.textContent = file.name;
+        fileSizeDisplay.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    }
+
 </script>
 @endpush

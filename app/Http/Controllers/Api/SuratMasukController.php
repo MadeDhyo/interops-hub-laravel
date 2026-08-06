@@ -25,7 +25,8 @@ class SuratMasukController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('no_surat', 'like', "%{$search}%")
                   ->orWhere('dari', 'like', "%{$search}%")
-                  ->orWhere('perihal', 'like', "%{$search}%");
+                  ->orWhere('perihal', 'like', "%{$search}%")
+                  ->orWhere('full_text_content', 'like', "%{$search}%");
             });
         }
 
@@ -139,21 +140,34 @@ class SuratMasukController extends Controller
         ]);
 
         $fileName = null;
+        $extractedText = null;
+
         if ($request->hasFile('file_pdf') && $request->file('file_pdf')->isValid()) {
             $file = $request->file('file_pdf');
             $fileName = time() . '_' . $file->hashName();
             $file->storeAs('arsip_pdf', $fileName, 'local'); 
+            
+            // Extract full text using smalot/pdfparser
+            try {
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf = $parser->parseFile($file->path());
+                $extractedText = $pdf->getText();
+            } catch (\Exception $e) {
+                // If parsing fails (e.g., scanned PDF), we just leave it null
+                $extractedText = null;
+            }
         }
 
         $surat = SuratMasuk::create([
-            'kepada'        => $request->input('kepada'),
-            'dari'          => $request->input('dari'),
-            'perihal'       => $request->input('perihal'),
-            'tanggal_masuk' => $request->input('tanggal_masuk'),
-            'no_surat'      => $request->input('no_surat'),
-            'no_dispo'      => null,
-            'file_pdf'      => $fileName,
-            'status'        => 'pending'
+            'kepada'            => $request->input('kepada'),
+            'dari'              => $request->input('dari'),
+            'perihal'           => $request->input('perihal'),
+            'tanggal_masuk'     => $request->input('tanggal_masuk'),
+            'no_surat'          => $request->input('no_surat'),
+            'no_dispo'          => null,
+            'file_pdf'          => $fileName,
+            'status'            => 'pending',
+            'full_text_content' => $extractedText
         ]);
 
         // KUNCI 3: Catat Log via Trait otomatis (user_id & nama langsung ketarik)

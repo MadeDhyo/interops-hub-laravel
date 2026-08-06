@@ -406,6 +406,41 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closePdfModal();
         });
+
+        // ----------------------------------------------------
+        // IDLE SESSION AUTO-LOCK (15 MENIT)
+        // ----------------------------------------------------
+        @if(Auth::check() && !request()->is('locked'))
+        let idleTime = 0;
+        const maxIdleTime = 15 * 60; // 15 menit dalam detik
+
+        // Reset timer jika ada aktivitas
+        function resetIdleTimer() {
+            idleTime = 0;
+        }
+
+        // Listener aktivitas mouse dan keyboard
+        window.addEventListener('mousemove', resetIdleTimer);
+        window.addEventListener('keypress', resetIdleTimer);
+        window.addEventListener('click', resetIdleTimer);
+        window.addEventListener('scroll', resetIdleTimer);
+
+        // Timer interval mengecek setiap detik
+        setInterval(function() {
+            idleTime++;
+            if (idleTime >= maxIdleTime) {
+                // Tembak API lock session, lalu redirect
+                $.ajax({
+                    url: "{{ url('/api/auth/lock') }}",
+                    type: "POST",
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    success: function() {
+                        window.location.href = "{{ url('/locked') }}";
+                    }
+                });
+            }
+        }, 1000);
+        @endif
     </script>
 </body>
 </html>

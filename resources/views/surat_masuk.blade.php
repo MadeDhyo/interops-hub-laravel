@@ -108,10 +108,22 @@
             </div>
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Berkas Dokumen (PDF)</label>
-                <div class="flex gap-2 items-center">
-                    <input type="file" id="file_pdf" name="file_pdf" accept="application/pdf" class="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-ops-abyss file:text-ops-gold hover:file:bg-ops-gold/10 cursor-pointer">
+                <div id="drop-area" class="w-full relative border-2 border-dashed border-gray-600 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-ops-gold hover:bg-white/5 transition-all group">
+                    <input type="file" id="file_pdf" name="file_pdf" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+                    <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 group-hover:text-ops-gold mb-3 transition-colors"></i>
+                    <p class="text-sm text-gray-300 font-medium"><span class="text-ops-gold">Klik untuk upload</span> atau drag & drop file ke sini</p>
+                    <p class="text-xs text-gray-500 mt-1">Hanya file PDF (Maks. 10MB)</p>
+                    <div id="file-info" class="hidden mt-3 p-2 bg-ops-abyss/80 rounded-lg border border-ops-border flex items-center gap-3 w-full">
+                        <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                        <div class="text-left flex-1 overflow-hidden">
+                            <p id="file-name" class="text-sm font-semibold text-white truncate"></p>
+                            <p id="file-size" class="text-xs text-gray-400"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-2">
                     <button type="button" id="btnAutoScan" class="px-5 py-2 btn-primary text-ops-abyss rounded-xl hover:bg-divhub-teal transition-all font-bold flex items-center gap-2">
-                        <i class="fas fa-microchip"></i> <span>Scan AI</span>
+                        <i class="fas fa-microchip"></i> <span>Scan AI (Otomatis Isi Form)</span>
                     </button>
                 </div>
             </div>
@@ -517,5 +529,70 @@
         if (window.currentStatusFilter) params.set('status', window.currentStatusFilter);
         window.location.href = "{{ url('/api/surat-masuk/export') }}?" + params.toString();
     }
+
+    // DRAG AND DROP FILE UPLOAD LOGIC
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file_pdf');
+    const fileInfo = document.getElementById('file-info');
+    const fileNameDisplay = document.getElementById('file-name');
+    const fileSizeDisplay = document.getElementById('file-size');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropArea.classList.add('border-ops-gold', 'bg-white/5');
+    }
+
+    function unhighlight(e) {
+        dropArea.classList.remove('border-ops-gold', 'bg-white/5');
+    }
+
+    dropArea.addEventListener('drop', handleDrop, false);
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
+    function handleDrop(e) {
+        let dt = e.dataTransfer;
+        let files = dt.files;
+        if (files.length > 0) {
+            fileInput.files = files; // Assign files to hidden input
+            handleFiles(files);
+        }
+    }
+
+    function handleFiles(files) {
+        const file = files[0];
+        if (!file) return;
+
+        // Validasi Ekstensi PDF
+        if (file.type !== 'application/pdf') {
+            Swal.fire('Error', 'Hanya file berformat PDF yang diperbolehkan!', 'error');
+            fileInput.value = ''; // Reset
+            fileInfo.classList.add('hidden');
+            return;
+        }
+
+        // Tampilkan info file
+        fileInfo.classList.remove('hidden');
+        fileNameDisplay.textContent = file.name;
+        fileSizeDisplay.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    }
+
 </script>
 @endpush

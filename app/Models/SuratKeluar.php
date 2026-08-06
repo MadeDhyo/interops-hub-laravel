@@ -16,6 +16,7 @@ class SuratKeluar extends Model
         'dari',
         'tanggal_input',
         'perihal',
-        'file_pdf'
+        'file_pdf',
+        'full_text_content'
     ];
 }
