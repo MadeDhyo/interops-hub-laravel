@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Ignored by Antigravity
+/.agents/
+/public/uploads/
