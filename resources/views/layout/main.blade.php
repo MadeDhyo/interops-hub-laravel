@@ -408,11 +408,11 @@
         });
 
         // ----------------------------------------------------
-        // IDLE SESSION AUTO-LOCK (15 MENIT)
+        // IDLE SESSION AUTO-LOCK (10 MENIT)
         // ----------------------------------------------------
         @if(Auth::check() && !request()->is('locked'))
         let idleTime = 0;
-        const maxIdleTime = 15 * 60; // 15 menit dalam detik
+        const maxIdleTime = 10 * 60; // 10 menit dalam detik
 
         // Reset timer jika ada aktivitas
         function resetIdleTimer() {
