@@ -8,17 +8,25 @@ use Illuminate\Support\Facades\Auth;
 trait Loggable
 {
     /**
-     * Catat aktivitas personel secara otomatis sesuai skema tabel database.
+     * Catat aktivitas personel secara otomatis, termasuk subbag pengguna.
+     *
+     * @param string $aksi     Judul singkat aksi (e.g. "Input Surat Masuk")
+     * @param string $deskripsi  Rincian aksi
+     * @param string|null $subbag  Override subbag (opsional, default dari user login)
      */
-    public function logActivity($aksi, $deskripsi)
+    public function logActivity(string $aksi, string $deskripsi, ?string $subbag = null): void
     {
-        // Ambil nama lengkap pelaku yang sedang login, atau fallback ke 'Sistem Admin'
-        $operator = Auth::user() ? Auth::user()->nama_lengkap : 'Sistem Admin';
+        $user     = Auth::user();
+        $operator = $user ? $user->nama_lengkap : 'Sistem';
+        $userSubbag = $subbag ?? ($user ? $user->subbag : null);
+        $userId   = $user ? $user->id : null;
 
-        // Masukkan data murni yang didukung oleh struktur kolom migration lu bray
         ActivityLog::create([
-            'aksi'    => $aksi,
-            'rincian' => "[$operator] " . $deskripsi, // Info nama digabung kesini biar aman & informatif
+            'user_id'   => $userId,
+            'nama_user' => $operator,
+            'subbag'    => $userSubbag,
+            'aksi'      => $aksi,
+            'rincian'   => "[{$operator}] " . $deskripsi,
         ]);
     }
 }

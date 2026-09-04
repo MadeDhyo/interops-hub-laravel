@@ -8,6 +8,5 @@ class ActivityLog extends Model
 {
     protected $table = 'activity_logs';
 
-    // Buka gembok mass-assignment secara total bray
     protected $guarded = [];
 }
