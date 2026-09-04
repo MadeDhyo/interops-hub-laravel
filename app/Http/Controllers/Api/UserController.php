@@ -47,6 +47,35 @@ class UserController extends Controller
             'data' => $user
         ]);
     }
+    // Memperbarui user berdasarkan ID
+    public function update(Request $request, $id)
+    {
+        Gate::authorize('akses-admin');
+
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'username' => 'required|string|max:50|unique:users,username,'.$id,
+            'password' => 'nullable|string|min:6'
+        ]);
+
+        $updateData = [
+            'username' => $request->username,
+        ];
+
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($updateData);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Pengguna berhasil diperbarui',
+            'data' => $user
+        ]);
+    }
+
 
     // Menghapus user berdasarkan ID
     public function destroy($id)

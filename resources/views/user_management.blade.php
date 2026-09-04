@@ -1,4 +1,4 @@
-﻿@extends('layout.main')
+@extends('layout.main')
 
 @section('title', 'Kelola Pengguna - InterOps-Hub')
 
@@ -84,6 +84,43 @@
         </form>
     </div>
 </div>
+
+<!-- Modal Edit User -->
+<div id="editUserModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50">
+    <div class="glass-card w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalEditContent">
+        <div class="p-6 border-b border-ops-border flex justify-between items-center">
+            <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                <i class="fas fa-user-edit text-ops-cyan"></i>
+                <span>Edit Pengguna</span>
+            </h3>
+            <button onclick="closeEditModal()" class="text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="editUserForm" class="p-6 space-y-4">
+            <input type="hidden" id="edit_user_id" name="id">
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Nama Lengkap</label>
+                <input type="text" id="edit_nama_lengkap" readonly class="w-full bg-ops-abyss/40 border border-ops-border/40 rounded-lg px-4 py-3 text-sm text-gray-500 cursor-not-allowed">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Username</label>
+                <input type="text" id="edit_username" name="username" required class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none transition-colors" placeholder="Masukkan username unik...">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Password Baru</label>
+                <input type="password" id="edit_password" name="password" class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none transition-colors" placeholder="Kosongkan jika tidak ingin ganti...">
+            </div>
+            <div class="pt-2 flex justify-end space-x-3">
+                <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white border border-ops-border transition-colors">Batal</button>
+                <button type="submit" class="px-5 py-2.5 btn-primary rounded-lg text-sm flex items-center space-x-2">
+                    <i class="fas fa-save text-xs"></i>
+                    <span>Update Akun</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -133,6 +170,43 @@
                 }
             });
         });
+
+        // Submit Form Edit via AJAX
+        $('#editUserForm').on('submit', function(e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+            let id = $('#edit_user_id').val();
+
+            $.ajax({
+                url: `{{ url('/api/users') }}/${id}`,
+                type: "PUT",
+                data: formData,
+                success: function(res) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: res.message,
+                        background: '#0b1628',
+                        color: '#fff',
+                        confirmButtonColor: '#00c6ff'
+                    });
+                    closeEditModal();
+                    $('#editUserForm')[0].reset();
+                    fetchUsers();
+                },
+                error: function(xhr) {
+                    let err = xhr.responseJSON;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Memperbarui',
+                        text: err.message || 'Terjadi kesalahan sistem.',
+                        background: '#0b1628',
+                        color: '#fff',
+                        confirmButtonColor: '#ef4444'
+                    });
+                }
+            });
+        });
     });
 
     function fetchUsers() {
@@ -166,11 +240,16 @@
                 // Jika akun sendiri, kasih teks penanda (tombol hapus dihilangkan)
                 aksiTombol = `<span class="text-xs text-gray-500 italic font-medium">Akun Anda (Aktif)</span>`;
             } else {
-                // Jika akun orang lain, tombol hapus muncul normal
+                // Jika akun orang lain, tombol hapus & edit muncul normal
                 aksiTombol = `
-                    <button onclick="deleteUser(${user.id}, '${user.nama_lengkap}')" class="p-2 text-gray-500 hover:text-rose-400 transition-colors" title="Hapus Akun">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                    <div class="flex items-center justify-center space-x-2">
+                        <button onclick="openEditModal(${user.id}, '${user.nama_lengkap}', '${user.username}')" class="p-2 text-gray-500 hover:text-ops-cyan transition-colors" title="Edit Akun">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteUser(${user.id}, '${user.nama_lengkap}')" class="p-2 text-gray-500 hover:text-rose-400 transition-colors" title="Hapus Akun">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                 `;
             }
 
@@ -247,6 +326,25 @@
         $('#modalContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
         setTimeout(() => {
             $('#userModal').removeClass('flex').addClass('hidden');
+        }, 300);
+    }
+
+    function openEditModal(id, nama, username) {
+        $('#edit_user_id').val(id);
+        $('#edit_nama_lengkap').val(nama);
+        $('#edit_username').val(username);
+        $('#edit_password').val('');
+
+        $('#editUserModal').removeClass('hidden').addClass('flex');
+        setTimeout(() => {
+            $('#modalEditContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
+        }, 10);
+    }
+
+    function closeEditModal() {
+        $('#modalEditContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
+        setTimeout(() => {
+            $('#editUserModal').removeClass('flex').addClass('hidden');
         }, 300);
     }
 </script>
