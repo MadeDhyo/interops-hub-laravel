@@ -54,7 +54,7 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Nunito', sans-serif;
             color: #e2e8f0;
             min-height: 100vh;
             background-color: #060d19;
@@ -62,13 +62,37 @@
                 radial-gradient(ellipse at 20% 20%, rgba(0,198,255,0.07) 0%, transparent 50%),
                 radial-gradient(ellipse at 80% 80%, rgba(167,139,250,0.06) 0%, transparent 50%),
                 radial-gradient(ellipse at 50% 100%, rgba(245,158,11,0.04) 0%, transparent 50%);
-            background-size: 200% 200%;
-            animation: meshShift 30s ease infinite;
+            /* GPU-accelerated: avoid background-size animation on scroll */
+            background-attachment: fixed;
         }
 
         h1, h2, h3, h4, h5, h6, .font-display {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Nunito', sans-serif;
             letter-spacing: -0.01em;
+        }
+
+        /* === SCROLL PERFORMANCE OPTIMIZATIONS === */
+        /* Use GPU layer for glass elements - avoid repaints during scroll */
+        .glass, .glass-card {
+            will-change: transform;
+            contain: layout style;
+        }
+
+        /* Sidebar is fixed, isolate it from scroll repaints */
+        aside {
+            isolation: isolate;
+        }
+
+        /* Table container: skip offscreen rendering */
+        .table-container {
+            content-visibility: auto;
+            contain-intrinsic-size: 0 400px;
+        }
+
+        /* Metric cards: GPU-promoted stacking context */
+        .metric-card {
+            transform: translateZ(0);
+            backface-visibility: hidden;
         }
 
         /* === GLASSMORPHISM BASE === */
@@ -77,6 +101,7 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(0, 198, 255, 0.12);
+            transition: backdrop-filter 0.1s;
         }
 
         .glass-card {
@@ -84,6 +109,14 @@
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(0, 198, 255, 0.10);
+            transition: backdrop-filter 0.1s;
+        }
+
+        /* Temporarily reduce blur during scroll to eliminate lag */
+        body.is-scrolling .glass,
+        body.is-scrolling .glass-card {
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         /* === STAMP BADGE (Classified aesthetic) === */
@@ -266,9 +299,13 @@
 
         @if(Auth::check())
         <div class="flex items-center space-x-4">
+            <button onclick="openSopModal()" class="px-3.5 py-1.5 rounded-lg border border-ops-gold/40 bg-ops-gold/10 hover:bg-ops-gold/20 text-ops-gold text-xs font-bold flex items-center space-x-2 transition-all shadow-sm">
+                <i class="fas fa-book-open"></i>
+                <span class="hidden sm:inline">Panduan SOP &amp; Peran</span>
+            </button>
             <div class="text-right">
                 <p class="text-sm font-semibold text-white leading-tight">{{ Auth::user()->nama_lengkap }}</p>
-                <p class="section-eyebrow capitalize" style="color: rgba(167,139,250,0.8);">{{ Auth::user()->role }}</p>
+                <p class="section-eyebrow capitalize" style="color: rgba(167,139,250,0.8);">{{ Auth::user()->role }} {{ Auth::user()->subbag ? '· ' . strtoupper(Auth::user()->subbag) : '' }}</p>
             </div>
             <div class="w-px h-8 bg-ops-border"></div>
             <a href="{{ url('/logout') }}" title="Keluar dari Sistem" class="text-slate-500 hover:text-red-400 transition-colors duration-200 p-2">
@@ -291,14 +328,27 @@
                                 <i class="fas fa-chart-pie w-4 text-center opacity-70"></i>
                                 <span>Dashboard</span>
                             </a>
+                            @if(auth()->user()->role !== 'kabag')
                             <a href="{{ url('/surat-masuk') }}" class="nav-item {{ Request::is('surat-masuk*') ? 'nav-active' : 'text-slate-400' }} flex items-center space-x-3 px-3 py-2.5 rounded-r-lg text-sm">
                                 <i class="fas fa-inbox w-4 text-center opacity-70"></i>
                                 <span>Surat Masuk</span>
                             </a>
+                            @endif
                             <a href="{{ url('/surat-keluar') }}" class="nav-item {{ Request::is('surat-keluar*') ? 'nav-active' : 'text-slate-400' }} flex items-center space-x-3 px-3 py-2.5 rounded-r-lg text-sm">
                                 <i class="fas fa-paper-plane w-4 text-center opacity-70"></i>
                                 <span>Surat Keluar</span>
                             </a>
+                        </nav>
+                    </div>
+
+                    <!-- SOP GUIDE -->
+                    <div class="border-t border-ops-border pt-5">
+                        <p class="section-eyebrow mb-3 px-3" style="color: rgba(245,158,11,0.7);">Buku Pedoman</p>
+                        <nav class="space-y-1">
+                            <button onclick="openSopModal()" class="w-full text-left nav-item text-slate-400 hover:text-ops-gold flex items-center space-x-3 px-3 py-2.5 rounded-r-lg text-sm transition-colors">
+                                <i class="fas fa-book-reader w-4 text-center opacity-80 text-ops-gold"></i>
+                                <span>SOP &amp; Do / Don'ts</span>
+                            </button>
                         </nav>
                     </div>
 
@@ -335,6 +385,8 @@
             </main>
         @endif
     </div>
+
+    @include('components.sop_modal')
 
     @stack('scripts')
 
@@ -424,6 +476,18 @@
         window.addEventListener('keypress', resetIdleTimer);
         window.addEventListener('click', resetIdleTimer);
         window.addEventListener('scroll', resetIdleTimer);
+
+        // -------------------------------------------------------
+        // SCROLL PERFORMANCE: Reduce blur cost while scrolling
+        // -------------------------------------------------------
+        let scrollTimer;
+        window.addEventListener('scroll', function() {
+            document.body.classList.add('is-scrolling');
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(function() {
+                document.body.classList.remove('is-scrolling');
+            }, 150);
+        }, { passive: true });
 
         // Timer interval mengecek setiap detik
         setInterval(function() {

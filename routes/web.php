@@ -40,6 +40,7 @@ Route::middleware(['auth', 'session.lock'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
     
     Route::get('/surat-masuk', function () {
+        if (auth()->user()->role === 'kabag') return redirect('/dashboard');
         return view('surat_masuk');
     });
 
@@ -65,6 +66,9 @@ Route::middleware(['auth', 'session.lock'])->group(function () {
     // ==========================================
     Route::get('/api/dashboard/stats', [DashboardController::class, 'getSlaStats']);
     Route::get('/api/users', [UserController::class, 'index']);
+    Route::post('/api/users', [UserController::class, 'store']);
+    Route::put('/api/users/{id}', [UserController::class, 'update']);
+    Route::delete('/api/users/{id}', [UserController::class, 'destroy']);
 
     // Surat Masuk API Endpoints (Bebas Typo)
     Route::get('/api/surat-masuk', [SuratMasukController::class, 'index']);
@@ -77,5 +81,7 @@ Route::middleware(['auth', 'session.lock'])->group(function () {
     Route::get('/api/surat-keluar', [SuratKeluarController::class, 'index']);
     Route::post('/api/surat-keluar', [SuratKeluarController::class, 'create']);
     Route::get('/api/surat-keluar/export', [SuratKeluarController::class, 'exportCsv']);
+    Route::get('/api/surat-keluar/today-signature', [SuratKeluarController::class, 'getTodaySignature']);
+    Route::post('/api/surat-keluar/{id}/paraf', [SuratKeluarController::class, 'parafKabag']);
     Route::get('/api/logs', [SuratMasukController::class, 'getLogs']);
 });

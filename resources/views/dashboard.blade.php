@@ -5,11 +5,20 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header -->
-    <div>
-        <p class="section-eyebrow mb-1">// SLA MONITORING · DISTRIBUSI KOMANDO</p>
-        <h1 class="font-display text-3xl text-white">Dashboard Pengawasan</h1>
-        <p class="text-sm text-slate-500 mt-1">Ringkasan operasional &amp; status ketaatan batas waktu disposisi pimpinan</p>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <p class="section-eyebrow mb-1">// SLA MONITORING · DISTRIBUSI KOMANDO</p>
+            <h1 class="font-display text-3xl text-white">Dashboard Pengawasan</h1>
+            <p class="text-sm text-slate-500 mt-1">Ringkasan operasional &amp; status ketaatan batas waktu disposisi pimpinan</p>
+        </div>
+        <button onclick="openSopModal()" class="px-4 py-2 rounded-xl bg-ops-gold/15 hover:bg-ops-gold/25 border border-ops-gold/40 text-ops-gold text-xs font-bold transition-all flex items-center space-x-2 self-start sm:self-auto shadow-sm">
+            <i class="fas fa-book-reader"></i>
+            <span>Buku Saku SOP Peran</span>
+        </button>
     </div>
+
+    <!-- Role Context Banner (Do's & Don'ts) -->
+    @include('components.role_banner')
 
     <!-- Metrics Row -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -87,9 +96,9 @@
                             <th class="pb-3 pl-3">No Surat</th>
                             <th class="pb-3">Asal</th>
                             <th class="pb-3 text-center">Keterlambatan</th>
-                            @if(auth()->user()->role === 'pimpinan')
+                            @can('bisa-disposisi')
                                 <th class="pb-3 text-center" id="th-tindakan">Tindakan</th>
-                            @endif
+                            @endcan
                         </tr>
                     </thead>
                     <tbody id="urgentTableBody" class="text-xs divide-y divide-ops-border">
@@ -115,7 +124,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     let statusChartInstance = null;
+    const canDisposisi = {{ auth()->user()->canDisposisi() ? 'true' : 'false' }};
     const currentRole = "{{ auth()->user()->role }}";
+    const currentSubbag = "{{ auth()->user()->subbag }}";
 
     $(document).ready(function() { loadDashboardData(); });
 
@@ -187,7 +198,7 @@
 
     function renderUrgentTable(list) {
         let html = '';
-        const colspanValue = currentRole === 'pimpinan' ? 4 : 3;
+        const colspanValue = canDisposisi ? 4 : 3;
 
         if (!list || list.length === 0) {
             html = `<tr><td colspan="${colspanValue}" class="text-center py-8 font-mono text-xs italic" style="color: #00c6ff;"><i class="fas fa-check-circle mr-2"></i>Aman — semua berkas di bawah batas SLA.</td></tr>`;
@@ -197,16 +208,33 @@
 
         list.forEach(row => {
             let tdTindakan = '';
-            if (currentRole === 'pimpinan') {
-                let safeNoSurat = encodeURIComponent(row.no_surat);
-                let safePerihalUrl = encodeURIComponent(row.perihal);
-                tdTindakan = `
-                    <td class="py-3 text-center">
-                        <a href="{{ url('/surat-masuk') }}?autodispo=${row.id}&no_surat=${safeNoSurat}&perihal=${safePerihalUrl}" class="btn-primary px-3 py-1.5 rounded-md text-[11px] inline-flex items-center space-x-1">
-                            <i class="fas fa-file-signature"></i><span>Eksekusi</span>
-                        </a>
-                    </td>
-                `;
+            if (canDisposisi) {
+                let isAllowedToDispoRow = false;
+                if (currentRole === 'admin' || currentRole === 'kabag') {
+                    isAllowedToDispoRow = true;
+                } else if (currentRole === 'kasubbag') {
+                    if (row.subbags && row.subbags.some(s => s.subbag === currentSubbag)) {
+                        isAllowedToDispoRow = true;
+                    }
+                }
+
+                if (isAllowedToDispoRow) {
+                    let safeNoSurat = encodeURIComponent(row.no_surat);
+                    let safePerihalUrl = encodeURIComponent(row.perihal);
+                    tdTindakan = `
+                        <td class="py-3 text-center">
+                            <a href="{{ url('/surat-masuk') }}?autodispo=${row.id}&no_surat=${safeNoSurat}&perihal=${safePerihalUrl}" class="btn-primary px-3 py-1.5 rounded-md text-[11px] inline-flex items-center space-x-1">
+                                <i class="fas fa-file-signature"></i><span>Eksekusi Disposisi</span>
+                            </a>
+                        </td>
+                    `;
+                } else {
+                    tdTindakan = `
+                        <td class="py-3 text-center">
+                            <span class="text-xs text-slate-500 italic">Hanya Memantau</span>
+                        </td>
+                    `;
+                }
             }
 
             html += `

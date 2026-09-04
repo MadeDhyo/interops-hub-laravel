@@ -14,35 +14,39 @@ class DashboardController extends Controller
         return view('dashboard');
     }
 
-    public function getSlaStats()
+    public function getSlaStats(Request $request)
     {
+        $user     = auth()->user();
         $limitSla = Carbon::now()->subDays(3);
 
-        $totalSurat   = SuratMasuk::count();
-        $totalDispo   = SuratMasuk::where('status', 'disposisi')->count();
-        
-        // Total surat pending keseluruhan
-        $totalPending = SuratMasuk::where('status', 'pending')->count();
+        $baseQuery = SuratMasuk::query();
 
-        // REAL LOGIC:
-        $realSlaBreach = SuratMasuk::where('status', 'pending')
+        // Kasubbag / Anggota non-urmin hanya melihat statistik subbag mereka sendiri
+        if (!$user->canSeeAllSubbag()) {
+            $baseQuery->whereHas('subbags', fn($q) => $q->where('subbag', $user->subbag));
+        }
+
+        $totalSurat   = (clone $baseQuery)->count();
+        $totalDispo   = (clone $baseQuery)->where('status', 'disposisi')->count();
+        $totalPending = (clone $baseQuery)->where('status', 'pending')->count();
+
+        // SLA breach
+        $realSlaBreach = (clone $baseQuery)->where('status', 'pending')
                             ->where('tanggal_masuk', '<=', $limitSla)
                             ->count();
 
-        // TRICK FOR SEEDER VISUAL: 
-        // Karena data seeder lampau semua, jika semua pending kena SLA (pending_safe = 0),
-        // kita paksa potong secara proporsional (misal: 60% SLA breach, 40% dianggap pending aman) 
-        // hanya untuk keperluan visualisasi chart agar 3 warna muncul seimbang.
+        // Visual trick for seeder balance
         if ($realSlaBreach === $totalPending && $totalPending > 0) {
-            $totalSlaBreach = (int) ceil($totalPending * 0.6); // 60% masuk merah
-            $pendingSafe    = $totalPending - $totalSlaBreach;  // 40% masuk kuning
+            $totalSlaBreach = (int) ceil($totalPending * 0.6);
+            $pendingSafe    = $totalPending - $totalSlaBreach;
         } else {
             $totalSlaBreach = $realSlaBreach;
             $pendingSafe    = $totalPending - $totalSlaBreach;
         }
 
-        // Antrean Urgent (tetap ambil data yang benar-benar telat secara tanggal)
-        $urgentSurat = SuratMasuk::where('status', 'pending')
+        // Antrean Urgent
+        $urgentSurat = (clone $baseQuery)->with('subbags')
+                            ->where('status', 'pending')
                             ->orderBy('tanggal_masuk', 'asc')
                             ->take(5)
                             ->get()
@@ -55,11 +59,11 @@ class DashboardController extends Controller
         return response()->json([
             'status' => 200,
             'metrics' => [
-                'total' => $totalSurat,
-                'pending' => $totalPending,       
+                'total'        => $totalSurat,
+                'pending'      => $totalPending,       
                 'pending_safe' => $pendingSafe,   
-                'disposisi' => $totalDispo,       
-                'sla_breach' => $realSlaBreach    
+                'disposisi'    => $totalDispo,       
+                'sla_breach'   => $realSlaBreach    
             ],
             'urgent_list' => $urgentSurat
         ], 200);
