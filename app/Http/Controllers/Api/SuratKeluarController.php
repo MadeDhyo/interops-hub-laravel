@@ -63,16 +63,23 @@ class SuratKeluarController extends Controller
         $limit         = $request->input('limit', 10);
         $paginatedData = $query->orderBy('id', 'desc')->paginate($limit);
 
-        $statsQuery = SuratKeluar::query();
-        if ($subbagFilter) $statsQuery->where('subbag', $subbagFilter);
+        // Stats via single conditional aggregation query
+        $statsBase = SuratKeluar::query();
+        if ($subbagFilter) $statsBase->where('subbag', $subbagFilter);
+        $statsRow = $statsBase->selectRaw(
+            'COUNT(*) as total,
+             SUM(CASE WHEN status_paraf_kabag = ? THEN 1 ELSE 0 END) as pending,
+             SUM(CASE WHEN status_paraf_kabag = ? THEN 1 ELSE 0 END) as disetujui',
+            ['pending', 'disetujui']
+        )->first();
 
         return response()->json([
             'status' => 200,
             'data'   => $paginatedData->items(),
             'stats'  => [
-                'total'     => $statsQuery->count(),
-                'pending'   => (clone $statsQuery)->where('status_paraf_kabag', 'pending')->count(),
-                'disetujui' => (clone $statsQuery)->where('status_paraf_kabag', 'disetujui')->count(),
+                'total'     => (int) ($statsRow->total     ?? 0),
+                'pending'   => (int) ($statsRow->pending   ?? 0),
+                'disetujui' => (int) ($statsRow->disetujui ?? 0),
             ],
             'pagination' => [
                 'page'        => $paginatedData->currentPage(),

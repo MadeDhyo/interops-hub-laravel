@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'InterOps-Hub')</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-divhubinter.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-divhubinter.png') }}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -380,7 +384,7 @@
             </main>
 
         @else
-            <main class="flex-1 p-8 flex items-center justify-center">
+            <main class="flex-1 min-h-[calc(100vh-60px)] p-8 flex items-center justify-center relative bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: linear-gradient(rgba(6, 13, 25, 0.78), rgba(6, 13, 25, 0.88)), url('{{ asset('images/login_bg.jpg') }}');">
                 @yield('content')
             </main>
         @endif

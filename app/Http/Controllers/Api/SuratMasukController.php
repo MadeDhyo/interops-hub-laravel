@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\SuratMasuk;
 use App\Models\SuratMasukSubbag;
 use App\Models\ActivityLog;
+use App\Jobs\ProcessOcrSuratMasuk;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
@@ -71,23 +72,28 @@ class SuratMasukController extends Controller
         $limit = $request->input('limit', 10);
         $paginatedData = $query->orderBy('id', 'desc')->paginate($limit);
 
-        // 5. Stats (scoped per subbag if applicable)
-        $statsQuery = SuratMasuk::query();
+        // 5. Stats (1 query via conditional aggregation)
+        $statsBase = SuratMasuk::query();
         if ($subbagFilter) {
-            $statsQuery->whereHas('subbags', fn($q) => $q->where('subbag', $subbagFilter));
+            $statsBase->whereHas('subbags', fn($q) => $q->where('subbag', $subbagFilter));
         }
+        $statsRow = $statsBase->selectRaw(
+            'COUNT(*) as total,
+             SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending,
+             SUM(CASE WHEN status = ? AND tanggal_masuk <= ? THEN 1 ELSE 0 END) as sla',
+            ['pending', 'pending', Carbon::now()->subDays(3)->toDateString()]
+        )->first();
         $stats = [
-            'total'   => (clone $statsQuery)->count(),
-            'pending' => (clone $statsQuery)->where('status', 'pending')->count(),
-            'sla'     => (clone $statsQuery)->where('status', 'pending')
-                            ->where('tanggal_masuk', '<=', Carbon::now()->subDays(3))->count(),
+            'total'   => (int) ($statsRow->total   ?? 0),
+            'pending' => (int) ($statsRow->pending  ?? 0),
+            'sla'     => (int) ($statsRow->sla      ?? 0),
         ];
 
-        // Append subbag_list to each row
-        $rows = collect($paginatedData->toArray()['data'])->map(function($row) {
-            $pivots = SuratMasukSubbag::where('surat_masuk_id', $row['id'])->pluck('subbag')->toArray();
-            $row['subbag_list'] = $pivots;
-            return $row;
+        // Append subbag_list using already-eager-loaded relation (no extra query)
+        $rows = $paginatedData->getCollection()->map(function($surat) {
+            $arr = $surat->toArray();
+            $arr['subbag_list'] = $surat->subbags->pluck('subbag')->toArray();
+            return $arr;
         });
 
         return response()->json([
@@ -158,19 +164,11 @@ class SuratMasukController extends Controller
         ]);
 
         $fileName = null;
-        $extractedText = null;
 
         if ($request->hasFile('file_pdf') && $request->file('file_pdf')->isValid()) {
             $file = $request->file('file_pdf');
             $fileName = time() . '_' . $file->hashName();
             $file->storeAs('arsip_pdf', $fileName, 'local');
-            try {
-                $parser = new \Smalot\PdfParser\Parser();
-                $pdf    = $parser->parseFile($file->path());
-                $extractedText = $pdf->getText();
-            } catch (\Exception $e) {
-                $extractedText = null;
-            }
         }
 
         $surat = SuratMasuk::create([
@@ -182,8 +180,13 @@ class SuratMasukController extends Controller
             'no_dispo'          => null,
             'file_pdf'          => $fileName,
             'status'            => 'pending',
-            'full_text_content' => $extractedText,
+            'full_text_content' => null,
         ]);
+
+        // Dispatch background OCR job jika ada file
+        if ($fileName) {
+            ProcessOcrSuratMasuk::dispatch($surat->id, 'arsip_pdf/' . $fileName);
+        }
 
         // Simpan ke pivot subbag (1-2 subbag)
         $subbagList = $request->input('tujuan_subbag');
@@ -192,7 +195,6 @@ class SuratMasukController extends Controller
                 'surat_masuk_id' => $surat->id,
                 'subbag'         => $subbag,
             ]);
-            // Log per subbag tujuan
             $this->logActivity(
                 'Input Surat Masuk',
                 "Urmin menginput surat {$surat->no_surat} dari {$surat->dari} → Subbag " . strtoupper($subbag),
@@ -267,8 +269,17 @@ class SuratMasukController extends Controller
             });
         }
 
-        $logs = $query->get();
-        return response()->json(['status' => 200, 'data' => $logs], 200);
+        $limit = $request->input('limit', 50);
+        $paginated = $query->paginate($limit);
+        return response()->json([
+            'status' => 200,
+            'data'   => $paginated->items(),
+            'pagination' => [
+                'page'        => $paginated->currentPage(),
+                'total_pages' => $paginated->lastPage(),
+                'total'       => $paginated->total(),
+            ],
+        ], 200);
     }
 
     public function parsePDF(Request $request)
@@ -278,7 +289,6 @@ class SuratMasukController extends Controller
         $request->validate(['file_pdf' => 'required|mimes:pdf|max:10000']);
 
         try {
-            set_time_limit(240);
             $file   = $request->file('file_pdf');
             $apiKey = env('GEMINI_API_KEY');
 
@@ -293,7 +303,9 @@ class SuratMasukController extends Controller
                     . "2. Jika data tidak ditemukan, isi properti tersebut dengan string kosong atau null.\n"
                     . "3. Berikan hasilnya murni dalam bentuk JSON objek langsung tanpa markdown backtick.";
 
-            $response = Http::withoutVerifying()->timeout(180)
+            // Panggil Gemini tetap sync di sini karena user butuh data untuk mengisi form
+            // (bukan untuk background indexing)
+            $response = Http::withoutVerifying()->timeout(60)
                 ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
                     'contents' => [['parts' => [['text' => $prompt], ['inlineData' => ['mimeType' => 'application/pdf', 'data' => $pdfBase64]]]]],
                     'generationConfig' => ['responseMimeType' => 'application/json'],
