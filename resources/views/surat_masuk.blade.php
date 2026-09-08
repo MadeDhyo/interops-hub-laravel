@@ -39,10 +39,54 @@
     </div>
     @endif
 
-    <div class="glass-card p-5 rounded-xl grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+    {{-- Filter PIC (Pills Cepat untuk Subbag) --}}
+    @php
+        $currSb = auth()->user()->subbag;
+        $picCounts = ['ops' => 3, 'koor' => 4, 'bhi' => 4, 'bi' => 3];
+    @endphp
+    @if($currSb && isset($picCounts[$currSb]))
+    <div class="glass-card px-5 py-3 rounded-xl flex items-center space-x-3 border border-ops-border/30">
+        <span class="section-eyebrow text-ops-gold flex items-center gap-1.5"><i class="fas fa-user-tag text-xs"></i> Filter PIC:</span>
+        <div class="flex flex-wrap gap-2">
+            <button onclick="setPicFilter(null)" id="picAll" class="pic-filter-btn px-3 py-1 rounded-md text-xs font-semibold transition-all bg-ops-gold/20 border border-ops-gold/40 text-ops-gold">Semua PIC</button>
+            @for($i = 1; $i <= $picCounts[$currSb]; $i++)
+            @php $picName = "Anggota " . strtoupper($currSb) . " " . $i; @endphp
+            <button onclick="setPicFilter('{{ $picName }}')" class="pic-filter-btn px-3 py-1 rounded-md text-xs font-semibold transition-all border border-ops-border/40 text-slate-400 hover:border-ops-gold/40 hover:text-ops-gold">{{ $picName }}</button>
+            @endfor
+        </div>
+    </div>
+    @endif
+
+    <div class="glass-card p-5 rounded-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
         <div class="space-y-1">
             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pencarian Smart</label>
             <input type="text" id="searchFilter" placeholder="Cari nomor, asal, perihal..." class="w-full px-4 py-2.5 ops-input rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none text-sm">
+        </div>
+        <div class="space-y-1">
+            <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Filter PIC</label>
+            <div class="relative">
+                <select id="picFilter" class="w-full px-4 py-2.5 ops-input rounded-lg text-gray-100 focus:outline-none text-sm cursor-pointer appearance-none">
+                    <option value="">Semua PIC</option>
+                    @php
+                        $subbagsToList = auth()->user()->canSeeAllSubbag() ? ['ops', 'koor', 'bhi', 'bi'] : ($currSb && isset($picCounts[$currSb]) ? [$currSb] : []);
+                    @endphp
+                    @foreach($subbagsToList as $sbKey)
+                        @if(auth()->user()->canSeeAllSubbag())
+                            <optgroup label="SUBBAG {{ strtoupper($sbKey) }}" class="bg-ops-abyss text-slate-300">
+                        @endif
+                        @for($i = 1; $i <= ($picCounts[$sbKey] ?? 0); $i++)
+                            @php $pName = "Anggota " . strtoupper($sbKey) . " " . $i; @endphp
+                            <option value="{{ $pName }}" class="bg-ops-abyss text-white">{{ $pName }}</option>
+                        @endfor
+                        @if(auth()->user()->canSeeAllSubbag())
+                            </optgroup>
+                        @endif
+                    @endforeach
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-ops-gold">
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+            </div>
         </div>
         <div class="space-y-1">
             <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tanggal Mulai</label>
@@ -344,12 +388,10 @@
             </form>
             @endif
 
-            {{-- Tombol tutup (untuk kasubbag/view-only) --}}
-            @if(auth()->user()->role !== 'anggota')
-            <div class="pt-2 flex justify-end">
+            {{-- Tombol tutup (untuk kasubbag/view-only/urmin) --}}
+            <div id="tlCloseOnlyWrap" class="pt-2 flex justify-end @if(auth()->user()->role === 'anggota') hidden @endif">
                 <button type="button" class="btn-close-tl px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl text-sm transition-colors">Tutup</button>
             </div>
-            @endif
         </div>
     </div>
 </div>
@@ -360,6 +402,7 @@
 <script>
     let currentPage = 1;
     let currentSubbagFilter = null;
+    let currentPicFilter = null;
     const currentUserRole = "{{ auth()->user()->role }}";
     const currentUserSubbag = "{{ auth()->user()->subbag }}";
     const canDisposisi = {{ auth()->user()->canDisposisi() ? 'true' : 'false' }};
@@ -515,6 +558,10 @@
             });
         }
 
+        $(document).on('change', '#picFilter', function() {
+            setPicFilter($(this).val() || null);
+        });
+
         // Drag & drop
         if (document.getElementById('drop-area')) {
             const dropArea = document.getElementById('drop-area');
@@ -563,6 +610,21 @@
         fetchSuratMasuk(1);
     }
 
+    function setPicFilter(pic) {
+        currentPicFilter = pic;
+        $('.pic-filter-btn').removeClass('bg-ops-gold/20 border-ops-gold/40 text-ops-gold').addClass('border-ops-border/40 text-slate-400');
+        if (!pic) {
+            $('#picAll').addClass('bg-ops-gold/20 border-ops-gold/40 text-ops-gold').removeClass('border-ops-border/40 text-slate-400');
+        } else {
+            $('.pic-filter-btn').each(function() {
+                if ($(this).text().trim() === pic) {
+                    $(this).addClass('bg-ops-gold/20 border-ops-gold/40 text-ops-gold').removeClass('border-ops-border/40 text-slate-400');
+                }
+            });
+        }
+        $('#picFilter').val(pic || '');
+        fetchSuratMasuk(1);
+    }
 
     function triggerDispoModal(id, no, perihal) {
         $('#dispoSuratId').val(id);
@@ -584,6 +646,7 @@
         };
         if (window.currentStatusFilter) reqData.status = window.currentStatusFilter;
         if (currentSubbagFilter) reqData.subbag = currentSubbagFilter;
+        if (currentPicFilter) reqData.pic = currentPicFilter;
 
         $.ajax({
             url: "{{ url('/api/surat-masuk') }}", type: "GET", data: reqData, dataType: "json",
@@ -642,19 +705,21 @@
                 let safeKasubag = encodeURIComponent(row.disposisi_kasubag || '-');
                 tombolAksi = `<button type="button" class="btn-open-detail px-3 py-1.5 border border-ops-cyan/30 text-ops-cyan bg-ops-cyan/08 text-xs rounded-lg font-semibold transition-all flex items-center space-x-1 hover:bg-ops-cyan/15" data-no="${safeNoSurat}" data-perihal="${safePerihal}" data-dispo="${safeDispo}" data-kabag="${safeKabag}" data-kasubag="${safeKasubag}"><i class="fas fa-eye text-[10px]"></i><span>Lihat Nota</span></button>`;
 
-                // Tombol Tindak Lanjut (anggota subbag yang bersangkutan + kasubbag untuk view)
-                let canTL = false;
-                if ((isAnggota || isKasubbag) && row.subbags && row.subbags.some(s => s.subbag === currentUserSubbag)) {
-                    canTL = true;
-                }
+                // Tombol Tindak Lanjut:
+                // 1. Anggota & Kasubbag subbag tujuan
+                // 2. Urmin (kasubbag maupun anggota) & Admin bisa melihat hasil tinjut subbag lain
+                let isDestSubbag = row.subbags && row.subbags.some(s => s.subbag === currentUserSubbag);
+                let isDestMember = isAnggota && isDestSubbag;
+                let canTL = isDestSubbag || canSeeAll || currentUserSubbag === 'urmin';
+
                 if (canTL) {
-                    let tlStatus = row.tindak_lanjut ? 'Sudah' : 'Belum';
-                    let tlColor = row.tindak_lanjut
+                    let hasTL = !!row.tindak_lanjut;
+                    let tlColor = hasTL
                         ? 'border-green-500/40 text-green-400 bg-green-500/08 hover:bg-green-500/15'
-                        : 'border-amber-500/40 text-amber-400 bg-amber-500/08 hover:bg-amber-500/15';
-                    let tlIcon = row.tindak_lanjut ? 'fa-check-circle' : 'fa-edit';
-                    let tlLabel = row.tindak_lanjut ? 'Tinjut ✓' : 'Tindak Lanjut';
-                    tombolAksi += ` <button type="button" class="btn-open-tl px-3 py-1.5 border ${tlColor} text-xs rounded-lg font-semibold transition-all flex items-center space-x-1" data-id="${row.id}" data-no="${safeNoSurat}" data-perihal="${safePerihal}"><i class="fas ${tlIcon} text-[10px]"></i><span>${tlLabel}</span></button>`;
+                        : (isDestMember ? 'border-amber-500/40 text-amber-400 bg-amber-500/08 hover:bg-amber-500/15' : 'border-slate-600/40 text-slate-400 bg-slate-500/08 hover:bg-slate-500/15');
+                    let tlIcon = hasTL ? 'fa-check-circle' : 'fa-edit';
+                    let tlLabel = hasTL ? 'Tinjut ✓' : (isDestMember ? 'Tindak Lanjut' : 'Cek Tinjut');
+                    tombolAksi += ` <button type="button" class="btn-open-tl px-3 py-1.5 border ${tlColor} text-xs rounded-lg font-semibold transition-all flex items-center space-x-1" data-id="${row.id}" data-no="${safeNoSurat}" data-perihal="${safePerihal}" data-dest="${isDestMember ? '1' : '0'}"><i class="fas ${tlIcon} text-[10px]"></i><span>${tlLabel}</span></button>`;
                 }
             }
 
@@ -672,6 +737,10 @@
                 </div>`;
             }
 
+            let picBadge = row.pic
+                ? `<div class="mt-1"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-ops-gold/10 border border-ops-gold/30 text-ops-gold hover:bg-ops-gold/20 transition-all cursor-pointer" onclick="setPicFilter('${row.pic}')" title="Klik untuk filter PIC: ${row.pic}"><i class="fas fa-user-tag text-[8px]"></i>${row.pic}</span></div>`
+                : '';
+
             let fileButton = row.file_pdf
                 ? `<button type="button" onclick="openPdfModal('{{ url('/arsip/dokumen') }}/${row.file_pdf}', '${row.file_pdf}')" class="text-ops-gold hover:text-white transition-colors" title="Preview PDF"><i class="fas fa-file-pdf text-base"></i></button>`
                 : `<span class="text-gray-600">-</span>`;
@@ -679,7 +748,7 @@
             let subbagCol = canSeeAll ? `<td class="py-3.5 px-6">${subbagBadges || '-'}</td>` : '';
 
             html += `<tr class="hover:bg-white/[0.02] transition-colors">
-                <td class="py-3.5 px-6 text-white font-mono text-xs">${row.no_surat}</td>
+                <td class="py-3.5 px-6 font-mono text-xs"><span class="text-white">${row.no_surat}</span>${picBadge}</td>
                 <td class="py-3.5 px-6 text-gray-300 text-xs">${row.dari}</td>
                 <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs">${row.perihal}</td>
                 <td class="py-3.5 px-6 text-gray-400 font-mono text-xs">${row.tanggal_masuk}</td>
@@ -698,7 +767,22 @@
         $('#paginationButtons').html(html);
     }
 
-    function handleFilter() { window.currentStatusFilter = null; fetchSuratMasuk(1); }
+    function handleFilter() {
+        let picVal = $('#picFilter').val();
+        currentPicFilter = picVal ? picVal : null;
+        $('.pic-filter-btn').removeClass('bg-ops-gold/20 border-ops-gold/40 text-ops-gold').addClass('border-ops-border/40 text-slate-400');
+        if (!currentPicFilter) {
+            $('#picAll').addClass('bg-ops-gold/20 border-ops-gold/40 text-ops-gold').removeClass('border-ops-border/40 text-slate-400');
+        } else {
+            $('.pic-filter-btn').each(function() {
+                if ($(this).text().trim() === currentPicFilter) {
+                    $(this).addClass('bg-ops-gold/20 border-ops-gold/40 text-ops-gold').removeClass('border-ops-border/40 text-slate-400');
+                }
+            });
+        }
+        window.currentStatusFilter = null;
+        fetchSuratMasuk(1);
+    }
     function openModal(id) { $(`#${id}`).removeClass('hidden'); }
     function closeModal(id) { $(`#${id}`).addClass('hidden'); }
 
@@ -706,6 +790,7 @@
         let params = new URLSearchParams({ search: $('#searchFilter').val() || '', start_date: $('#startDateFilter').val() || '', end_date: $('#endDateFilter').val() || '' });
         if (window.currentStatusFilter) params.set('status', window.currentStatusFilter);
         if (currentSubbagFilter) params.set('subbag', currentSubbagFilter);
+        if (currentPicFilter) params.set('pic', currentPicFilter);
         window.location.href = "{{ url('/api/surat-masuk/export') }}?" + params.toString();
     }
 
@@ -714,7 +799,8 @@
         let id      = $(this).data('id');
         let noSurat = decodeURIComponent($(this).data('no') || '');
         let perihal = decodeURIComponent($(this).data('perihal') || '');
-        openTindakLanjutModal(id, noSurat, perihal);
+        let isDest  = $(this).data('dest') == '1';
+        openTindakLanjutModal(id, noSurat, perihal, isDest);
     });
 
     $(document).on('click', '.btn-close-tl', function() {
@@ -722,7 +808,7 @@
         setTimeout(() => { $('#tindakLanjutModal').removeClass('flex').addClass('hidden'); }, 300);
     });
 
-    function openTindakLanjutModal(suratId, noSurat, perihal) {
+    function openTindakLanjutModal(suratId, noSurat, perihal, isDestMember) {
         $('#tlSuratId').val(suratId);
         $('#tlNoSurat').text(noSurat);
         $('#tlPerihal').text(perihal);
@@ -731,6 +817,13 @@
         if ($('#tindakLanjutForm').length) {
             $('#tindakLanjutForm')[0].reset();
             $('#tlNoBalasanWrap').addClass('hidden');
+            if (isDestMember) {
+                $('#tindakLanjutForm').removeClass('hidden');
+                $('#tlCloseOnlyWrap').addClass('hidden');
+            } else {
+                $('#tindakLanjutForm').addClass('hidden');
+                $('#tlCloseOnlyWrap').removeClass('hidden');
+            }
         }
 
         // Fetch existing tindak lanjut
@@ -753,8 +846,8 @@
                     $('#tlExistingContent').html(html);
                     $('#tlExistingArea').removeClass('hidden');
 
-                    // Pre-fill form for editing (anggota only)
-                    if ($('#tindakLanjutForm').length) {
+                    // Pre-fill form for editing (hanya anggota subbag tujuan)
+                    if (isDestMember && $('#tindakLanjutForm').length) {
                         $('#tl_tipe_aksi').val(tl.tipe_aksi);
                         $('#tl_catatan').val(tl.catatan);
                         $('#tl_no_balasan').val(tl.no_balasan || '');
@@ -762,7 +855,10 @@
                         $('#btnSubmitTL span').text('Perbarui Tindak Lanjut');
                     }
                 } else {
-                    if ($('#tindakLanjutForm').length) {
+                    if (!isDestMember) {
+                        $('#tlExistingContent').html('<p class="text-xs text-slate-400 italic"><i class="fas fa-info-circle mr-1 text-ops-cyan"></i>Belum ada tindak lanjut yang diinput untuk surat ini.</p>');
+                        $('#tlExistingArea').removeClass('hidden');
+                    } else if ($('#tindakLanjutForm').length) {
                         $('#btnSubmitTL span').text('Simpan Tindak Lanjut');
                     }
                 }

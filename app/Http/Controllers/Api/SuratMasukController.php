@@ -69,11 +69,16 @@ class SuratMasukController extends Controller
             }
         }
 
-        // 4. Pagination
+        // 4. PIC Filter
+        if ($pic = $request->input('pic')) {
+            $query->where('disposisi_kasubag', 'like', "%{$pic}%");
+        }
+
+        // 5. Pagination
         $limit = $request->input('limit', 10);
         $paginatedData = $query->orderBy('id', 'desc')->paginate($limit);
 
-        // 5. Stats (1 query via conditional aggregation)
+        // 6. Stats (1 query via conditional aggregation)
         $statsBase = SuratMasuk::query();
         if ($subbagFilter) {
             $statsBase->whereHas('subbags', fn($q) => $q->where('subbag', $subbagFilter));
@@ -90,10 +95,21 @@ class SuratMasukController extends Controller
             'sla'     => (int) ($statsRow->sla      ?? 0),
         ];
 
-        // Append subbag_list using already-eager-loaded relation (no extra query)
+        // Append subbag_list and extracted pic
         $rows = $paginatedData->getCollection()->map(function($surat) {
             $arr = $surat->toArray();
             $arr['subbag_list'] = $surat->subbags->pluck('subbag')->toArray();
+
+            $pic = null;
+            if ($surat->disposisi_kasubag) {
+                if (preg_match('/\[PIC:\s*([^\]]+)\]/i', $surat->disposisi_kasubag, $matches)) {
+                    $pic = trim($matches[1]);
+                } elseif (preg_match('/^PIC:\s*([^\.\n\r]+)/i', $surat->disposisi_kasubag, $matches)) {
+                    $pic = trim($matches[1]);
+                }
+            }
+            $arr['pic'] = $pic;
+
             return $arr;
         });
 
@@ -130,6 +146,7 @@ class SuratMasukController extends Controller
         }
         if ($startDate = $request->input('start_date')) $query->where('tanggal_masuk', '>=', $startDate);
         if ($endDate = $request->input('end_date')) $query->where('tanggal_masuk', '<=', $endDate);
+        if ($pic = $request->input('pic')) $query->where('disposisi_kasubag', 'like', "%{$pic}%");
 
         $data = $query->orderBy('id', 'desc')->get();
         $headers = [
@@ -338,8 +355,8 @@ class SuratMasukController extends Controller
         $surat = SuratMasuk::with(['subbags', 'tindakLanjut'])->findOrFail($id);
         $user  = auth()->user();
 
-        // Hanya anggota/kasubbag di subbag yang sesuai, admin, atau kabag
-        if (!$user->isAdmin() && !$user->isKabag()) {
+        // Admin, Kabag, Urmin (kasubbag & anggota), atau user di subbag tujuan surat
+        if (!$user->canSeeAllSubbag()) {
             $subbagSurat = $surat->subbags->pluck('subbag')->toArray();
             if (!in_array($user->subbag, $subbagSurat)) {
                 return response()->json(['status' => 403, 'message' => 'Akses ditolak.'], 403);
