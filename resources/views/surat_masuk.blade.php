@@ -657,7 +657,16 @@
     function renderTable(data) {
         let html = '';
         if (!data || data.length === 0) {
-            $('#tableBody').html('<tr><td colspan="7" class="text-center py-8 text-gray-500"><i class="fas fa-inbox text-2xl mb-2 block opacity-30"></i>Tidak ada arsip ditemukan.</td></tr>');
+            let colCount = canSeeAll ? 8 : 7;
+            $('#tableBody').html(`<tr>
+                <td colspan="${colCount}" class="text-center py-12 text-slate-400 font-mono text-xs">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <i class="fas fa-inbox text-2xl text-slate-600"></i>
+                        <p class="font-semibold text-slate-400">Tidak ada arsip surat masuk ditemukan</p>
+                        <p class="text-[11px] text-slate-500">Coba ubah kriteria filter, tanggal, atau kata kunci pencarian</p>
+                    </div>
+                </td>
+            </tr>`);
             return;
         }
 
@@ -671,12 +680,17 @@
 
             let safeNoSurat = encodeURIComponent(row.no_surat || '');
             let safePerihal = encodeURIComponent(row.perihal || '');
+            let escNoSurat = escapeHtml(row.no_surat);
+            let escDari = escapeHtml(row.dari);
+            let escPerihal = escapeHtml(row.perihal);
+            let escTanggal = escapeHtml(row.tanggal_masuk);
+            let escStatus = escapeHtml(row.status);
             let tombolAksi = '';
 
             // Subbag tujuan badge
             let subbagBadges = '';
             if (canSeeAll && row.subbags && row.subbags.length > 0) {
-                subbagBadges = row.subbags.map(s => `<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-ops-violet/15 border border-ops-violet/30 text-ops-violet uppercase">${s.subbag}</span>`).join(' ');
+                subbagBadges = row.subbags.map(s => `<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-ops-violet/15 border border-ops-violet/30 text-ops-violet uppercase">${escapeHtml(s.subbag)}</span>`).join(' ');
             }
 
             // Validasi hak disposisi per baris:
@@ -729,31 +743,31 @@
                 let tipeMap = { tindak_lanjut: 'Tindak Lanjut', arsip: 'Diarsipkan', buat_balasan: 'Buat Balasan', lainnya: 'Lainnya' };
                 let tipeLabel = tipeMap[tl.tipe_aksi] || tl.tipe_aksi;
                 let waktu = tl.updated_at || tl.created_at || '';
-                let userNama = tl.nama_user ? ` • ${tl.nama_user}` : '';
-                let safeCatatan = (tl.catatan || '').replace(/"/g, '&quot;');
+                let userNama = tl.nama_user ? ` • ${escapeHtml(tl.nama_user)}` : '';
+                let safeCatatan = escapeHtml(tl.catatan || '');
                 tlInfo = `<div class="mt-1 flex items-center gap-1 text-[10px] text-emerald-400 font-mono tracking-tight" title="${safeCatatan}">
                     <i class="fas fa-check-double text-[9px] text-emerald-400"></i>
-                    <span>${tipeLabel} <span class="text-slate-400">(${waktu}${userNama})</span></span>
+                    <span>${escapeHtml(tipeLabel)} <span class="text-slate-400">(${escapeHtml(waktu)}${userNama})</span></span>
                 </div>`;
             }
 
             let picBadge = row.pic
-                ? `<div class="mt-1"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-ops-gold/10 border border-ops-gold/30 text-ops-gold hover:bg-ops-gold/20 transition-all cursor-pointer" onclick="setPicFilter('${row.pic}')" title="Klik untuk filter PIC: ${row.pic}"><i class="fas fa-user-tag text-[8px]"></i>${row.pic}</span></div>`
+                ? `<div class="mt-1"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-ops-gold/10 border border-ops-gold/30 text-ops-gold hover:bg-ops-gold/20 transition-all cursor-pointer" onclick="setPicFilter('${escapeHtml(row.pic)}')" title="Klik untuk filter PIC: ${escapeHtml(row.pic)}"><i class="fas fa-user-tag text-[8px]"></i>${escapeHtml(row.pic)}</span></div>`
                 : '';
 
             let fileButton = row.file_pdf
-                ? `<button type="button" onclick="openPdfModal('{{ url('/arsip/dokumen') }}/${row.file_pdf}', '${row.file_pdf}')" class="text-ops-gold hover:text-white transition-colors" title="Preview PDF"><i class="fas fa-file-pdf text-base"></i></button>`
+                ? `<button type="button" onclick="openPdfModal('{{ url('/arsip/dokumen') }}/${encodeURIComponent(row.file_pdf)}', '${escNoSurat}')" class="text-ops-gold hover:text-white transition-colors" title="Preview PDF"><i class="fas fa-file-pdf text-base"></i></button>`
                 : `<span class="text-gray-600">-</span>`;
 
             let subbagCol = canSeeAll ? `<td class="py-3.5 px-6">${subbagBadges || '-'}</td>` : '';
 
             html += `<tr class="hover:bg-white/[0.02] transition-colors">
-                <td class="py-3.5 px-6 font-mono text-xs"><span class="text-white">${row.no_surat}</span>${picBadge}</td>
-                <td class="py-3.5 px-6 text-gray-300 text-xs">${row.dari}</td>
-                <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs">${row.perihal}</td>
-                <td class="py-3.5 px-6 text-gray-400 font-mono text-xs">${row.tanggal_masuk}</td>
+                <td class="py-3.5 px-6 font-mono text-xs"><span class="text-white font-semibold">${escNoSurat}</span>${picBadge}</td>
+                <td class="py-3.5 px-6 text-gray-200 text-xs">${escDari}</td>
+                <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs" title="${escPerihal}">${escPerihal}</td>
+                <td class="py-3.5 px-6 text-gray-400 font-mono text-xs">${escTanggal}</td>
                 ${subbagCol}
-                <td class="py-3.5 px-6"><span class="${badgeColor}">${statusDot}${row.status}</span>${tlInfo}</td>
+                <td class="py-3.5 px-6"><span class="${badgeColor}">${statusDot}${escStatus}</span>${tlInfo}</td>
                 <td class="py-3.5 px-6 text-center flex items-center justify-center space-x-3">${fileButton} ${tombolAksi}</td>
             </tr>`;
         });

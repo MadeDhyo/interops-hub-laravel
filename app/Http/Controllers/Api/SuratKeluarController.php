@@ -145,15 +145,8 @@ class SuratKeluarController extends Controller
 
         if ($request->hasFile('file_pdf') && $request->file('file_pdf')->isValid()) {
             $file     = $request->file('file_pdf');
-            $fileName = time() . '_' . $file->getClientOriginalName();
+            $fileName = time() . '_' . $file->hashName();
             $file->storeAs('arsip_pdf', $fileName, 'local');
-            try {
-                $parser = new \Smalot\PdfParser\Parser();
-                $pdf    = $parser->parseFile($file->path());
-                $extractedText = $pdf->getText();
-            } catch (\Exception $e) {
-                $extractedText = null;
-            }
         }
 
         // Auto-tag subbag dari user yang login
@@ -167,11 +160,15 @@ class SuratKeluarController extends Controller
             'tanggal_input'      => $request->input('tanggal_input'),
             'perihal'            => $request->input('perihal'),
             'file_pdf'           => $fileName,
-            'full_text_content'  => $extractedText,
+            'full_text_content'  => null,
             'subbag'             => $subbag,
             'keterangan_tujuan'  => $request->input('keterangan_tujuan'),
             'status_paraf_kabag' => 'pending',
         ]);
+
+        if ($fileName) {
+            \App\Jobs\ExtractPdfTextSuratKeluar::dispatch($surat->id, $fileName);
+        }
 
         $this->logActivity(
             'Input Surat Keluar',

@@ -416,17 +416,30 @@
         const colspan = canSeeAllSubbag ? 8 : 7;
 
         if (!data || data.length === 0) {
-            html = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500 font-mono text-xs">Belum ada surat keluar yang terdaftar.</td></tr>`;
+            html = `<tr>
+                <td colspan="${colspan}" class="text-center py-12 text-slate-400 font-mono text-xs">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <i class="fas fa-inbox text-2xl text-slate-600"></i>
+                        <p class="font-semibold text-slate-400">Belum ada data surat keluar</p>
+                        <p class="text-[11px] text-slate-500">Gunakan tombol "Tambah Surat Keluar" atau ubah parameter pencarian</p>
+                    </div>
+                </td>
+            </tr>`;
             $('#tableBody').html(html);
             return;
         }
 
         data.forEach(item => {
-            let fileBtn = '<span class="text-xs text-gray-500 italic">Tidak ada</span>';
+            let safeNoSurat = escapeHtml(item.no_surat);
+            let safeKepada = escapeHtml(item.kepada);
+            let safePerihal = escapeHtml(item.perihal);
+            let safeKet = item.keterangan_tujuan ? escapeHtml(item.keterangan_tujuan) : '';
+
+            let fileBtn = '<span class="text-xs text-gray-500 italic">-</span>';
             if (item.file_pdf) {
-                let fileUrl = `{{ url('/arsip/dokumen') }}/${item.file_pdf}`;
+                let fileUrl = `{{ url('/arsip/dokumen') }}/${encodeURIComponent(item.file_pdf)}`;
                 fileBtn = `
-                    <button onclick="openPdfModal('${fileUrl}', '${item.no_surat}')" class="p-2 rounded-lg bg-ops-cyan/10 hover:bg-ops-cyan/20 border border-ops-cyan/30 text-ops-cyan transition-colors" title="Lihat Dokumen">
+                    <button onclick="openPdfModal('${fileUrl}', '${safeNoSurat}')" class="p-2 rounded-lg bg-ops-cyan/10 hover:bg-ops-cyan/20 border border-ops-cyan/30 text-ops-cyan transition-colors" title="Lihat Dokumen">
                         <i class="fas fa-file-pdf"></i>
                     </button>
                 `;
@@ -439,20 +452,20 @@
                 statusParafBadge = '<span class="stamp stamp-red text-[9px]">REVISI</span>';
             }
 
-            let subbagCol = canSeeAllSubbag ? `<td class="py-4 px-6 font-mono text-xs"><span class="px-2 py-0.5 rounded bg-ops-cyan/10 text-ops-cyan uppercase">${item.subbag || '-'}</span></td>` : '';
+            let subbagCol = canSeeAllSubbag ? `<td class="py-4 px-6 font-mono text-xs"><span class="px-2 py-0.5 rounded bg-ops-cyan/10 text-ops-cyan uppercase">${escapeHtml(item.subbag || '-')}</span></td>` : '';
 
             let actionBtn = '-';
             if (canParafKabag) {
                 if (item.status_paraf_kabag === 'pending') {
                     actionBtn = `
-                        <button onclick="openParafModal(${item.id}, '${escapeHtml(item.no_surat)}', '${escapeHtml(item.kepada)}', '${escapeHtml(item.subbag || '-')}', '${escapeHtml(item.keterangan_tujuan || '-')}')" class="px-3 py-1.5 rounded-md bg-ops-violet/15 hover:bg-ops-violet/25 border border-ops-violet/40 text-ops-violet text-xs font-bold transition-all inline-flex items-center space-x-1">
+                        <button onclick="openParafModal(${item.id}, '${safeNoSurat}', '${safeKepada}', '${escapeHtml(item.subbag || '-')}', '${safeKet}')" class="px-3 py-1.5 rounded-md bg-ops-violet/15 hover:bg-ops-violet/25 border border-ops-violet/40 text-ops-violet text-xs font-bold transition-all inline-flex items-center space-x-1">
                             <i class="fas fa-file-signature"></i>
                             <span>Paraf</span>
                         </button>
                     `;
                 } else {
                     actionBtn = `
-                        <button onclick="openParafModal(${item.id}, '${escapeHtml(item.no_surat)}', '${escapeHtml(item.kepada)}', '${escapeHtml(item.subbag || '-')}', '${escapeHtml(item.keterangan_tujuan || '-')}')" class="px-3 py-1.5 rounded-md bg-slate-500/15 hover:bg-slate-500/25 border border-slate-500/40 text-slate-300 text-xs font-bold transition-all inline-flex items-center space-x-1">
+                        <button onclick="openParafModal(${item.id}, '${safeNoSurat}', '${safeKepada}', '${escapeHtml(item.subbag || '-')}', '${safeKet}')" class="px-3 py-1.5 rounded-md bg-slate-500/15 hover:bg-slate-500/25 border border-slate-500/40 text-slate-300 text-xs font-bold transition-all inline-flex items-center space-x-1">
                             <i class="fas fa-edit"></i>
                             <span>Edit Paraf</span>
                         </button>
@@ -460,7 +473,7 @@
                 }
             } else if (item.status_paraf_kabag !== 'pending') {
                 actionBtn = `
-                    <button onclick="openViewParafModal('${escapeHtml(item.no_surat)}', '${item.status_paraf_kabag}', '${escapeHtml(item.catatan_kabag || '-')}')" class="px-3 py-1.5 rounded-md bg-ops-cyan/15 hover:bg-ops-cyan/25 border border-ops-cyan/40 text-ops-cyan text-xs font-bold transition-all inline-flex items-center space-x-1">
+                    <button onclick="openViewParafModal('${safeNoSurat}', '${item.status_paraf_kabag}', '${escapeHtml(item.catatan_kabag || '-')}')" class="px-3 py-1.5 rounded-md bg-ops-cyan/15 hover:bg-ops-cyan/25 border border-ops-cyan/40 text-ops-cyan text-xs font-bold transition-all inline-flex items-center space-x-1">
                         <i class="fas fa-eye"></i>
                         <span>Lihat Paraf</span>
                     </button>
@@ -469,10 +482,10 @@
 
             html += `
                 <tr class="hover:bg-white/[0.02] transition-colors">
-                    <td class="py-4 px-6 font-mono font-semibold text-white text-xs">${item.no_surat}</td>
-                    <td class="py-4 px-6 font-medium text-slate-200 text-xs">${item.kepada}</td>
-                    <td class="py-4 px-6 text-slate-300 text-xs max-w-xs truncate" title="${escapeHtml(item.keterangan_tujuan || '-')}">${item.keterangan_tujuan || '<span class="text-slate-500 italic">-</span>'}</td>
-                    <td class="py-4 px-6 text-slate-300 text-xs max-w-xs truncate" title="${escapeHtml(item.perihal)}">${item.perihal}</td>
+                    <td class="py-4 px-6 font-mono font-semibold text-white text-xs">${safeNoSurat}</td>
+                    <td class="py-4 px-6 font-medium text-slate-200 text-xs">${safeKepada}</td>
+                    <td class="py-4 px-6 text-slate-300 text-xs max-w-xs truncate" title="${safeKet || '-'}">${safeKet || '<span class="text-slate-500 italic">-</span>'}</td>
+                    <td class="py-4 px-6 text-slate-300 text-xs max-w-xs truncate" title="${safePerihal}">${safePerihal}</td>
                     ${subbagCol}
                     <td class="py-4 px-6">${statusParafBadge}</td>
                     <td class="py-4 px-6 text-center">${fileBtn}</td>

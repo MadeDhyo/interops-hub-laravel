@@ -29,16 +29,20 @@ class UserController extends Controller
 
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'username' => 'required|string|unique:users,username|max:50',
-            'role' => 'required|in:admin,pimpinan,staf',
-            'password' => 'required|string|min:6'
+            'username'     => 'required|string|unique:users,username|max:50',
+            'role'         => 'required|in:admin,kabag,kasubbag,anggota,pimpinan,staf',
+            'subbag'       => 'nullable|in:bhi,bi,ops,koor,urmin',
+            'password'     => 'required|string|min:6'
         ]);
+
+        $subbag = in_array($request->role, ['admin', 'kabag']) ? null : $request->subbag;
 
         $user = User::create([
             'nama_lengkap' => $request->nama_lengkap,
-            'username' => $request->username,
-            'role' => $request->role,
-            'password' => Hash::make($request->password)
+            'username'     => $request->username,
+            'role'         => $request->role,
+            'subbag'       => $subbag,
+            'password'     => Hash::make($request->password)
         ]);
 
         return response()->json([
@@ -47,6 +51,7 @@ class UserController extends Controller
             'data' => $user
         ]);
     }
+
     // Memperbarui user berdasarkan ID
     public function update(Request $request, $id)
     {
@@ -55,13 +60,25 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'username' => 'required|string|max:50|unique:users,username,'.$id,
-            'password' => 'nullable|string|min:6'
+            'nama_lengkap' => 'sometimes|required|string|max:255',
+            'username'     => 'required|string|max:50|unique:users,username,'.$id,
+            'role'         => 'sometimes|required|in:admin,kabag,kasubbag,anggota,pimpinan,staf',
+            'subbag'       => 'nullable|in:bhi,bi,ops,koor,urmin',
+            'password'     => 'nullable|string|min:6'
         ]);
 
         $updateData = [
             'username' => $request->username,
         ];
+
+        if ($request->filled('nama_lengkap')) {
+            $updateData['nama_lengkap'] = $request->nama_lengkap;
+        }
+
+        if ($request->filled('role')) {
+            $updateData['role'] = $request->role;
+            $updateData['subbag'] = in_array($request->role, ['admin', 'kabag']) ? null : $request->subbag;
+        }
 
         if ($request->filled('password')) {
             $updateData['password'] = Hash::make($request->password);
@@ -76,11 +93,10 @@ class UserController extends Controller
         ]);
     }
 
-
     // Menghapus user berdasarkan ID
     public function destroy($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('akses-admin');
+        Gate::authorize('akses-admin');
 
         $user = User::findOrFail($id);
         

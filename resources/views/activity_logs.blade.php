@@ -130,7 +130,15 @@
     function renderLogTable(data) {
         let html = '';
         if (!data || data.length === 0) {
-            html = '<tr><td colspan="5" class="text-center py-8 text-gray-500 font-mono text-xs">Belum ada rekaman log aktivitas terekam dalam sistem.</td></tr>';
+            html = `<tr>
+                <td colspan="5" class="text-center py-12 text-slate-400 font-mono text-xs">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                        <i class="fas fa-search text-2xl text-slate-600"></i>
+                        <p class="font-semibold text-slate-400">Tidak ada log aktivitas ditemukan</p>
+                        <p class="text-[11px] text-slate-500">Coba ubah kata kunci pencarian atau reset filter subbag</p>
+                    </div>
+                </td>
+            </tr>`;
             $('#logTableBody').html(html);
             return;
         }
@@ -144,7 +152,13 @@
             }
 
             let waktu = row.created_at ? new Date(row.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-';
-            let subbagBadge = row.subbag ? `<span class="px-2 py-0.5 rounded bg-ops-cyan/10 border border-ops-cyan/30 text-ops-cyan font-mono text-[10px] uppercase">${row.subbag}</span>` : '<span class="text-slate-500 italic text-xs">Global</span>';
+            let safeSubbag = row.subbag ? escapeHtml(row.subbag) : '';
+            let subbagBadge = safeSubbag
+                ? `<span class="px-2 py-0.5 rounded bg-ops-cyan/10 border border-ops-cyan/30 text-ops-cyan font-mono text-[10px] uppercase">${safeSubbag}</span>`
+                : '<span class="text-slate-500 italic text-xs">Global</span>';
+
+            let safeAksi = escapeHtml(row.aksi);
+            let safeRincian = escapeHtml(row.rincian);
 
             html += `
                 <tr class="hover:bg-white/[0.02] transition-colors">
@@ -153,10 +167,10 @@
                     <td class="py-4 px-6">${subbagBadge}</td>
                     <td class="py-4 px-6">
                         <span class="${badgeClass} text-[10px]">
-                            ${row.aksi}
+                            ${safeAksi}
                         </span>
                     </td>
-                    <td class="py-4 px-6 text-gray-300 font-medium text-xs">${row.rincian}</td>
+                    <td class="py-4 px-6 text-gray-300 font-medium text-xs">${safeRincian}</td>
                 </tr>
             `;
         });

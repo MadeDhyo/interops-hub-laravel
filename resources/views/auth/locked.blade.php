@@ -73,7 +73,7 @@
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-400">Login sebagai</p>
-                <p class="font-bold text-white">{{ auth()->user()->nama }}</p>
+                <p class="font-bold text-white">{{ auth()->user()->nama_lengkap ?? auth()->user()->username }}</p>
             </div>
         </div>
 
@@ -93,7 +93,7 @@
         </form>
 
         <div class="mt-6 text-xs text-gray-500">
-            Bukan {{ auth()->user()->nama }}? <a href="{{ url('/logout') }}" class="text-blue-400 hover:text-blue-300">Logout & Ganti Akun</a>
+            Bukan {{ auth()->user()->nama_lengkap ?? auth()->user()->username }}? <a href="{{ url('/logout') }}" class="text-blue-400 hover:text-blue-300">Logout & Ganti Akun</a>
         </div>
     </div>
 

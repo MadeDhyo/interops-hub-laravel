@@ -5,10 +5,10 @@
 @section('content')
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 class="text-3xl font-bold text-white tracking-wide">Kelola Pengguna</h1>
-            <p class="text-sm text-gray-400 mt-1">Manajemen hak akses data akun administrator, pimpinan, dan staf pelaksana</p>
+            <p class="text-sm text-gray-400 mt-1">Manajemen personel, hak akses peran, dan penugasan subbag</p>
         </div>
         <button onclick="openAddModal()" class="px-5 py-2.5 btn-primary rounded-lg transition-all duration-200 shadow-lg flex items-center space-x-2 text-sm">
             <i class="fas fa-user-plus text-xs"></i>
@@ -21,18 +21,19 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-ops-border text-[10px] font-mono font-semibold uppercase tracking-widest text-slate-600 bg-ops-abyss/40">
-                        <th class="py-4 px-6 w-20">No</th>
+                    <tr class="border-b border-ops-border text-[10px] font-mono font-semibold uppercase tracking-widest text-slate-500 bg-ops-abyss/40">
+                        <th class="py-4 px-6 w-16">No</th>
                         <th class="py-4 px-6">Nama Lengkap</th>
                         <th class="py-4 px-6">Username</th>
                         <th class="py-4 px-6">Role</th>
-                        <th class="py-4 px-6 text-center w-32">Aksi</th>
+                        <th class="py-4 px-6">Subbag</th>
+                        <th class="py-4 px-6 text-center w-36">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="userTableBody" class="text-sm divide-y divide-ops-border">
                     <tr>
-                        <td colspan="5" class="text-center py-8 text-gray-500">
-                            <i class="fas fa-spinner fa-spin mr-2"></i> Memuat data pengguna...
+                        <td colspan="6" class="text-center py-8 text-gray-400 font-mono text-xs">
+                            <i class="fas fa-spinner fa-spin mr-2 text-ops-cyan"></i> Memuat data pengguna...
                         </td>
                     </tr>
                 </tbody>
@@ -42,7 +43,7 @@
 </div>
 
 <!-- Modal Tambah User -->
-<div id="userModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50">
+<div id="userModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
     <div class="glass-card w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
         <div class="p-6 border-b border-ops-border flex justify-between items-center">
             <h3 class="text-lg font-bold text-white flex items-center space-x-2">
@@ -56,26 +57,39 @@
         <form id="addUserForm" class="p-6 space-y-4">
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Nama Lengkap</label>
-                <input type="text" name="nama_lengkap" required class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none  transition-colors" placeholder="Masukkan nama lengkap...">
+                <input type="text" name="nama_lengkap" required class="w-full ops-input rounded-lg px-4 py-2.5 text-sm text-gray-100 focus:outline-none" placeholder="Masukkan nama lengkap...">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Username</label>
-                <input type="text" name="username" required class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none  transition-colors" placeholder="Masukkan username unik...">
+                <input type="text" name="username" required class="w-full ops-input rounded-lg px-4 py-2.5 text-sm text-gray-100 focus:outline-none" placeholder="Masukkan username unik...">
             </div>
-            <div>
-                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Role Akses</label>
-                <select name="role" required class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none  transition-colors">
-                    <option value="staf">Staf (Pelaksana)</option>
-                    <option value="pimpinan">Pimpinan (Validator)</option>
-                    <option value="admin">Admin (Full Control)</option>
-                </select>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Role Akses</label>
+                    <select name="role" id="add_role" required onchange="toggleSubbagSelect('add')" class="w-full ops-input rounded-lg px-3 py-2.5 text-sm text-gray-100 focus:outline-none cursor-pointer">
+                        <option value="anggota">Anggota</option>
+                        <option value="kasubbag">Kasubbag</option>
+                        <option value="kabag">Kabag</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div id="add_subbag_wrap">
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Subbag</label>
+                    <select name="subbag" id="add_subbag" class="w-full ops-input rounded-lg px-3 py-2.5 text-sm text-gray-100 focus:outline-none cursor-pointer">
+                        <option value="urmin">URMIN</option>
+                        <option value="ops">OPS</option>
+                        <option value="koor">KOOR</option>
+                        <option value="bhi">BHI</option>
+                        <option value="bi">BI</option>
+                    </select>
+                </div>
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Password Awal</label>
-                <input type="password" name="password" required class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none  transition-colors" placeholder="Minimal 6 karakter...">
+                <input type="password" name="password" required class="w-full ops-input rounded-lg px-4 py-2.5 text-sm text-gray-100 focus:outline-none" placeholder="Minimal 6 karakter...">
             </div>
             <div class="pt-2 flex justify-end space-x-3">
-                <button type="button" onclick="closeAddModal()" class="px-5 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white border border-ops-border px-4 py-2 transition-colors">Batal</button>
+                <button type="button" onclick="closeAddModal()" class="px-5 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white border border-ops-border transition-colors">Batal</button>
                 <button type="submit" class="px-5 py-2.5 btn-primary rounded-lg text-sm flex items-center space-x-2">
                     <i class="fas fa-save text-xs"></i>
                     <span>Simpan Akun</span>
@@ -86,7 +100,7 @@
 </div>
 
 <!-- Modal Edit User -->
-<div id="editUserModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50">
+<div id="editUserModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
     <div class="glass-card w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="modalEditContent">
         <div class="p-6 border-b border-ops-border flex justify-between items-center">
             <h3 class="text-lg font-bold text-white flex items-center space-x-2">
@@ -101,15 +115,36 @@
             <input type="hidden" id="edit_user_id" name="id">
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Nama Lengkap</label>
-                <input type="text" id="edit_nama_lengkap" readonly class="w-full bg-ops-abyss/40 border border-ops-border/40 rounded-lg px-4 py-3 text-sm text-gray-500 cursor-not-allowed">
+                <input type="text" id="edit_nama_lengkap" name="nama_lengkap" required class="w-full ops-input rounded-lg px-4 py-2.5 text-sm text-gray-100 focus:outline-none">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Username</label>
-                <input type="text" id="edit_username" name="username" required class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none transition-colors" placeholder="Masukkan username unik...">
+                <input type="text" id="edit_username" name="username" required class="w-full ops-input rounded-lg px-4 py-2.5 text-sm text-gray-100 focus:outline-none" placeholder="Masukkan username unik...">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Role Akses</label>
+                    <select name="role" id="edit_role" required onchange="toggleSubbagSelect('edit')" class="w-full ops-input rounded-lg px-3 py-2.5 text-sm text-gray-100 focus:outline-none cursor-pointer">
+                        <option value="anggota">Anggota</option>
+                        <option value="kasubbag">Kasubbag</option>
+                        <option value="kabag">Kabag</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div id="edit_subbag_wrap">
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Subbag</label>
+                    <select name="subbag" id="edit_subbag" class="w-full ops-input rounded-lg px-3 py-2.5 text-sm text-gray-100 focus:outline-none cursor-pointer">
+                        <option value="urmin">URMIN</option>
+                        <option value="ops">OPS</option>
+                        <option value="koor">KOOR</option>
+                        <option value="bhi">BHI</option>
+                        <option value="bi">BI</option>
+                    </select>
+                </div>
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Password Baru</label>
-                <input type="password" id="edit_password" name="password" class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none transition-colors" placeholder="Kosongkan jika tidak ingin ganti...">
+                <input type="password" id="edit_password" name="password" class="w-full ops-input rounded-lg px-4 py-2.5 text-sm text-gray-100 focus:outline-none" placeholder="Kosongkan jika tidak ingin ganti...">
             </div>
             <div class="pt-2 flex justify-end space-x-3">
                 <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white border border-ops-border transition-colors">Batal</button>
@@ -128,14 +163,12 @@
     $(document).ready(function() {
         fetchUsers();
 
-        // Setup AJAX CSRF Token dari Meta Tag HTML
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
 
-        // Submit Form via AJAX
         $('#addUserForm').on('submit', function(e) {
             e.preventDefault();
             let formData = $(this).serialize();
@@ -162,7 +195,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal Menyimpan',
-                        text: err.message || 'Terjadi kesalahan sistem.',
+                        text: err?.message || 'Terjadi kesalahan sistem.',
                         background: '#0b1628',
                         color: '#fff',
                         confirmButtonColor: '#ef4444'
@@ -171,7 +204,6 @@
             });
         });
 
-        // Submit Form Edit via AJAX
         $('#editUserForm').on('submit', function(e) {
             e.preventDefault();
             let formData = $(this).serialize();
@@ -199,7 +231,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Gagal Memperbarui',
-                        text: err.message || 'Terjadi kesalahan sistem.',
+                        text: err?.message || 'Terjadi kesalahan sistem.',
                         background: '#0b1628',
                         color: '#fff',
                         confirmButtonColor: '#ef4444'
@@ -209,13 +241,24 @@
         });
     });
 
+    function toggleSubbagSelect(prefix) {
+        let role = $(`#${prefix}_role`).val();
+        if (role === 'admin' || role === 'kabag') {
+            $(`#${prefix}_subbag_wrap`).addClass('opacity-30 pointer-events-none');
+            $(`#${prefix}_subbag`).prop('disabled', true);
+        } else {
+            $(`#${prefix}_subbag_wrap`).removeClass('opacity-30 pointer-events-none');
+            $(`#${prefix}_subbag`).prop('disabled', false);
+        }
+    }
+
     function fetchUsers() {
         $.ajax({
             url: "{{ url('/api/users') }}",
             type: "GET",
             dataType: "json",
             success: function(res) {
-                if(res.status === 200) {
+                if (res.status === 200) {
                     renderUserTable(res.data);
                 }
             }
@@ -224,29 +267,38 @@
 
     function renderUserTable(data) {
         let html = '';
-        
-        // Ambil nama username admin yang lagi login dari Laravel Blade (disuntik ke JS)
         let currentUsername = "{{ auth()->user()->username }}";
+
+        if (!data || data.length === 0) {
+            html = '<tr><td colspan="6" class="text-center py-8 text-gray-500 font-mono text-xs">Belum ada akun pengguna terdaftar.</td></tr>';
+            $('#userTableBody').html(html);
+            return;
+        }
 
         data.forEach((user, index) => {
             let roleBadge = 'bg-gray-700 text-gray-300';
             if (user.role === 'admin') roleBadge = 'stamp stamp-red';
-            else if (user.role === 'pimpinan') roleBadge = 'stamp stamp-pending';
-            else if (user.role === 'staf') roleBadge = 'stamp stamp-disposisi';
+            else if (user.role === 'kabag') roleBadge = 'stamp stamp-pending';
+            else if (user.role === 'kasubbag') roleBadge = 'stamp stamp-disposisi';
+            else if (user.role === 'anggota') roleBadge = 'bg-ops-cyan/15 text-ops-cyan border border-ops-cyan/30';
 
-            // Cek apakah baris ini adalah akun si admin yang sedang login
+            let safeName = escapeHtml(user.nama_lengkap);
+            let safeUsername = escapeHtml(user.username);
+            let safeRole = escapeHtml(user.role);
+            let subbagBadge = user.subbag
+                ? `<span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-ops-gold/15 text-ops-gold border border-ops-gold/30">${escapeHtml(user.subbag)}</span>`
+                : `<span class="text-slate-500 italic text-xs">-</span>`;
+
             let aksiTombol = '';
             if (user.username === currentUsername) {
-                // Jika akun sendiri, kasih teks penanda (tombol hapus dihilangkan)
-                aksiTombol = `<span class="text-xs text-gray-500 italic font-medium">Akun Anda (Aktif)</span>`;
+                aksiTombol = `<span class="text-xs text-slate-500 italic font-medium">Akun Anda (Aktif)</span>`;
             } else {
-                // Jika akun orang lain, tombol hapus & edit muncul normal
                 aksiTombol = `
                     <div class="flex items-center justify-center space-x-2">
-                        <button onclick="openEditModal(${user.id}, '${user.nama_lengkap}', '${user.username}')" class="p-2 text-gray-500 hover:text-ops-cyan transition-colors" title="Edit Akun">
+                        <button onclick="openEditModal(${user.id}, '${safeName.replace(/'/g, "\\'")}', '${safeUsername.replace(/'/g, "\\'")}', '${safeRole}', '${user.subbag || ''}')" class="p-2 text-slate-400 hover:text-ops-cyan transition-colors" title="Edit Akun">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="deleteUser(${user.id}, '${user.nama_lengkap}')" class="p-2 text-gray-500 hover:text-rose-400 transition-colors" title="Hapus Akun">
+                        <button onclick="deleteUser(${user.id}, '${safeName.replace(/'/g, "\\'")}')" class="p-2 text-slate-400 hover:text-rose-400 transition-colors" title="Hapus Akun">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
@@ -256,13 +308,14 @@
             html += `
                 <tr class="hover:bg-white/[0.02] transition-colors">
                     <td class="py-4 px-6 text-gray-500 font-mono text-xs">${index + 1}</td>
-                    <td class="py-4 px-6 font-semibold text-white">${user.nama_lengkap}</td>
-                    <td class="py-4 px-6 font-mono text-xs text-gray-400">${user.username}</td>
+                    <td class="py-4 px-6 font-semibold text-white">${safeName}</td>
+                    <td class="py-4 px-6 font-mono text-xs text-gray-300">${safeUsername}</td>
                     <td class="py-4 px-6">
                         <span class="px-2.5 py-1 rounded-md text-xs font-semibold capitalize ${roleBadge}">
-                            ${user.role}
+                            ${safeRole}
                         </span>
                     </td>
+                    <td class="py-4 px-6">${subbagBadge}</td>
                     <td class="py-4 px-6 text-center">
                         ${aksiTombol}
                     </td>
@@ -304,7 +357,7 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Aksi Ditolak',
-                            text: xhr.responseJSON.message || 'Gagal menghapus user.',
+                            text: xhr.responseJSON?.message || 'Gagal menghapus user.',
                             background: '#0b1628',
                             color: '#fff',
                             confirmButtonColor: '#ef4444'
@@ -316,6 +369,7 @@
     }
 
     function openAddModal() {
+        toggleSubbagSelect('add');
         $('#userModal').removeClass('hidden').addClass('flex');
         setTimeout(() => {
             $('#modalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
@@ -329,11 +383,14 @@
         }, 300);
     }
 
-    function openEditModal(id, nama, username) {
+    function openEditModal(id, nama, username, role, subbag) {
         $('#edit_user_id').val(id);
         $('#edit_nama_lengkap').val(nama);
         $('#edit_username').val(username);
+        $('#edit_role').val(role || 'anggota');
+        $('#edit_subbag').val(subbag || 'urmin');
         $('#edit_password').val('');
+        toggleSubbagSelect('edit');
 
         $('#editUserModal').removeClass('hidden').addClass('flex');
         setTimeout(() => {

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', [AuthController::class, 'index'])->name('login');
 Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login/attempt', [AuthController::class, 'attemptLogin']);
+Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/logout', [AuthController::class, 'logout']);
 
 // UI Halaman Kunci (bisa diakses jika Auth, tapi tak terpengaruh session.lock)

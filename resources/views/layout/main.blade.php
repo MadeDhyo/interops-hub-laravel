@@ -10,7 +10,6 @@
     <link rel="icon" type="image/png" href="{{ asset('images/logo-divhubinter.png') }}">
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-divhubinter.png') }}">
 
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -19,35 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Nunito', 'sans-serif'],
-                        display: ['Nunito', 'sans-serif'],
-                        mono: ['IBM Plex Mono', 'monospace'],
-                    },
-                    colors: {
-                        ops: {
-                            abyss:   '#060d19',
-                            deep:    '#0b1628',
-                            panel:   'rgba(11,22,40,0.7)',
-                            border:  'rgba(0,198,255,0.15)',
-                            cyan:    '#00c6ff',
-                            violet:  '#a78bfa',
-                            gold:    '#f59e0b',
-                            red:     '#ff3333',
-                            parchment: '#e8d5a0',
-                        }
-                    },
-                    backdropBlur: {
-                        glass: '20px',
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         /* === ANIMATED MESH GRADIENT BACKGROUND === */
@@ -302,19 +273,26 @@
         </div>
 
         @if(Auth::check())
-        <div class="flex items-center space-x-4">
-            <button onclick="openSopModal()" class="px-3.5 py-1.5 rounded-lg border border-ops-gold/40 bg-ops-gold/10 hover:bg-ops-gold/20 text-ops-gold text-xs font-bold flex items-center space-x-2 transition-all shadow-sm">
+        <div class="flex items-center space-x-3">
+            <button onclick="openSopModal()" class="px-3 py-1.5 rounded-lg border border-ops-gold/40 bg-ops-gold/10 hover:bg-ops-gold/20 text-ops-gold text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm">
                 <i class="fas fa-book-open"></i>
-                <span class="hidden sm:inline">Panduan SOP &amp; Peran</span>
+                <span class="hidden sm:inline">SOP &amp; Peran</span>
             </button>
-            <div class="text-right">
+            <button onclick="triggerLockScreen()" title="Kunci Layar Sekarang (Instant Lock)" class="px-3 py-1.5 rounded-lg border border-ops-cyan/40 bg-ops-cyan/10 hover:bg-ops-cyan/20 text-ops-cyan text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm">
+                <i class="fas fa-lock text-xs"></i>
+                <span class="hidden md:inline">Kunci Layar</span>
+            </button>
+            <div class="text-right hidden sm:block">
                 <p class="text-sm font-semibold text-white leading-tight">{{ Auth::user()->nama_lengkap }}</p>
                 <p class="section-eyebrow capitalize" style="color: rgba(167,139,250,0.8);">{{ Auth::user()->role }} {{ Auth::user()->subbag ? '· ' . strtoupper(Auth::user()->subbag) : '' }}</p>
             </div>
-            <div class="w-px h-8 bg-ops-border"></div>
-            <a href="{{ url('/logout') }}" title="Keluar dari Sistem" class="text-slate-500 hover:text-red-400 transition-colors duration-200 p-2">
-                <i class="fas fa-sign-out-alt"></i>
-            </a>
+            <div class="w-px h-8 bg-ops-border hidden sm:block"></div>
+            <form id="logoutForm" action="{{ url('/logout') }}" method="POST" class="inline m-0 p-0">
+                @csrf
+                <button type="submit" title="Keluar dari Sistem" class="text-slate-500 hover:text-red-400 transition-colors duration-200 p-2 flex items-center">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </form>
         </div>
         @endif
     </nav>
@@ -509,6 +487,32 @@
             }
         }, 1000);
         @endif
+
+        @if(Auth::check())
+        window.triggerLockScreen = function() {
+            $.ajax({
+                url: "{{ url('/api/auth/lock') }}",
+                type: "POST",
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function() {
+                    window.location.href = "{{ url('/locked') }}";
+                },
+                error: function() {
+                    window.location.href = "{{ url('/locked') }}";
+                }
+            });
+        };
+        @endif
+
+        window.escapeHtml = function(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        };
     </script>
 </body>
 </html>

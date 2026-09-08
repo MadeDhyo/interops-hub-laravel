@@ -24,3 +24,5 @@ Homestead.yaml
 Thumbs.db
 /.agents/
 /public/uploads/
+skills-lock.json
+.skills/
