@@ -76,6 +76,8 @@ Route::middleware(['auth', 'session.lock'])->group(function () {
     Route::post('/api/surat-masuk/update/{id}', [SuratMasukController::class, 'updateDisposisi']);
     Route::post('/api/surat-masuk/parse', [SuratMasukController::class, 'parsePDF']);
     Route::get('/api/surat-masuk/export', [SuratMasukController::class, 'exportCsv']);
+    Route::get('/api/surat-masuk/{id}/tindak-lanjut', [SuratMasukController::class, 'getTindakLanjut']);
+    Route::post('/api/surat-masuk/{id}/tindak-lanjut', [SuratMasukController::class, 'storeTindakLanjut']);
     
     // Surat Keluar & Logs API Endpoints
     Route::get('/api/surat-keluar', [SuratKeluarController::class, 'index']);

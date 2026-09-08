@@ -282,6 +282,78 @@
     </div>
 </div>
 
+{{-- ===== MODAL TINDAK LANJUT SURAT MASUK (Anggota + View-only Kasubbag) ===== --}}
+<div id="tindakLanjutModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="tlModalContent">
+        <div class="p-6 border-b border-ops-border flex justify-between items-center">
+            <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                <i class="fas fa-tasks text-green-400"></i>
+                <span>Tindak Lanjut Surat</span>
+            </h3>
+            <button type="button" class="btn-close-tl text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+            {{-- Info Surat --}}
+            <div class="space-y-1 bg-ops-abyss/40 p-4 rounded-xl border border-ops-border/50 text-xs">
+                <p class="text-gray-400">No. Surat: <span id="tlNoSurat" class="text-white font-semibold font-mono"></span></p>
+                <p class="text-gray-400">Perihal: <span id="tlPerihal" class="text-white"></span></p>
+            </div>
+
+            {{-- Existing Tindak Lanjut (readonly for all, shows current state) --}}
+            <div id="tlExistingArea" class="hidden">
+                <p class="section-eyebrow mb-2" style="color: rgba(74,222,128,0.7);">Status Tindak Lanjut Saat Ini</p>
+                <div id="tlExistingContent" class="bg-ops-abyss/40 p-4 rounded-xl border border-green-500/20 space-y-2 text-sm"></div>
+            </div>
+
+            {{-- Form Input (hanya role anggota) --}}
+            @if(auth()->user()->role === 'anggota')
+            <form id="tindakLanjutForm" class="space-y-4 border-t border-ops-border pt-4">
+                <input type="hidden" id="tlSuratId">
+                <p class="section-eyebrow" style="color: rgba(74,222,128,0.7);">Isi / Edit Tindak Lanjut</p>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Jenis Aksi</label>
+                    <div class="relative">
+                        <select id="tl_tipe_aksi" name="tipe_aksi" required class="w-full ops-input rounded-lg px-4 py-3 text-sm text-gray-100 focus:outline-none appearance-none cursor-pointer">
+                            <option value="" disabled selected>-- Pilih Jenis Aksi --</option>
+                            <option value="tindak_lanjut">Tindak Lanjut</option>
+                            <option value="arsip">Arsipkan</option>
+                            <option value="buat_balasan">Buat Balasan Surat</option>
+                            <option value="lainnya">Lainnya</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-ops-gold">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                <div id="tlNoBalasanWrap" class="hidden">
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">No. Surat Balasan</label>
+                    <input type="text" id="tl_no_balasan" name="no_balasan" class="w-full ops-input rounded-lg px-4 py-3 text-sm text-white focus:outline-none" placeholder="Nomor surat balasan (opsional)">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Catatan Tindak Lanjut <span class="text-red-400">*</span></label>
+                    <textarea id="tl_catatan" name="catatan" rows="4" required class="w-full ops-input rounded-lg px-4 py-3 text-sm text-white focus:outline-none" placeholder="Tuliskan aksi yang dilakukan, kapan (hari/tanggal/jam), dan detail tindak lanjut..."></textarea>
+                </div>
+                <div class="pt-2 flex justify-end space-x-3">
+                    <button type="button" class="btn-close-tl px-5 py-2.5 rounded-lg text-sm text-slate-400 hover:text-white border border-ops-border transition-colors">Batal</button>
+                    <button type="submit" id="btnSubmitTL" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg text-sm flex items-center space-x-2 transition-all shadow-lg">
+                        <i class="fas fa-check text-xs"></i> <span>Simpan Tindak Lanjut</span>
+                    </button>
+                </div>
+            </form>
+            @endif
+
+            {{-- Tombol tutup (untuk kasubbag/view-only) --}}
+            @if(auth()->user()->role !== 'anggota')
+            <div class="pt-2 flex justify-end">
+                <button type="button" class="btn-close-tl px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl text-sm transition-colors">Tutup</button>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
@@ -292,6 +364,8 @@
     const currentUserSubbag = "{{ auth()->user()->subbag }}";
     const canDisposisi = {{ auth()->user()->canDisposisi() ? 'true' : 'false' }};
     const canSeeAll = {{ auth()->user()->canSeeAllSubbag() ? 'true' : 'false' }};
+    const isAnggota = currentUserRole === 'anggota';
+    const isKasubbag = currentUserRole === 'kasubbag';
 
     $(document).ready(function() {
         $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
@@ -567,6 +641,35 @@
                 let safeKabag = encodeURIComponent(row.disposisi_kabag || '-');
                 let safeKasubag = encodeURIComponent(row.disposisi_kasubag || '-');
                 tombolAksi = `<button type="button" class="btn-open-detail px-3 py-1.5 border border-ops-cyan/30 text-ops-cyan bg-ops-cyan/08 text-xs rounded-lg font-semibold transition-all flex items-center space-x-1 hover:bg-ops-cyan/15" data-no="${safeNoSurat}" data-perihal="${safePerihal}" data-dispo="${safeDispo}" data-kabag="${safeKabag}" data-kasubag="${safeKasubag}"><i class="fas fa-eye text-[10px]"></i><span>Lihat Nota</span></button>`;
+
+                // Tombol Tindak Lanjut (anggota subbag yang bersangkutan + kasubbag untuk view)
+                let canTL = false;
+                if ((isAnggota || isKasubbag) && row.subbags && row.subbags.some(s => s.subbag === currentUserSubbag)) {
+                    canTL = true;
+                }
+                if (canTL) {
+                    let tlStatus = row.tindak_lanjut ? 'Sudah' : 'Belum';
+                    let tlColor = row.tindak_lanjut
+                        ? 'border-green-500/40 text-green-400 bg-green-500/08 hover:bg-green-500/15'
+                        : 'border-amber-500/40 text-amber-400 bg-amber-500/08 hover:bg-amber-500/15';
+                    let tlIcon = row.tindak_lanjut ? 'fa-check-circle' : 'fa-edit';
+                    let tlLabel = row.tindak_lanjut ? 'Tinjut ✓' : 'Tindak Lanjut';
+                    tombolAksi += ` <button type="button" class="btn-open-tl px-3 py-1.5 border ${tlColor} text-xs rounded-lg font-semibold transition-all flex items-center space-x-1" data-id="${row.id}" data-no="${safeNoSurat}" data-perihal="${safePerihal}"><i class="fas ${tlIcon} text-[10px]"></i><span>${tlLabel}</span></button>`;
+                }
+            }
+
+            let tlInfo = '';
+            if (row.tindak_lanjut) {
+                let tl = row.tindak_lanjut;
+                let tipeMap = { tindak_lanjut: 'Tindak Lanjut', arsip: 'Diarsipkan', buat_balasan: 'Buat Balasan', lainnya: 'Lainnya' };
+                let tipeLabel = tipeMap[tl.tipe_aksi] || tl.tipe_aksi;
+                let waktu = tl.updated_at || tl.created_at || '';
+                let userNama = tl.nama_user ? ` • ${tl.nama_user}` : '';
+                let safeCatatan = (tl.catatan || '').replace(/"/g, '&quot;');
+                tlInfo = `<div class="mt-1 flex items-center gap-1 text-[10px] text-emerald-400 font-mono tracking-tight" title="${safeCatatan}">
+                    <i class="fas fa-check-double text-[9px] text-emerald-400"></i>
+                    <span>${tipeLabel} <span class="text-slate-400">(${waktu}${userNama})</span></span>
+                </div>`;
             }
 
             let fileButton = row.file_pdf
@@ -581,7 +684,7 @@
                 <td class="py-3.5 px-6 text-gray-300 max-w-xs truncate text-xs">${row.perihal}</td>
                 <td class="py-3.5 px-6 text-gray-400 font-mono text-xs">${row.tanggal_masuk}</td>
                 ${subbagCol}
-                <td class="py-3.5 px-6"><span class="${badgeColor}">${statusDot}${row.status}</span></td>
+                <td class="py-3.5 px-6"><span class="${badgeColor}">${statusDot}${row.status}</span>${tlInfo}</td>
                 <td class="py-3.5 px-6 text-center flex items-center justify-center space-x-3">${fileButton} ${tombolAksi}</td>
             </tr>`;
         });
@@ -605,5 +708,109 @@
         if (currentSubbagFilter) params.set('subbag', currentSubbagFilter);
         window.location.href = "{{ url('/api/surat-masuk/export') }}?" + params.toString();
     }
+
+    // ===== TINDAK LANJUT HANDLERS =====
+    $(document).on('click', '.btn-open-tl', function() {
+        let id      = $(this).data('id');
+        let noSurat = decodeURIComponent($(this).data('no') || '');
+        let perihal = decodeURIComponent($(this).data('perihal') || '');
+        openTindakLanjutModal(id, noSurat, perihal);
+    });
+
+    $(document).on('click', '.btn-close-tl', function() {
+        $('#tlModalContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
+        setTimeout(() => { $('#tindakLanjutModal').removeClass('flex').addClass('hidden'); }, 300);
+    });
+
+    function openTindakLanjutModal(suratId, noSurat, perihal) {
+        $('#tlSuratId').val(suratId);
+        $('#tlNoSurat').text(noSurat);
+        $('#tlPerihal').text(perihal);
+        $('#tlExistingArea').addClass('hidden');
+        $('#tlExistingContent').html('');
+        if ($('#tindakLanjutForm').length) {
+            $('#tindakLanjutForm')[0].reset();
+            $('#tlNoBalasanWrap').addClass('hidden');
+        }
+
+        // Fetch existing tindak lanjut
+        $.ajax({
+            url: `/api/surat-masuk/${suratId}/tindak-lanjut`,
+            type: 'GET',
+            success: function(res) {
+                if (res.data) {
+                    let tl = res.data;
+                    let tipeLabels = { tindak_lanjut: 'Tindak Lanjut', arsip: 'Arsipkan', buat_balasan: 'Buat Balasan Surat', lainnya: 'Lainnya' };
+                    let html = `<div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i>${tipeLabels[tl.tipe_aksi] || tl.tipe_aksi}</span>
+                            <span class="text-[10px] text-gray-500 font-mono">${tl.updated_at || tl.created_at}</span>
+                        </div>
+                        <p class="text-white text-sm whitespace-pre-line">${tl.catatan}</p>
+                        ${tl.no_balasan ? `<p class="text-xs text-ops-gold">No. Balasan: ${tl.no_balasan}</p>` : ''}
+                        <p class="text-[10px] text-gray-500">Oleh: ${tl.nama_user}</p>
+                    </div>`;
+                    $('#tlExistingContent').html(html);
+                    $('#tlExistingArea').removeClass('hidden');
+
+                    // Pre-fill form for editing (anggota only)
+                    if ($('#tindakLanjutForm').length) {
+                        $('#tl_tipe_aksi').val(tl.tipe_aksi);
+                        $('#tl_catatan').val(tl.catatan);
+                        $('#tl_no_balasan').val(tl.no_balasan || '');
+                        if (tl.tipe_aksi === 'buat_balasan') $('#tlNoBalasanWrap').removeClass('hidden');
+                        $('#btnSubmitTL span').text('Perbarui Tindak Lanjut');
+                    }
+                } else {
+                    if ($('#tindakLanjutForm').length) {
+                        $('#btnSubmitTL span').text('Simpan Tindak Lanjut');
+                    }
+                }
+            }
+        });
+
+        $('#tindakLanjutModal').removeClass('hidden').addClass('flex');
+        setTimeout(() => { $('#tlModalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100'); }, 50);
+    }
+
+    // Conditional show no_balasan field
+    $(document).on('change', '#tl_tipe_aksi', function() {
+        if ($(this).val() === 'buat_balasan') {
+            $('#tlNoBalasanWrap').removeClass('hidden');
+        } else {
+            $('#tlNoBalasanWrap').addClass('hidden');
+            $('#tl_no_balasan').val('');
+        }
+    });
+
+    // Submit tindak lanjut form
+    if ($('#tindakLanjutForm').length) {
+        $(document).on('submit', '#tindakLanjutForm', function(e) {
+            e.preventDefault();
+            let suratId = $('#tlSuratId').val();
+            let data = {
+                tipe_aksi:  $('#tl_tipe_aksi').val(),
+                catatan:    $('#tl_catatan').val(),
+                no_balasan: $('#tl_no_balasan').val() || null,
+            };
+            $('#btnSubmitTL').prop('disabled', true);
+            $.ajax({
+                url: `/api/surat-masuk/${suratId}/tindak-lanjut`,
+                type: 'POST',
+                data: data,
+                success: function(res) {
+                    Swal.fire({ icon: 'success', title: 'Sukses!', text: res.message, background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#22c55e' });
+                    $('.btn-close-tl').first().click();
+                    fetchSuratMasuk(currentPage);
+                },
+                error: function(xhr) {
+                    let msg = xhr.responseJSON?.message || 'Gagal menyimpan tindak lanjut.';
+                    Swal.fire({ icon: 'error', title: 'Gagal', text: msg, background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
+                },
+                complete: function() { $('#btnSubmitTL').prop('disabled', false); }
+            });
+        });
+    }
+
 </script>
 @endpush

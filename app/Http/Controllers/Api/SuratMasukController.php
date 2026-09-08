@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SuratMasuk;
 use App\Models\SuratMasukSubbag;
+use App\Models\TindakLanjutSuratMasuk;
 use App\Models\ActivityLog;
 use App\Jobs\ProcessOcrSuratMasuk;
 use Illuminate\Support\Facades\Gate;
@@ -20,7 +21,7 @@ class SuratMasukController extends Controller
     public function index(Request $request)
     {
         $user  = auth()->user();
-        $query = SuratMasuk::with('subbags');
+        $query = SuratMasuk::with(['subbags', 'tindakLanjut']);
 
         // --- Subbag filter: scope per subbag kecuali urmin/admin ---
         $subbagFilter = null;
@@ -330,5 +331,88 @@ class SuratMasukController extends Controller
         } catch (\Exception $e) {
             return response()->json(['status' => 500, 'message' => 'Sistem Error: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function getTindakLanjut($id)
+    {
+        $surat = SuratMasuk::with(['subbags', 'tindakLanjut'])->findOrFail($id);
+        $user  = auth()->user();
+
+        // Hanya anggota/kasubbag di subbag yang sesuai, admin, atau kabag
+        if (!$user->isAdmin() && !$user->isKabag()) {
+            $subbagSurat = $surat->subbags->pluck('subbag')->toArray();
+            if (!in_array($user->subbag, $subbagSurat)) {
+                return response()->json(['status' => 403, 'message' => 'Akses ditolak.'], 403);
+            }
+        }
+
+        return response()->json([
+            'status' => 200,
+            'data'   => $surat->tindakLanjut,
+        ], 200);
+    }
+
+    public function storeTindakLanjut(Request $request, $id)
+    {
+        $user = auth()->user();
+
+        // Hanya anggota yang boleh mengisi/edit tindak lanjut
+        if ($user->role !== 'anggota') {
+            return response()->json(['status' => 403, 'message' => 'Hanya anggota yang bisa mengisi tindak lanjut.'], 403);
+        }
+
+        $request->validate([
+            'tipe_aksi'  => 'required|in:tindak_lanjut,arsip,buat_balasan,lainnya',
+            'catatan'    => 'required|string|max:2000',
+            'no_balasan' => 'nullable|string|max:255',
+        ]);
+
+        $surat = SuratMasuk::with('subbags')->findOrFail($id);
+
+        // Cek surat harus milik subbag user
+        $subbagSurat = $surat->subbags->pluck('subbag')->toArray();
+        if (!in_array($user->subbag, $subbagSurat)) {
+            return response()->json(['status' => 403, 'message' => 'Surat ini bukan milik subbag Anda.'], 403);
+        }
+
+        // Cek surat harus sudah disposisi
+        if ($surat->status !== 'disposisi') {
+            return response()->json(['status' => 422, 'message' => 'Surat belum didisposisi, tidak bisa ditindak lanjuti.'], 422);
+        }
+
+        $existing = TindakLanjutSuratMasuk::where('surat_masuk_id', $id)->first();
+        $isEdit   = (bool) $existing;
+
+        $tl = TindakLanjutSuratMasuk::updateOrCreate(
+            ['surat_masuk_id' => $id],
+            [
+                'user_id'    => $user->id,
+                'nama_user'  => $user->nama_lengkap,
+                'tipe_aksi'  => $request->tipe_aksi,
+                'no_balasan' => $request->no_balasan,
+                'catatan'    => $request->catatan,
+            ]
+        );
+
+        $tipeLabel = [
+            'tindak_lanjut' => 'Tindak Lanjut',
+            'arsip'         => 'Arsipkan',
+            'buat_balasan'  => 'Buat Balasan',
+            'lainnya'       => 'Lainnya',
+        ];
+        $label  = $tipeLabel[$request->tipe_aksi] ?? $request->tipe_aksi;
+        $action = $isEdit ? 'mengedit tindak lanjut' : 'menindak lanjuti';
+
+        $this->logActivity(
+            'Tindak Lanjut Surat Masuk',
+            "{$action} surat {$surat->no_surat} — Aksi: {$label}" . ($request->no_balasan ? " (No. Balasan: {$request->no_balasan})" : ''),
+            $user->subbag
+        );
+
+        return response()->json([
+            'status'  => 200,
+            'message' => $isEdit ? 'Tindak lanjut berhasil diperbarui.' : 'Tindak lanjut berhasil disimpan.',
+            'data'    => $tl,
+        ], 200);
     }
 }

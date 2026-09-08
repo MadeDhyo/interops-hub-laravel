@@ -23,6 +23,11 @@ class SuratMasuk extends Model
         return $this->hasMany(SuratMasukSubbag::class, 'surat_masuk_id');
     }
 
+    public function tindakLanjut()
+    {
+        return $this->hasOne(TindakLanjutSuratMasuk::class, 'surat_masuk_id');
+    }
+
     /**
      * Helper: ambil list nama subbag tujuan sebagai array.
      */
