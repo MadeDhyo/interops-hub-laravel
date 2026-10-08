@@ -176,7 +176,7 @@
                 <div class="grid grid-cols-3 gap-2">
                     @foreach(['urmin','bhi','bi','ops','koor'] as $sb)
                     <label class="flex items-center space-x-2 glass px-3 py-2 rounded-lg cursor-pointer hover:border-ops-cyan/40 transition-all border border-transparent" id="lbl_{{ $sb }}">
-                        <input type="checkbox" name="subbag_tujuan[]" value="{{ $sb }}" class="subbag-checkbox accent-cyan-400" onchange="validateSubbagCheckboxes(this)">
+                        <input type="checkbox" name="tujuan_subbag[]" value="{{ $sb }}" class="subbag-checkbox accent-cyan-400" onchange="validateSubbagCheckboxes(this)">
                         <span class="text-xs font-semibold text-slate-300 uppercase">{{ $sb }}</span>
                     </label>
                     @endforeach
@@ -467,31 +467,105 @@
                 e.preventDefault();
                 let fileInput = $('#file_pdf')[0].files[0];
                 if (!fileInput) {
-                    Swal.fire({ icon: 'warning', title: 'File Kosong', text: 'Upload PDF terlebih dahulu.', background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#00c6ff' });
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'File Kosong',
+                        text: 'Pilih atau drop berkas PDF terlebih dahulu sebelum menjalankan scan AI.',
+                        background: '#0b1628',
+                        color: '#F3F4F6',
+                        confirmButtonColor: '#00c6ff'
+                    });
                     return;
                 }
+
                 let formData = new FormData();
                 formData.append('file_pdf', fileInput);
-                Swal.fire({ title: 'Menganalisis Dokumen', html: 'AI sedang mengekstrak data...', background: '#0b1628', color: '#F3F4F6', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+                const $btn = $(this);
+                const originalHtml = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> <span>Menganalisis Dokumen...</span>');
+
+                Swal.fire({
+                    title: 'Menganalisis Dokumen',
+                    html: '<div class="text-xs text-gray-300 mt-2">AI sedang membaca dokumen visual dan mengekstrak nomor surat, asal, tujuan, serta perihal...</div>',
+                    background: '#0b1628',
+                    color: '#F3F4F6',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
                 $.ajax({
-                    url: '/api/surat-masuk/parse', type: 'POST', data: formData, contentType: false, processData: false,
+                    url: '/api/surat-masuk/parse',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
                     success: function(response) {
                         Swal.close();
-                        if (response.status === 200) {
-                            const d = new Date();
-                            const localDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000));
-                            $('#no_surat').val(response.data.no_surat);
-                            $('#tanggal_masuk').val(localDate.toISOString().split('T')[0]);
-                            $('#dari').val(response.data.dari);
-                            $('#kepada').val(response.data.kepada);
-                            $('#perihal').val(response.data.perihal);
-                            Swal.fire({ icon: 'success', title: 'Scan Selesai!', text: 'Data berhasil diekstrak.', background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#00c6ff' });
+                        if (response.status === 200 && response.data) {
+                            const data = response.data;
+                            let filled = 0;
+
+                            const fields = [
+                                { id: '#no_surat', val: data.no_surat },
+                                { id: '#dari', val: data.dari },
+                                { id: '#kepada', val: data.kepada },
+                                { id: '#perihal', val: data.perihal }
+                            ];
+
+                            fields.forEach(f => {
+                                if (f.val && String(f.val).trim() !== '') {
+                                    $(f.id).val(f.val).addClass('ring-2 ring-ops-cyan transition-all');
+                                    filled++;
+                                }
+                            });
+
+                            // Tanggal masuk selalu mengikuti tanggal sistem (hari ini)
+                            const todayStr = data.tanggal_masuk || new Date().toISOString().split('T')[0];
+                            $('#tanggal_masuk').val(todayStr).addClass('ring-2 ring-ops-cyan transition-all');
+                            filled++;
+
+                            // Hilangkan highlight ring setelah beberapa detik
+                            setTimeout(() => {
+                                $('#no_surat, #tanggal_masuk, #dari, #kepada, #perihal').removeClass('ring-2 ring-ops-cyan');
+                            }, 3000);
+
+                            if (filled > 0) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Scan AI Berhasil!',
+                                    text: `${filled} informasi berhasil diekstrak dan otomatis dimasukkan ke dalam form.`,
+                                    background: '#0b1628',
+                                    color: '#F3F4F6',
+                                    confirmButtonColor: '#00c6ff'
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Scan Selesai',
+                                    text: 'Dokumen berhasil dipindai, namun data spesifik tidak terdeteksi otomatis. Silakan isi form manual.',
+                                    background: '#0b1628',
+                                    color: '#F3F4F6',
+                                    confirmButtonColor: '#00c6ff'
+                                });
+                            }
                         }
                     },
                     error: function(xhr) {
                         Swal.close();
-                        let msg = xhr.responseJSON?.message || 'Terjadi kesalahan.';
-                        Swal.fire({ icon: 'error', title: 'Gagal Scan', text: msg, background: '#0b1628', color: '#F3F4F6', confirmButtonColor: '#ef4444' });
+                        let msg = xhr.responseJSON?.message || 'Gagal memproses dokumen dengan AI.';
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Scan AI',
+                            text: msg,
+                            background: '#0b1628',
+                            color: '#F3F4F6',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false).html(originalHtml);
                     }
                 });
             });

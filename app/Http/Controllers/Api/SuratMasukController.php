@@ -175,9 +175,14 @@ class SuratMasukController extends Controller
     {
         Gate::authorize('bisa-input-surma');
 
+        // Terima baik nama field 'tujuan_subbag' maupun 'subbag_tujuan'
+        if (!$request->has('tujuan_subbag') && $request->has('subbag_tujuan')) {
+            $request->merge(['tujuan_subbag' => $request->input('subbag_tujuan')]);
+        }
+
         $request->validate([
-            'file_pdf'    => 'nullable|file|mimes:pdf|max:10240',
-            'tujuan_subbag' => 'required|array|min:1|max:2',
+            'file_pdf'        => 'nullable|file|mimes:pdf|max:10240',
+            'tujuan_subbag'   => 'required|array|min:1|max:2',
             'tujuan_subbag.*' => 'in:bhi,bi,ops,koor,urmin',
         ]);
 
@@ -308,47 +313,98 @@ class SuratMasukController extends Controller
 
         try {
             $file   = $request->file('file_pdf');
-            $apiKey = env('GEMINI_API_KEY');
+            $apiKey = config('services.gemini.key');
 
             if (!$apiKey) {
                 return response()->json(['status' => 500, 'message' => 'GEMINI_API_KEY belum dipasang di file .env'], 500);
             }
 
             $pdfBase64 = base64_encode(file_get_contents($file->path()));
-            $prompt = "Kamu adalah sistem AI pintar kearsipan dinas kepolisian. Tugasmu wajib menganalisis file dokumen visual PDF/Scan terlampir, lalu lakukan OCR dan ambil data: no_surat, tanggal_masuk, dari, kepada, dan perihal.\n\n"
-                    . "Aturan penting:\n"
-                    . "1. Format tanggal_masuk WAJIB berformat YYYY-MM-DD. Jika dokumen hanya menyebutkan bulan dan tahun seperti 'Mei 2026', ubah otomatis menjadi tanggal 1 yaitu '2026-05-01'.\n"
-                    . "2. Jika data tidak ditemukan, isi properti tersebut dengan string kosong atau null.\n"
-                    . "3. Berikan hasilnya murni dalam bentuk JSON objek langsung tanpa markdown backtick.";
+            $prompt = "Kamu adalah sistem AI pintar kearsipan dinas kepolisian Divisi Hubungan Internasional Polri (NCB Jakarta / Divhubinter). Analisis dokumen visual resmi terlampir (bisa berupa Lembar Disposisi, Surat Dinas, Nota Dinas, atau Faks/Pesan I-24/7 Interpol).\n\n"
+                    . "Tugasmu mengekstrak 4 informasi utama dokumen berikut:\n"
+                    . "1. no_surat: Nomor surat resmi (contoh: B/..., ND-..., IRT/..., Sprin/..., Kep/...). Ambil nomor lengkapnya.\n"
+                    . "2. dari: Instansi, satuan kerja, atau pengirim surat (contoh: CHEMEX, Kemenko Polkam, Bagjatranin, dll).\n"
+                    . "3. kepada: Pihak tujuan/penerima surat dengan ATURAN WAJIB:\n"
+                    . "   - ATURAN UTAMA: Jika di dalam dokumen ADA halaman 'LEMBAR DISPOSISI' (Markas Besar Kepolisian / Divisi Hubungan Internasional), maka nilai 'kepada' WAJIB diisi: \"KADIVHUBINTER\".\n"
+                    . "   - ATURAN KEDUA: Jika TIDAK ADA lembar disposisi, cari penerima (field 'To:') pada lembar faks/email/surat. Jika terdapat banyak NCB negara lain di seluruh dunia atau ditujukan ke Indonesia, SELALU pilih/isi: \"NCB JAKARTA\".\n"
+                    . "4. perihal: Pokok perihal atau ringkasan isi surat secara padat dan jelas.\n\n"
+                    . "Kembalikan HANYA format JSON murni berikut:\n"
+                    . "{\n"
+                    . "  \"no_surat\": \"...\",\n"
+                    . "  \"dari\": \"...\",\n"
+                    . "  \"kepada\": \"...\",\n"
+                    . "  \"perihal\": \"...\"\n"
+                    . "}";
 
-            // Panggil Gemini tetap sync di sini karena user butuh data untuk mengisi form
-            // (bukan untuk background indexing)
-            $response = Http::withoutVerifying()->timeout(60)
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
-                    'contents' => [['parts' => [['text' => $prompt], ['inlineData' => ['mimeType' => 'application/pdf', 'data' => $pdfBase64]]]]],
-                    'generationConfig' => ['responseMimeType' => 'application/json'],
-                ]);
+            $payload = [
+                'contents' => [['parts' => [['text' => $prompt], ['inlineData' => ['mimeType' => 'application/pdf', 'data' => $pdfBase64]]]]],
+                'generationConfig' => [
+                    'responseMimeType' => 'application/json',
+                    'thinkingConfig'   => ['thinkingBudget' => 0],
+                ],
+            ];
+
+            // Coba model gemini-3.5-flash (super cepat ~2s), fallback ke gemini-flash-latest
+            $response = Http::withoutVerifying()->timeout(35)
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={$apiKey}", $payload);
 
             if ($response->failed()) {
-                return response()->json(['status' => 500, 'message' => 'Gagal konek ke Gemini. Detail: ' . $response->body()], 500);
+                $response = Http::withoutVerifying()->timeout(35)
+                    ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}", $payload);
+            }
+
+            if ($response->failed()) {
+                return response()->json(['status' => 500, 'message' => 'Gagal konek ke Gemini AI. Detail: ' . $response->body()], 500);
             }
 
             $resultJson    = $response->json('candidates.0.content.parts.0.text');
-            $cleanJson     = preg_replace('/^```json\s*|```\s*$/i', '', trim($resultJson));
+            $cleanJson     = preg_replace('/^```(?:json)?\s*|\s*```$/i', '', trim((string)$resultJson));
             $extractedData = json_decode($cleanJson, true);
 
-            if (!$extractedData) {
-                return response()->json(['status' => 500, 'message' => 'AI gagal memformat JSON murni.'], 500);
+            if (!$extractedData || !is_array($extractedData)) {
+                return response()->json(['status' => 500, 'message' => 'AI gagal membaca format data dokumen.'], 500);
             }
+
+            // Normalisasi alias field agar tahan variasi nama key dari AI
+            $noSurat = $extractedData['no_surat'] ?? $extractedData['nomor_surat'] ?? $extractedData['nomor'] ?? null;
+            $dari    = $extractedData['dari'] ?? $extractedData['pengirim'] ?? $extractedData['asal_surat'] ?? $extractedData['asal'] ?? null;
+            $kepada  = $extractedData['kepada'] ?? $extractedData['tujuan'] ?? $extractedData['penerima'] ?? null;
+            $perihal = $extractedData['perihal'] ?? $extractedData['hal'] ?? $extractedData['pokok_surat'] ?? $extractedData['tentang'] ?? null;
+
+            // Standarisasi nilai 'kepada' sesuai aturan bisnis
+            if ($kepada) {
+                $kepadaUpper = strtoupper(trim((string)$kepada));
+                if (str_contains($kepadaUpper, 'KADIV') || str_contains($kepadaUpper, 'DIVHUBINTER') || str_contains($kepadaUpper, 'DISPOSISI')) {
+                    $kepada = 'KADIVHUBINTER';
+                } elseif (str_contains($kepadaUpper, 'NCB')) {
+                    $kepada = 'NCB JAKARTA';
+                }
+            }
+
+            // Tanggal masuk selalu mengikuti tanggal hari ini dari sistem
+            $tanggal = Carbon::now()->format('Y-m-d');
+
+            $sanitized = [
+                'no_surat'      => $noSurat ? mb_substr(trim((string)$noSurat), 0, 100) : null,
+                'tanggal_masuk' => $tanggal,
+                'dari'          => $dari ? mb_substr(trim((string)$dari), 0, 150) : null,
+                'kepada'        => $kepada ? mb_substr(trim((string)$kepada), 0, 150) : null,
+                'perihal'       => $perihal ? mb_substr(trim((string)$perihal), 0, 300) : null,
+            ];
 
             $this->logActivity('AI OCR Scan', 'Sistem AI mengekstrak payload dokumen secara visual via Gemini API');
 
-            return response()->json(['status' => 200, 'message' => 'Dokumen berhasil discan oleh AI!', 'data' => $extractedData], 200);
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Dokumen berhasil discan oleh AI!',
+                'data'    => $sanitized,
+            ], 200);
 
         } catch (\Exception $e) {
             return response()->json(['status' => 500, 'message' => 'Sistem Error: ' . $e->getMessage()], 500);
         }
     }
+
 
     public function getTindakLanjut($id)
     {

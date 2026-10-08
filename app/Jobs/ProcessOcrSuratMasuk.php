@@ -33,27 +33,36 @@ class ProcessOcrSuratMasuk implements ShouldQueue
             return;
         }
 
-        $fullPath = Storage::disk('local')->path(str_replace('arsip_pdf/', '', $this->filePath));
-        if (!file_exists($fullPath)) {
-            // Try absolute path directly
-            $fullPath = Storage::disk('local')->path('arsip_pdf/' . basename($this->filePath));
-        }
+        $fullPath = Storage::disk('local')->path($this->filePath);
         if (!file_exists($fullPath)) {
             Log::error("ProcessOcrSuratMasuk: File not found at {$fullPath}");
             return;
         }
 
         $pdfBase64 = base64_encode(file_get_contents($fullPath));
-        $prompt = "Kamu adalah sistem AI pintar kearsipan dinas kepolisian. Tugasmu wajib menganalisis file dokumen visual PDF/Scan terlampir, lakukan OCR, dan kembalikan HANYA teks mentah dari dokumen tersebut (full text content) tanpa format apapun.";
+        $prompt = "Kamu adalah sistem OCR kearsipan instansi kepolisian. Dokumen terlampir adalah surat dinas resmi berbahasa Indonesia. "
+            . "Ekstrak dan kembalikan SELURUH TEKS dari dokumen tersebut dalam Bahasa Indonesia, termasuk: nomor surat, tanggal, perihal, isi surat, dan nama penandatangan. "
+            . "Abaikan: cap basah/stempel, background watermark, header/footer halaman, dan metadata file. "
+            . "Batas output maksimum: 8000 karakter.";
 
         try {
-            $response = Http::withoutVerifying()->timeout(180)
-                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
-                    'contents' => [['parts' => [
-                        ['text' => $prompt],
-                        ['inlineData' => ['mimeType' => 'application/pdf', 'data' => $pdfBase64]]
-                    ]]],
-                ]);
+            $payload = [
+                'contents' => [['parts' => [
+                    ['text' => $prompt],
+                    ['inlineData' => ['mimeType' => 'application/pdf', 'data' => $pdfBase64]]
+                ]]],
+                'generationConfig' => [
+                    'thinkingConfig' => ['thinkingBudget' => 0]
+                ]
+            ];
+
+            $response = Http::withoutVerifying()->timeout(120)
+                ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={$apiKey}", $payload);
+
+            if ($response->failed()) {
+                $response = Http::withoutVerifying()->timeout(120)
+                    ->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}", $payload);
+            }
 
             if ($response->failed()) {
                 Log::error("ProcessOcrSuratMasuk: Gemini API error for surat #{$this->suratMasukId}: " . $response->body());
@@ -63,7 +72,7 @@ class ProcessOcrSuratMasuk implements ShouldQueue
             $text = $response->json('candidates.0.content.parts.0.text');
             if ($text) {
                 SuratMasuk::where('id', $this->suratMasukId)
-                    ->update(['full_text_content' => $text]);
+                    ->update(['full_text_content' => mb_substr($text, 0, 8000)]);
             }
         } catch (\Exception $e) {
             Log::error("ProcessOcrSuratMasuk exception for surat #{$this->suratMasukId}: " . $e->getMessage());
