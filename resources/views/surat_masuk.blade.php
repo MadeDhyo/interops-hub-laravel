@@ -187,7 +187,7 @@
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-gray-400 uppercase">Berkas Dokumen (PDF)</label>
                 <div id="drop-area" class="w-full relative border-2 border-dashed border-gray-600 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-ops-gold hover:bg-white/5 transition-all group">
-                    <input type="file" id="file_pdf" name="file_pdf" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required>
+                    <input type="file" id="file_pdf" name="file_pdf" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                     <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 group-hover:text-ops-gold mb-3 transition-colors"></i>
                     <p class="text-sm text-gray-300 font-medium"><span class="text-ops-gold">Klik untuk upload</span> atau drag &amp; drop</p>
                     <p class="text-xs text-gray-500 mt-1">Hanya file PDF (Maks. 10MB)</p>
@@ -524,7 +524,6 @@
                             // Tanggal masuk selalu mengikuti tanggal sistem (hari ini)
                             const todayStr = data.tanggal_masuk || new Date().toISOString().split('T')[0];
                             $('#tanggal_masuk').val(todayStr).addClass('ring-2 ring-ops-cyan transition-all');
-                            filled++;
 
                             // Hilangkan highlight ring setelah beberapa detik
                             setTimeout(() => {

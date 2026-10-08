@@ -78,10 +78,16 @@ class SuratMasukController extends Controller
         $limit = $request->input('limit', 10);
         $paginatedData = $query->orderBy('id', 'desc')->paginate($limit);
 
-        // 6. Stats (1 query via conditional aggregation)
+        // 6. Stats (1 query via conditional aggregation, ikuti filter subbag+date)
         $statsBase = SuratMasuk::query();
         if ($subbagFilter) {
             $statsBase->whereHas('subbags', fn($q) => $q->where('subbag', $subbagFilter));
+        }
+        if ($startDate = $request->input('start_date')) {
+            $statsBase->where('tanggal_masuk', '>=', $startDate);
+        }
+        if ($endDate = $request->input('end_date')) {
+            $statsBase->where('tanggal_masuk', '<=', $endDate);
         }
         $statsRow = $statsBase->selectRaw(
             'COUNT(*) as total,
@@ -251,7 +257,8 @@ class SuratMasukController extends Controller
 
             $romawiBulan  = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
             $romawi       = $romawiBulan[date('n') - 1];
-            $autoNoDispo  = 'DSP/' . date('Y') . '/' . $romawi . '/' . rand(1000, 9999);
+            $seq          = strtoupper(substr(uniqid(), -5));
+            $autoNoDispo  = 'DSP/' . date('Y') . '/' . $romawi . '/' . $seq;
 
             $surat->update([
                 'status'             => 'disposisi',
@@ -374,7 +381,12 @@ class SuratMasukController extends Controller
             // Standarisasi nilai 'kepada' sesuai aturan bisnis
             if ($kepada) {
                 $kepadaUpper = strtoupper(trim((string)$kepada));
-                if (str_contains($kepadaUpper, 'KADIV') || str_contains($kepadaUpper, 'DIVHUBINTER') || str_contains($kepadaUpper, 'DISPOSISI')) {
+                $isKadiv = str_contains($kepadaUpper, 'KADIV')
+                    || str_contains($kepadaUpper, 'DIVHUBINTER')
+                    || str_contains($kepadaUpper, 'HUBINTER')
+                    || str_contains($kepadaUpper, 'DISPOSISI')
+                    || str_contains($kepadaUpper, 'KEPALA DIVISI');
+                if ($isKadiv) {
                     $kepada = 'KADIVHUBINTER';
                 } elseif (str_contains($kepadaUpper, 'NCB')) {
                     $kepada = 'NCB JAKARTA';
